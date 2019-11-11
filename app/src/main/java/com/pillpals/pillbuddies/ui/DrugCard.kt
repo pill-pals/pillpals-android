@@ -1,14 +1,13 @@
-package com.example.pillbuddies
+package com.pillpals.pillbuddies.ui
 
 import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Color
-import android.graphics.Paint
-import android.graphics.Rect
 import android.util.AttributeSet
 import android.widget.TextView
 import android.widget.LinearLayout
 import com.google.android.material.button.MaterialButton
+import com.pillpals.pillbuddies.R
 
 class DrugCard : LinearLayout {
 
@@ -16,8 +15,10 @@ class DrugCard : LinearLayout {
     private val VIEW_NOT_CHANGED = false
     private val DEFAULT_COLOR = Color.DKGRAY
 
-    private lateinit var mPaint: Paint
-    private lateinit var mRect: Rect
+    public lateinit var medicationDueText: TextView
+    public lateinit var medicationLateText: TextView
+    public lateinit var medicationNameText: TextView
+    public lateinit var medicationLogButton: MaterialButton
 
     companion object {
         private var mSquareColor: Int = 0
@@ -43,28 +44,19 @@ class DrugCard : LinearLayout {
         //Inflate xml resource, pass "this" as the parent, we use <merge> tag in xml to avoid
         //redundant parent, otherwise a LinearLayout will be added to this LinearLayout ending up
         //with two view groups
-        inflate(getContext(), R.layout.drug_card,this);
+        inflate(getContext(), R.layout.drug_card,this)
 
-        //Get references to text views
-        var medicationDueText  = findViewById(R.id.medicationDue) as TextView;
-        var medicationLateText  = findViewById(R.id.medicationLate) as TextView;
-        var medicationNameText  = findViewById(R.id.medicationName) as TextView;
-        var medicationLogButton  = findViewById(R.id.logButton) as MaterialButton;
+        //Get references to elements
+        medicationDueText  = findViewById(R.id.medicationDue)
+        medicationLateText  = findViewById(R.id.medicationLate)
+        medicationNameText  = findViewById(R.id.medicationName)
+        medicationLogButton  = findViewById(R.id.logButton)
 
-        //Initially all views are gone
+        //Initialize elements
         medicationLateText.setVisibility(GONE);
     }
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
-        setViewBounds()
-        canvas.drawRect(mRect, mPaint)
-    }
-
-    private fun setViewBounds() {
-        mRect.left = originX + mPadding
-        mRect.right = width - mPadding
-        mRect.top = originY + mPadding
-        mRect.bottom = height - mPadding
     }
 }

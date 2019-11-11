@@ -1,4 +1,4 @@
-package com.example.pillbuddies
+package com.pillpals.pillbuddies
 
 import androidx.test.InstrumentationRegistry
 import androidx.test.runner.AndroidJUnit4

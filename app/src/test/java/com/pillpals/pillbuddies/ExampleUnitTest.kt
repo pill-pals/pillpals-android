@@ -1,4 +1,4 @@
-package com.example.pillbuddies
+package com.pillpals.pillbuddies
 
 import org.junit.Test
 
