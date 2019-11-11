@@ -25,13 +25,19 @@ class MainActivity : AppCompatActivity() {
         upcomingStack = findViewById(R.id.upcomingStack)
         completedStack = findViewById(R.id.completedStack)
 
-        //create the Box and added to the parent above
-        val newCard = DrugCard(this)
-        newCard.medicationNameText.text = "Adderall"
-        currentStack.addView(newCard)
+        populateAllStacks(8)
+    }
 
-        val newCardTwo = DrugCard(this)
+    private fun populateAllStacks(n: Int) {
+        val testCards = Array(n) { DrugCard(this) }
 
-        currentStack.addView(newCardTwo)
+        for (i in 0..(testCards.size - 1)) {
+            testCards[i].medicationNameText.text = "Medication ${i + 1}"
+            when(i % 3) {
+                0 -> currentStack.addView(testCards[i])
+                1 -> completedStack.addView(testCards[i])
+                2 -> upcomingStack.addView(testCards[i])
+            }
+        }
     }
 }
