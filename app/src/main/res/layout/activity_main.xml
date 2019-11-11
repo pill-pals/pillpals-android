@@ -45,12 +45,14 @@
                     android:id="@+id/currentStack"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
+                    android:layout_marginBottom="8dp"
                     android:orientation="vertical">
 
                     <TextView
                         android:id="@+id/currentText"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:layout_marginBottom="8dp"
                         android:text="Current:"
                         android:textAppearance="@style/TextAppearance.baseText" />
 
@@ -68,12 +70,14 @@
                     android:id="@+id/completedStack"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
+                    android:layout_marginBottom="8dp"
                     android:orientation="vertical">
 
                     <TextView
                         android:id="@+id/completedText"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:layout_marginBottom="8dp"
                         android:text="Completed:"
                         android:textAppearance="@style/TextAppearance.baseText" />
 
@@ -88,12 +92,14 @@
                     android:id="@+id/upcomingStack"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
+                    android:layout_marginBottom="8dp"
                     android:orientation="vertical">
 
                     <TextView
                         android:id="@+id/upcomingText"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:layout_marginBottom="8dp"
                         android:text="Upcoming:"
                         android:textAppearance="@style/TextAppearance.baseText" />
                 </LinearLayout>
