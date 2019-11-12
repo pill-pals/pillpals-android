@@ -31,7 +31,7 @@ class MainActivity : AppCompatActivity() {
     private fun populateAllStacks(n: Int) {
         val testCards = Array(n) { DrugCard(this) }
 
-        for (i in 0..(testCards.size - 1)) {
+        for (i in testCards.indices) {
             testCards[i].medicationNameText.text = "Medication ${i + 1}"
             when(i % 3) {
                 0 -> currentStack.addView(testCards[i])
