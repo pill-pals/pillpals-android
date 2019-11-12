@@ -14,6 +14,9 @@ class NotificationsFragment : Fragment() {
 
     private lateinit var notificationsViewModel: NotificationsViewModel
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+    }
     /*
     override fun onCreateView(
         inflater: LayoutInflater,
