@@ -42,7 +42,7 @@
                     android:layout_marginStart="16dp"
                     android:layout_marginLeft="16dp"
                     android:text="Late"
-                    android:textColor="#FF0000"
+                    android:textColor="@color/colorRed"
 
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintStart_toEndOf="@+id/medicationDue" />
@@ -70,9 +70,9 @@
                 android:layout_marginBottom="8dp"
                 android:gravity="center"
                 android:text="Log"
-                android:textColor="#ffffff"
+                android:textColor="@color/colorWhite"
                 android:textSize="18dp"
-                app:backgroundTint="#219653"
+                app:backgroundTint="@color/colorGreen"
                 app:cornerRadius="8dp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
