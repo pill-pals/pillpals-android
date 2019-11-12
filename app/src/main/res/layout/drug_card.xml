@@ -10,6 +10,7 @@
 
         android:layout_gravity="bottom"
         app:cardCornerRadius="8dp"
+        app:cardBackgroundColor="@color/colorWhite"
         app:cardElevation="0dp"
         app:cardUseCompatPadding="false"
         android:layout_marginBottom="8dp">
@@ -33,7 +34,8 @@
                     android:layout_height="wrap_content"
                     android:text="8:00 AM"
                     app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintStart_toStartOf="parent" />
+                    app:layout_constraintStart_toStartOf="parent"
+                    android:textColor="@color/colorDarkGrey"/>
 
                 <TextView
                     android:id="@+id/medicationLate"
@@ -60,7 +62,7 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
-            <com.google.android.material.button.MaterialButton
+            <Button
                 android:id="@+id/logButton"
                 android:layout_width="68dp"
                 android:layout_height="48dp"
