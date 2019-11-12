@@ -10,6 +10,7 @@
 
         android:layout_gravity="bottom"
         app:cardCornerRadius="8dp"
+        app:cardBackgroundColor="@color/colorWhite"
         app:cardElevation="0dp"
         app:cardUseCompatPadding="false"
         android:layout_marginBottom="8dp">
@@ -60,7 +61,7 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
-            <com.google.android.material.button.MaterialButton
+            <Button
                 android:id="@+id/logButton"
                 android:layout_width="68dp"
                 android:layout_height="48dp"
