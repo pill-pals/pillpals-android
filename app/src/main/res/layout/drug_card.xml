@@ -34,7 +34,8 @@
                     android:layout_height="wrap_content"
                     android:text="8:00 AM"
                     app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintStart_toStartOf="parent" />
+                    app:layout_constraintStart_toStartOf="parent"
+                    android:textColor="@color/colorDarkGrey"/>
 
                 <TextView
                     android:id="@+id/medicationLate"
