@@ -38,19 +38,7 @@ class MainActivity : AppCompatActivity() {
 
         // Testing
         //clearDatabase()
-        var medications = readAllData(Medications::class.java) as RealmResults<Medications>
-        Log.i("uhh", medications.count().toString())
-        if (medications.count() == 0) {
-            createTestMedicationData()
-            medications = readAllData(Medications::class.java) as RealmResults<Medications>
-        }
-        var schedules = readAllData(Schedules::class.java) as RealmResults<Schedules>
-        if (schedules.count() == 0) {
-            createTestSchedulesData(medications.first()!!)
-            schedules = readAllData(Schedules::class.java) as RealmResults<Schedules>
-        }
-        Log.i("yeet", schedules.first()?.occurrence.toString())
-        Log.i("yeet", medications.first()?.name)
+        createTestData()
         populateAllStacks(8)
     }
 
@@ -71,6 +59,21 @@ class MainActivity : AppCompatActivity() {
                 2 -> upcomingStack.addView(testCards[i])
             }
         }
+    }
+
+    private fun createTestData() {
+        var medications = readAllData(Medications::class.java) as RealmResults<Medications>
+        if (medications.count() == 0) {
+            createTestMedicationData()
+            medications = readAllData(Medications::class.java) as RealmResults<Medications>
+        }
+        var schedules = readAllData(Schedules::class.java) as RealmResults<Schedules>
+        if (schedules.count() == 0) {
+            createTestSchedulesData(medications.first()!!)
+            schedules = readAllData(Schedules::class.java) as RealmResults<Schedules>
+        }
+        Log.i("yeet", schedules.first()?.occurrence.toString())
+        Log.i("yeet", medications.first()?.name)
     }
 
     private fun clearDatabase() {
