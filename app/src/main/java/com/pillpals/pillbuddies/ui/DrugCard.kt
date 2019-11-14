@@ -8,6 +8,7 @@ import android.widget.TextView
 import android.widget.LinearLayout
 import com.google.android.material.button.MaterialButton
 import com.pillpals.pillbuddies.R
+import androidx.cardview.widget.CardView
 
 class DrugCard : LinearLayout {
 
@@ -19,6 +20,7 @@ class DrugCard : LinearLayout {
     public lateinit var medicationLateText: TextView
     public lateinit var medicationNameText: TextView
     public lateinit var medicationLogButton: MaterialButton
+    public lateinit var drugCard: CardView
 
     companion object {
         private var mSquareColor: Int = 0
@@ -47,13 +49,14 @@ class DrugCard : LinearLayout {
         inflate(getContext(), R.layout.drug_card,this)
 
         //Get references to elements
+        drugCard = findViewById(R.id.LogCard)
         medicationDueText  = findViewById(R.id.medicationDue)
         medicationLateText  = findViewById(R.id.medicationLate)
         medicationNameText  = findViewById(R.id.medicationName)
         medicationLogButton  = findViewById(R.id.logButton)
 
         //Initialize elements
-        medicationLateText.setVisibility(GONE);
+        medicationLateText.setVisibility(GONE)
     }
 
     override fun onDraw(canvas: Canvas) {

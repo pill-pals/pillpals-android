@@ -28,6 +28,7 @@ import android.util.AttributeSet
 import com.google.android.material.button.MaterialButton
 import android.util.Log
 import com.pillpals.pillbuddies.ui.DrugCard
+import kotlinx.android.synthetic.main.drug_card.view.*
 
 
 class DashboardFragment : Fragment() {
@@ -47,13 +48,85 @@ class DashboardFragment : Fragment() {
         upcomingStack = view!!.findViewById(R.id.upcomingStack)
         completedStack = view!!.findViewById(R.id.completedStack)
 
+        //region
         // Testing
         //clearDatabase()
         createTestData()
-        populateAllStacks(8)
+        //populateAllStacks(8)
+        //endregion
 
+        setUpScheduleCards(readAllData(Schedules::class.java) as RealmResults<out Schedules>)
 
         return view
+    }
+
+    fun setUpScheduleCards(schedules: RealmResults<out Schedules>) {
+        for (databaseSchedule in schedules) {
+            var testSchedule = realm.copyFromRealm(databaseSchedule)
+
+            var loggedToday = testSchedule.logs.filter { it.occurrence!! > DateHelper.today() && it.occurrence!! < DateHelper.tomorrow() }.count()
+            val n = testSchedule.repetitionCount!!
+            val u = DateHelper.getUnitByIndex(testSchedule.repetitionUnit!!)
+
+            while (testSchedule.occurrence!! < DateHelper.today()) {
+                testSchedule.occurrence = DateHelper.addUnitToDate(testSchedule.occurrence!!, n, u)
+            }
+
+            for (i in 1..loggedToday) {
+                testSchedule.occurrence = DateHelper.addUnitToDate(testSchedule.occurrence!!, -n, u)
+            }
+
+            while(testSchedule.occurrence!! < DateHelper.tomorrow()) {
+                if(testSchedule.occurrence!! > DateHelper.today()) {
+                    addDrugCard(testSchedule, databaseSchedule.medication!!.first()!!)
+                }
+                //testSchedule = realm.copyFromRealm(testSchedule)
+                testSchedule.occurrence = DateHelper.addUnitToDate(testSchedule.occurrence!!, n, u)
+            }
+        }
+    }
+
+    private fun addDrugCard(schedule: Schedules, medication: Medications) {
+        var new = DrugCard(this.context!!)
+
+        new.medicationNameText.text = medication.name
+        new.medicationDueText.text = DateHelper.dateToString(schedule.occurrence!!)
+        val diff = Date().time - schedule.occurrence!!.time
+        val seconds = diff / 1000
+        //new.medicationCountdownText.text = DateHelper.secondsToCountdown(seconds)
+        new.medicationLogButton.setOnClickListener {
+            Log.i("click","clicked ${medication.name}")
+        }
+
+        // MARK: Select stack and colour
+        val currentDate = Calendar.getInstance()
+        currentDate.time = Date()
+        currentDate.add(Calendar.MINUTE, 10)
+        val lateDate = Calendar.getInstance()
+        lateDate.time = Date()
+        lateDate.add(Calendar.MINUTE, -10)
+        val currentLog = schedule.logs.filter { it.due == schedule.occurrence }
+        if (currentLog.count() > 0) {
+            // Completed
+            //new.medicationDoneImage.setVisibility(LinearLayout.VISIBLE)
+            new.drugCard.setCardBackgroundColor(this.resources.getColor(R.color.colorLightGrey))
+            completedStack.addView(new)
+        }
+        else if (currentDate.time >= schedule.occurrence!!) {
+            // Current
+            new.logButton.setVisibility(LinearLayout.VISIBLE)
+            if (lateDate.time >= schedule.occurrence!!) {
+                new.medicationLateText.setVisibility(LinearLayout.VISIBLE)
+            }
+            new.drugCard.setCardBackgroundColor(this.resources.getColor(R.color.colorWhite))
+            currentStack.addView(new)
+        }
+        else {
+            // Upcoming
+            //new.medicationCountdownLabel.setVisibility(LinearLayout.VISIBLE)
+            new.drugCard.setCardBackgroundColor(this.resources.getColor(R.color.colorWhite))
+            upcomingStack.addView(new)
+        }
     }
 
     private fun readAllData(realmClass: Class<out RealmObject>): RealmResults<out RealmObject> {
@@ -88,6 +161,7 @@ class DashboardFragment : Fragment() {
         }
         Log.i("yeet", schedules.first()?.occurrence.toString())
         Log.i("yeet", medications.first()?.name)
+        Log.i("yeet", schedules.first()?.medication.toString())
     }
 
     private fun clearDatabase() {
@@ -129,7 +203,7 @@ class DashboardFragment : Fragment() {
             cal2.set(Calendar.MILLISECOND, 0)
             cal2.set(Calendar.SECOND, 0)
             cal2.set(Calendar.MINUTE, 0)
-            cal2.set(Calendar.HOUR_OF_DAY, 8)
+            cal2.set(Calendar.HOUR_OF_DAY, 20)
             secondSchedule.occurrence = cal2.time
 
             secondSchedule.repetitionCount = 1
