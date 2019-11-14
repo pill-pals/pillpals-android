@@ -99,12 +99,13 @@ class DashboardFragment : Fragment() {
         }
 
         // MARK: Select stack and colour
+        val paddingTime = 10
         val currentDate = Calendar.getInstance()
         currentDate.time = Date()
-        currentDate.add(Calendar.MINUTE, 10)
+        currentDate.add(Calendar.MINUTE, paddingTime)
         val lateDate = Calendar.getInstance()
         lateDate.time = Date()
-        lateDate.add(Calendar.MINUTE, -10)
+        lateDate.add(Calendar.MINUTE, -paddingTime)
         val currentLog = schedule.logs.filter { it.due == schedule.occurrence }
         if (currentLog.count() > 0) {
             // Completed
