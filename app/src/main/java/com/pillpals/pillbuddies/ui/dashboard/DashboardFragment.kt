@@ -101,9 +101,9 @@ class DashboardFragment : Fragment() {
 
         new.medicationNameText.text = medication.name
         new.medicationDueText.text = DateHelper.dateToString(schedule.occurrence!!)
-        val diff = Date().time - schedule.occurrence!!.time
+        val diff = schedule.occurrence!!.time - Date().time
         val seconds = diff / 1000
-        //new.medicationCountdownText.text = DateHelper.secondsToCountdown(seconds)
+        new.medicationCountdownLabel.text = DateHelper.secondsToCountdown(seconds)
 
         new.medicationLogButton.setOnClickListener {
             drugLogFunction(schedule)
@@ -121,7 +121,7 @@ class DashboardFragment : Fragment() {
         val currentLog = schedule.logs.filter { it.due == schedule.occurrence }
         if (currentLog.count() > 0) {
             // Completed
-            //new.medicationDoneImage.setVisibility(LinearLayout.VISIBLE)
+            new.medicationDoneImage.setVisibility(LinearLayout.VISIBLE)
             new.drugCard.setCardBackgroundColor(this.resources.getColor(R.color.colorGrey))
             completedStack.addView(new)
         }
@@ -136,7 +136,7 @@ class DashboardFragment : Fragment() {
         }
         else {
             // Upcoming
-            //new.medicationCountdownLabel.setVisibility(LinearLayout.VISIBLE)
+            new.medicationCountdownLabel.setVisibility(LinearLayout.VISIBLE)
             new.drugCard.setCardBackgroundColor(this.resources.getColor(R.color.colorWhite))
             upcomingStack.addView(new)
         }

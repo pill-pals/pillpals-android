@@ -4,6 +4,7 @@ import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Color
 import android.util.AttributeSet
+import android.widget.ImageView
 import android.widget.TextView
 import android.widget.LinearLayout
 import com.google.android.material.button.MaterialButton
@@ -20,7 +21,9 @@ class DrugCard : LinearLayout {
     public lateinit var medicationLateText: TextView
     public lateinit var medicationNameText: TextView
     public lateinit var medicationLogButton: MaterialButton
+    public lateinit var medicationCountdownLabel: TextView
     public lateinit var drugCard: CardView
+    public lateinit var medicationDoneImage: ImageView
 
     companion object {
         private var mSquareColor: Int = 0
@@ -42,7 +45,6 @@ class DrugCard : LinearLayout {
     }
 
     private fun init() {
-
         //Inflate xml resource, pass "this" as the parent, we use <merge> tag in xml to avoid
         //redundant parent, otherwise a LinearLayout will be added to this LinearLayout ending up
         //with two view groups
@@ -54,9 +56,14 @@ class DrugCard : LinearLayout {
         medicationLateText  = findViewById(R.id.medicationLate)
         medicationNameText  = findViewById(R.id.medicationName)
         medicationLogButton  = findViewById(R.id.logButton)
+        medicationCountdownLabel = findViewById(R.id.medicationCountdownLabel)
+        medicationDoneImage = findViewById(R.id.medicationDoneImage)
 
         //Initialize elements
-        medicationLateText.setVisibility(GONE)
+        medicationLogButton.visibility = GONE
+        medicationDoneImage.visibility = GONE
+        medicationCountdownLabel.visibility = GONE
+        medicationLateText.visibility = GONE
     }
 
     override fun onDraw(canvas: Canvas) {
