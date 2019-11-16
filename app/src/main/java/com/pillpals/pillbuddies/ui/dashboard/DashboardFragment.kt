@@ -21,6 +21,9 @@ import com.pillpals.pillbuddies.helpers.DateHelper
 import android.util.Log
 import com.pillpals.pillbuddies.ui.DrugCard
 
+import kotlinx.android.synthetic.main.drug_card.view.*
+import com.pillpals.pillbuddies.services.NotificationUtils
+
 class DashboardFragment : Fragment() {
 
     public lateinit var currentStack: LinearLayout
@@ -50,7 +53,7 @@ class DashboardFragment : Fragment() {
         return view
     }
 
-    fun setUpScheduleCards(schedules: RealmResults<out Schedules>) {
+    public fun setUpScheduleCards(schedules: RealmResults<out Schedules>) {
         for (databaseSchedule in schedules) {
 
             var testSchedule = realm.copyFromRealm(databaseSchedule)
@@ -79,6 +82,7 @@ class DashboardFragment : Fragment() {
                         testSchedule.logs
                     )
                     addDrugCard(newSchedule, databaseSchedule.medication!!.first()!!)
+                    NotificationUtils.startAlarm(this.context!!, newSchedule)
                 }
                 //testSchedule = realm.copyFromRealm(testSchedule)
                 testSchedule.occurrence = DateHelper.addUnitToDate(testSchedule.occurrence!!, n, u)
