@@ -4,12 +4,8 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProvider
 import com.pillpals.pillbuddies.R
-import androidx.appcompat.app.AppCompatActivity
 import android.widget.LinearLayout
 import io.realm.Realm
 import io.realm.RealmObject
@@ -21,15 +17,11 @@ import java.util.UUID
 import java.util.Date
 import java.util.Calendar
 import com.pillpals.pillbuddies.helpers.DateHelper
-import android.content.Context
-import android.graphics.Canvas
-import android.graphics.Color
-import android.util.AttributeSet
 
-import com.google.android.material.button.MaterialButton
 import android.util.Log
 import com.pillpals.pillbuddies.ui.DrugCard
 import kotlinx.android.synthetic.main.drug_card.view.*
+import com.pillpals.pillbuddies.services.NotificationUtils
 
 class DashboardFragment : Fragment() {
 
@@ -60,7 +52,7 @@ class DashboardFragment : Fragment() {
         return view
     }
 
-    fun setUpScheduleCards(schedules: RealmResults<out Schedules>) {
+    public fun setUpScheduleCards(schedules: RealmResults<out Schedules>) {
         for (databaseSchedule in schedules) {
 
             var testSchedule = realm.copyFromRealm(databaseSchedule)
@@ -89,6 +81,7 @@ class DashboardFragment : Fragment() {
                         testSchedule.logs
                     )
                     addDrugCard(newSchedule, databaseSchedule.medication!!.first()!!)
+                    NotificationUtils.startAlarm(this.context!!, newSchedule)
                 }
                 //testSchedule = realm.copyFromRealm(testSchedule)
                 testSchedule.occurrence = DateHelper.addUnitToDate(testSchedule.occurrence!!, n, u)

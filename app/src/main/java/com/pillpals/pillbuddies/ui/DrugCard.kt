@@ -48,7 +48,7 @@ class DrugCard : LinearLayout {
         //Inflate xml resource, pass "this" as the parent, we use <merge> tag in xml to avoid
         //redundant parent, otherwise a LinearLayout will be added to this LinearLayout ending up
         //with two view groups
-        inflate(getContext(), R.layout.drug_card,this)
+        inflate(this.context, R.layout.drug_card,this)
 
         //Get references to elements
         drugCard = findViewById(R.id.LogCard)

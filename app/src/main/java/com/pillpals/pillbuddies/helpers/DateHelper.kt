@@ -3,9 +3,16 @@ package com.pillpals.pillbuddies.helpers
 import java.util.Date
 import java.util.Calendar
 import java.text.SimpleDateFormat
+import java.time.LocalDateTime
+import java.time.ZoneId
 
 class DateHelper {
     companion object {
+        fun convertToLocalDateViaInstant(dateToConvert: Date): LocalDateTime {
+            return dateToConvert.toInstant()
+                .atZone(ZoneId.systemDefault())
+                .toLocalDateTime()
+        }
         fun getUnitByIndex(index: Int): Int {
             return when(index) {
                 0 -> Calendar.YEAR
@@ -26,6 +33,17 @@ class DateHelper {
                 Calendar.MINUTE -> 4
                 Calendar.SECOND -> 5
                 else -> 2
+            }
+        }
+        fun getMillisecondsByUnit(unit: Int): Long {
+            return when(unit) {
+                Calendar.YEAR -> 1000L * 60L * 60L * 24L * 7L * 52L
+                Calendar.MONTH -> 1000L * 60L * 60L * 24L * 30L
+                Calendar.DATE -> 1000 * 60 * 60 * 24
+                Calendar.HOUR_OF_DAY -> 1000 * 60 * 60
+                Calendar.MINUTE -> 1000 * 60
+                Calendar.SECOND -> 1000
+                else -> 1000 * 60 * 60 * 24
             }
         }
         fun today(): Date {
@@ -67,7 +85,7 @@ class DateHelper {
             else {
                 val hours = (seconds / 3600)
                 val minutes = (seconds / 60) % 60
-                return "${hours}:${minutes} hours"
+                return "${hours}:${minutes.toString().take(2)} hours"
             }
         }
     }
