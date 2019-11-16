@@ -31,7 +31,7 @@ class NotificationUtils {
             val interval = DateHelper.getMillisecondsByUnit(
                 schedule.repetitionUnit!!
             ) * schedule.repetitionCount!!
-            am.set(AlarmManager.RTC_WAKEUP, firstTime, mAlarmSender)
+            am.setRepeating(AlarmManager.RTC_WAKEUP, firstTime, interval, mAlarmSender)
         }
     }
 }
