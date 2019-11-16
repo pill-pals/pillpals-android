@@ -2,7 +2,6 @@ package com.pillpals.pillbuddies.ui.home
 
 import android.app.AlertDialog
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -10,16 +9,13 @@ import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProvider
 import com.pillpals.pillbuddies.R
 import com.pillpals.pillbuddies.data.model.Medications
 import com.pillpals.pillbuddies.data.model.Schedules
 import com.pillpals.pillbuddies.helpers.DatabaseHelper
 import com.pillpals.pillbuddies.ui.AddDrugActivity
+import com.pillpals.pillbuddies.ui.DrugCard
 import io.realm.Realm
-import io.realm.RealmResults
-import kotlinx.android.synthetic.main.prompts.*
 import kotlinx.android.synthetic.main.prompts.view.*
 import java.util.*
 import android.content.Intent
@@ -28,6 +24,7 @@ class HomeFragment : Fragment() {
 
     public lateinit var drugButton: Button
     public lateinit var btnNewActivity: Button
+    public lateinit var stack: LinearLayout
 
     private lateinit var realm: Realm
 
@@ -38,6 +35,7 @@ class HomeFragment : Fragment() {
         realm = Realm.getDefaultInstance()
 
         drugButton = view!!.findViewById(R.id.drugButton)
+        stack = view!!.findViewById(R.id.stack)
 
         drugButton.setOnClickListener{
 
@@ -77,7 +75,34 @@ class HomeFragment : Fragment() {
             startActivity(intent);
         }
 
+        updateMedicationList()
+
         return view
+    }
+
+    private fun updateMedicationList() {
+        stack.removeAllViews()
+        for (drug in realm.where(Medications::class.java).findAll()) {
+            addDrugCard(realm.copyFromRealm(drug))
+        }
+    }
+
+    private fun addDrugCard(medication: Medications) {
+        var new = DrugCard(this.context!!)
+
+        new.medicationNameText.text = medication.name
+        new.medicationDueText.text = medication.dosage
+
+        new.medicationLogButton.setOnClickListener {
+            //Edit drug settings
+        }
+        new.medicationLogButton.text = "Edit"
+        new.medicationLogButton.layoutParams.width = ViewGroup.LayoutParams.WRAP_CONTENT
+        new.medicationLogButton.visibility = View.VISIBLE
+
+        new.drugCard.setCardBackgroundColor(this.resources.getColor(R.color.colorGrey))
+
+        stack.addView(new)
     }
 
     private fun createMedicationData(drugName: String, drugDose: String) {
@@ -86,5 +111,6 @@ class HomeFragment : Fragment() {
             medication.name = drugName
             medication.dosage = drugDose
         }
+        updateMedicationList()
     }
 }
