@@ -58,6 +58,7 @@ class DrugCard : LinearLayout {
         medicationLogButton  = findViewById(R.id.logButton)
         medicationCountdownLabel = findViewById(R.id.medicationCountdownLabel)
         medicationDoneImage = findViewById(R.id.medicationDoneImage)
+        medicationDoneImage = findViewById(R.id.medicationDoneImage)
 
         //Initialize elements
         medicationLogButton.visibility = GONE
