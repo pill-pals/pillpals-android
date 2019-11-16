@@ -17,13 +17,14 @@ class DrugCard : LinearLayout {
     private val VIEW_NOT_CHANGED = false
     private val DEFAULT_COLOR = Color.DKGRAY
 
-    public lateinit var medicationDueText: TextView
-    public lateinit var medicationLateText: TextView
-    public lateinit var medicationNameText: TextView
-    public lateinit var medicationLogButton: MaterialButton
-    public lateinit var medicationCountdownLabel: TextView
     public lateinit var drugCard: CardView
-    public lateinit var medicationDoneImage: ImageView
+    public lateinit var nameText: TextView
+    public lateinit var altText: TextView
+    public lateinit var lateText: TextView
+    public lateinit var button: MaterialButton
+    public lateinit var countdownLabel: TextView
+    public lateinit var icon: ImageView
+    public lateinit var doneImage: ImageView
 
     companion object {
         private var mSquareColor: Int = 0
@@ -52,19 +53,19 @@ class DrugCard : LinearLayout {
 
         //Get references to elements
         drugCard = findViewById(R.id.LogCard)
-        medicationDueText  = findViewById(R.id.medicationDue)
-        medicationLateText  = findViewById(R.id.medicationLate)
-        medicationNameText  = findViewById(R.id.medicationName)
-        medicationLogButton  = findViewById(R.id.logButton)
-        medicationCountdownLabel = findViewById(R.id.medicationCountdownLabel)
-        medicationDoneImage = findViewById(R.id.medicationDoneImage)
-        medicationDoneImage = findViewById(R.id.medicationDoneImage)
+        altText  = findViewById(R.id.altText)
+        lateText  = findViewById(R.id.lateText)
+        nameText  = findViewById(R.id.nameText)
+        button  = findViewById(R.id.button)
+        countdownLabel = findViewById(R.id.countdownLabel)
+        icon = findViewById(R.id.icon)
+        doneImage = findViewById(R.id.doneImage)
 
         //Initialize elements
-        medicationLogButton.visibility = GONE
-        medicationDoneImage.visibility = GONE
-        medicationCountdownLabel.visibility = GONE
-        medicationLateText.visibility = GONE
+        button.visibility = GONE
+        doneImage.visibility = GONE
+        countdownLabel.visibility = GONE
+        lateText.visibility = GONE
     }
 
     override fun onDraw(canvas: Canvas) {

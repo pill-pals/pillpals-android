@@ -7,12 +7,9 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.LinearLayout
-import android.widget.TextView
 import androidx.fragment.app.Fragment
 import com.pillpals.pillbuddies.R
 import com.pillpals.pillbuddies.data.model.Medications
-import com.pillpals.pillbuddies.data.model.Schedules
-import com.pillpals.pillbuddies.helpers.DatabaseHelper
 import com.pillpals.pillbuddies.ui.AddDrugActivity
 import com.pillpals.pillbuddies.ui.DrugCard
 import io.realm.Realm
@@ -88,19 +85,19 @@ class HomeFragment : Fragment() {
     }
 
     private fun addDrugCard(medication: Medications) {
-        var new = DrugCard(this.context!!)
+        var newCard = DrugCard(this.context!!)
 
-        new.medicationNameText.text = medication.name
-        new.medicationDueText.text = medication.dosage
+        newCard.nameText.text = medication.name
+        newCard.altText.text = medication.dosage
 
-        new.medicationLogButton.setOnClickListener {
+        newCard.button.setOnClickListener {
             //Edit drug settings
         }
-        new.medicationLogButton.text = "Edit"
-        new.medicationLogButton.layoutParams.width = ViewGroup.LayoutParams.WRAP_CONTENT
-        new.medicationLogButton.visibility = View.VISIBLE
+        newCard.button.text = "Edit"
+        newCard.button.layoutParams.width = ViewGroup.LayoutParams.WRAP_CONTENT
+        newCard.button.visibility = View.VISIBLE
         
-        stack.addView(new)
+        stack.addView(newCard)
     }
 
     private fun createMedicationData(drugName: String, drugDose: String) {
