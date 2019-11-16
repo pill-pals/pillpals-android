@@ -21,8 +21,7 @@ import com.pillpals.pillbuddies.helpers.DateHelper
 import android.util.Log
 import com.pillpals.pillbuddies.ui.DrugCard
 
-import kotlinx.android.synthetic.main.drug_card.view.*
-import com.pillpals.pillbuddies.services.NotificationUtils
+import com.pillpals.pillbuddies.helpers.NotificationUtils
 
 class DashboardFragment : Fragment() {
 

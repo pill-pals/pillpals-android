@@ -34,11 +34,11 @@ public class AlarmReceiver: BroadcastReceiver() {
 
         // Set the notification content
         val mBuilder = NotificationCompat.Builder(context, context.getString(R.string.channel_id))
-            .setSmallIcon(R.drawable.notification_icon_background)
+            .setSmallIcon(R.drawable.ic_pill_v5)
             .setContentTitle(title)
-//            .setContentText("")
-//            .setStyle(NotificationCompat.BigTextStyle()
-//                .bigText("Much longer text that cannot fit one line so that I am extending this line to fill more than one line"))
+            .setContentText("Notes...")
+            .setStyle(NotificationCompat.BigTextStyle()
+                .bigText("Notes: Placeholder for drug notes"))
             .setPriority(NotificationCompat.PRIORITY_MAX)
             .setContentIntent(pendingIntent)
 
