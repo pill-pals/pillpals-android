@@ -30,9 +30,15 @@
         android:layout_marginStart="16dp"
         android:layout_marginTop="20dp"
         android:background="@color/colorDarkGrey"
+        android:backgroundTint="@color/colorGrey"
         android:insetTop="0dp"
         android:insetBottom="0dp"
+        android:textSize="0sp"
         app:icon="@drawable/ic_home_black_24dp"
+        app:iconPadding="0dp"
+        app:iconSize="80dp"
+        app:iconGravity="textStart"
+        app:iconTint="@color/colorBlack"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
