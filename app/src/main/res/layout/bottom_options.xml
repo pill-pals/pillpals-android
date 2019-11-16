@@ -7,7 +7,7 @@
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="40">
+        android:layout_height="40dp">
 
         <View
             android:id="@+id/splitBar"
@@ -17,7 +17,7 @@
             android:layout_marginBottom="4dp"
             android:background="@color/colorWhite"
             android:backgroundTint="@color/colorWhite"
-            android:elevation="1"
+            android:elevation="1dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
