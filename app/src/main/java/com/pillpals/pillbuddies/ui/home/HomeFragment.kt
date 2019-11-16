@@ -99,9 +99,7 @@ class HomeFragment : Fragment() {
         new.medicationLogButton.text = "Edit"
         new.medicationLogButton.layoutParams.width = ViewGroup.LayoutParams.WRAP_CONTENT
         new.medicationLogButton.visibility = View.VISIBLE
-
-        new.drugCard.setCardBackgroundColor(this.resources.getColor(R.color.colorGrey))
-
+        
         stack.addView(new)
     }
 
