@@ -19,6 +19,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
         <receiver  android:process=":remote" android:name=".services.AlarmReceiver"></receiver>
         <receiver
             android:name=".services.BootupReceiver"
@@ -29,6 +30,9 @@
             </intent-filter>
         </receiver>
 
+        <activity android:name=".ui.AddDrugActivity" >
+
+        </activity>
     </application>
 
 </manifest>

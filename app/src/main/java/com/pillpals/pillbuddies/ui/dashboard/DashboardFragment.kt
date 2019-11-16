@@ -20,6 +20,7 @@ import com.pillpals.pillbuddies.helpers.DateHelper
 
 import android.util.Log
 import com.pillpals.pillbuddies.ui.DrugCard
+
 import kotlinx.android.synthetic.main.drug_card.view.*
 import com.pillpals.pillbuddies.services.NotificationUtils
 
@@ -90,15 +91,15 @@ class DashboardFragment : Fragment() {
     }
 
     private fun addDrugCard(schedule: Schedules, medication: Medications) {
-        var new = DrugCard(this.context!!)
+        var newCard = DrugCard(this.context!!)
 
-        new.medicationNameText.text = medication.name
-        new.medicationDueText.text = DateHelper.dateToString(schedule.occurrence!!)
+        newCard.nameText.text = medication.name
+        newCard.altText.text = DateHelper.dateToString(schedule.occurrence!!)
         val diff = schedule.occurrence!!.time - Date().time
         val seconds = diff / 1000
-        new.medicationCountdownLabel.text = DateHelper.secondsToCountdown(seconds)
+        newCard.countdownLabel.text = DateHelper.secondsToCountdown(seconds)
 
-        new.medicationLogButton.setOnClickListener {
+        newCard.button.setOnClickListener {
             drugLogFunction(schedule)
             update()
         }
@@ -114,24 +115,24 @@ class DashboardFragment : Fragment() {
         val currentLog = schedule.logs.filter { it.due == schedule.occurrence }
         if (currentLog.count() > 0) {
             // Completed
-            new.medicationDoneImage.setVisibility(LinearLayout.VISIBLE)
-            new.drugCard.setCardBackgroundColor(this.resources.getColor(R.color.colorGrey))
-            completedStack.addView(new)
+            newCard.doneImage.setVisibility(LinearLayout.VISIBLE)
+            newCard.drugCard.setCardBackgroundColor(this.resources.getColor(R.color.colorGrey))
+            completedStack.addView(newCard)
         }
         else if (currentDate.time >= schedule.occurrence!!) {
             // Current
-            new.logButton.setVisibility(LinearLayout.VISIBLE)
+            newCard.button.setVisibility(LinearLayout.VISIBLE)
             if (lateDate.time >= schedule.occurrence!!) {
-                new.medicationLateText.setVisibility(LinearLayout.VISIBLE)
+                newCard.lateText.setVisibility(LinearLayout.VISIBLE)
             }
-            new.drugCard.setCardBackgroundColor(this.resources.getColor(R.color.colorWhite))
-            currentStack.addView(new)
+            newCard.drugCard.setCardBackgroundColor(this.resources.getColor(R.color.colorWhite))
+            currentStack.addView(newCard)
         }
         else {
             // Upcoming
-            new.medicationCountdownLabel.setVisibility(LinearLayout.VISIBLE)
-            new.drugCard.setCardBackgroundColor(this.resources.getColor(R.color.colorWhite))
-            upcomingStack.addView(new)
+            newCard.countdownLabel.setVisibility(LinearLayout.VISIBLE)
+            newCard.drugCard.setCardBackgroundColor(this.resources.getColor(R.color.colorWhite))
+            upcomingStack.addView(newCard)
         }
     }
 
@@ -165,7 +166,7 @@ class DashboardFragment : Fragment() {
         val testCards = Array(n) { DrugCard(getContext()!!) }
 
         for (i in testCards.indices) {
-            testCards[i].medicationNameText.text = "Medication ${i + 1}"
+            testCards[i].nameText.text = "Medication ${i + 1}"
             when(i % 3) {
                 0 -> currentStack.addView(testCards[i])
                 1 -> completedStack.addView(testCards[i])
