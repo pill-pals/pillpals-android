@@ -16,15 +16,18 @@ import com.pillpals.pillbuddies.R
 import com.pillpals.pillbuddies.data.model.Medications
 import com.pillpals.pillbuddies.data.model.Schedules
 import com.pillpals.pillbuddies.helpers.DatabaseHelper
+import com.pillpals.pillbuddies.ui.AddDrugActivity
 import io.realm.Realm
 import io.realm.RealmResults
 import kotlinx.android.synthetic.main.prompts.*
 import kotlinx.android.synthetic.main.prompts.view.*
 import java.util.*
+import android.content.Intent
 
 class HomeFragment : Fragment() {
 
     public lateinit var drugButton: Button
+    public lateinit var btnNewActivity: Button
 
     private lateinit var realm: Realm
 
@@ -65,6 +68,13 @@ class HomeFragment : Fragment() {
                 mAlertDialog.dismiss()
             }
 
+        }
+
+        btnNewActivity = view!!.findViewById(R.id.btnNewActivity)
+
+        btnNewActivity.setOnClickListener {
+            val intent = Intent(context, AddDrugActivity::class.java)
+            startActivity(intent);
         }
 
         return view
