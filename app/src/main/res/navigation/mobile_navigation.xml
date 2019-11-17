@@ -8,7 +8,7 @@
     <fragment
         android:id="@+id/navigation_home"
         android:name="com.pillpals.pillbuddies.ui.home.HomeFragment"
-        android:label="Home"
+        android:label="Medication"
         tools:layout="@layout/fragment_home" />
 
     <fragment
@@ -20,6 +20,6 @@
     <fragment
         android:id="@+id/navigation_notifications"
         android:name="com.pillpals.pillbuddies.ui.notifications.NotificationsFragment"
-        android:label="Notifications"
+        android:label="Statistics"
         tools:layout="@layout/fragment_notifications" />
 </navigation>
