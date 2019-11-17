@@ -69,7 +69,7 @@ class MedicationsFragment : Fragment() {
 
         btnNewActivity.setOnClickListener {
             val intent = Intent(context, AddDrugActivity::class.java)
-            startActivity(intent);
+            startActivityForResult(intent, 1)
         }
 
         updateMedicationList()
