@@ -87,7 +87,6 @@ class DashboardFragment : Fragment() {
 
             while(testSchedule.occurrence!! < DateHelper.tomorrow()) {
                 if(testSchedule.occurrence!! > DateHelper.today()) {
-                    Log.i("schedules", testSchedule.occurrence.toString())
                     val newSchedule = Schedules(
                         testSchedule.uid,
                         testSchedule.occurrence,
@@ -96,7 +95,6 @@ class DashboardFragment : Fragment() {
                         testSchedule.logs
                     )
                     addDrugCard(newSchedule, databaseSchedule.medication!!.first()!!)
-                    NotificationUtils.startAlarm(this.context!!, newSchedule)
                 }
                 //testSchedule = realm.copyFromRealm(testSchedule)
                 testSchedule.occurrence = DateHelper.addUnitToDate(testSchedule.occurrence!!, n, u)
@@ -141,6 +139,9 @@ class DashboardFragment : Fragment() {
             }
             newCard.drugCard.setCardBackgroundColor(this.resources.getColor(R.color.colorWhite))
             currentStack.addView(newCard)
+
+            // Send notification
+            NotificationUtils.startAlarm(this.context!!, schedule)
         }
         else {
             // Upcoming
