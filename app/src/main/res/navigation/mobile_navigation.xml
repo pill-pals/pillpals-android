@@ -6,10 +6,10 @@
     app:startDestination="@id/navigation_dashboard">
 
     <fragment
-        android:id="@+id/navigation_home"
-        android:name="com.pillpals.pillbuddies.ui.home.HomeFragment"
-        android:label="Home"
-        tools:layout="@layout/fragment_home" />
+        android:id="@+id/navigation_medications"
+        android:name="com.pillpals.pillbuddies.ui.medications.MedicationsFragment"
+        android:label="Medications"
+        tools:layout="@layout/fragment_medications" />
 
     <fragment
         android:id="@+id/navigation_dashboard"
@@ -18,8 +18,8 @@
         tools:layout="@layout/fragment_dashboard" />
 
     <fragment
-        android:id="@+id/navigation_notifications"
-        android:name="com.pillpals.pillbuddies.ui.notifications.NotificationsFragment"
-        android:label="Notifications"
-        tools:layout="@layout/fragment_notifications" />
+        android:id="@+id/navigation_statistics"
+        android:name="com.pillpals.pillbuddies.ui.statistics.StatisticsFragment"
+        android:label="Statistics"
+        tools:layout="@layout/fragment_statistics" />
 </navigation>

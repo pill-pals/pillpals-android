@@ -1,4 +1,4 @@
-package com.pillpals.pillbuddies.ui.home
+package com.pillpals.pillbuddies.ui.medications
 
 import android.app.AlertDialog
 import android.os.Bundle
@@ -17,7 +17,7 @@ import kotlinx.android.synthetic.main.prompts.view.*
 import java.util.*
 import android.content.Intent
 
-class HomeFragment : Fragment() {
+class MedicationsFragment : Fragment() {
 
     public lateinit var drugButton: Button
     public lateinit var btnNewActivity: Button
@@ -27,7 +27,7 @@ class HomeFragment : Fragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         super.onCreateView(inflater, container, savedInstanceState)
-        val view = inflater!!.inflate(R.layout.fragment_home, container,false)
+        val view = inflater!!.inflate(R.layout.fragment_medications, container,false)
 
         realm = Realm.getDefaultInstance()
 
