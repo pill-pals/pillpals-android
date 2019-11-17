@@ -80,7 +80,7 @@ class DateHelper {
         }
         fun secondsToCountdown(seconds: Long): String {
             if (seconds / 3600 < 1) {
-                return "" + seconds / 60 + 1 + " min"
+                return "" + (seconds / 60 + 1) + " min"
             }
             else {
                 val hours = (seconds / 3600)

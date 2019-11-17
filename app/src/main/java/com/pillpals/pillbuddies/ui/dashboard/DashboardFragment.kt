@@ -13,15 +13,15 @@ import com.pillpals.pillbuddies.data.model.Medications
 import com.pillpals.pillbuddies.data.model.Schedules
 import com.pillpals.pillbuddies.data.model.Logs
 import io.realm.RealmResults
-import java.util.UUID
-import java.util.Date
-import java.util.Calendar
 import com.pillpals.pillbuddies.helpers.DateHelper
 
 import android.util.Log
 import com.pillpals.pillbuddies.ui.DrugCard
 
 import com.pillpals.pillbuddies.helpers.NotificationUtils
+import android.os.Handler
+import java.util.*
+
 
 class DashboardFragment : Fragment() {
 
@@ -48,6 +48,21 @@ class DashboardFragment : Fragment() {
         //endregion
 
         setUpScheduleCards(readAllData(Schedules::class.java) as RealmResults<out Schedules>)
+
+
+        val handler = Handler()
+        val timer = Timer()
+        val doAsynchronousTask = object : TimerTask() {
+            override fun run() {
+                handler.post(Runnable {
+                    try {
+                        update()
+                    } catch (e: Exception) {
+                    }
+                })
+            }
+        }
+        timer.schedule(doAsynchronousTask, 0, 60000)
 
         return view
     }
@@ -226,7 +241,7 @@ class DashboardFragment : Fragment() {
             cal2.set(Calendar.MILLISECOND, 0)
             cal2.set(Calendar.SECOND, 0)
             cal2.set(Calendar.MINUTE, 0)
-            cal2.set(Calendar.HOUR_OF_DAY, 20)
+            cal2.set(Calendar.HOUR_OF_DAY, 22)
             secondSchedule.occurrence = cal2.time
 
             secondSchedule.repetitionCount = 1
