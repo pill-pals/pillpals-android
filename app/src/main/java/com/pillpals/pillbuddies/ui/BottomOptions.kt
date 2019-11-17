@@ -43,7 +43,8 @@ class BottomOptions : ConstraintLayout {
         //with two view groups
         inflate(getContext(), R.layout.bottom_options,this)
 
-
+        leftButton = findViewById(R.id.leftButton)
+        rightButton = findViewById(R.id.rightButton)
 
     }
 

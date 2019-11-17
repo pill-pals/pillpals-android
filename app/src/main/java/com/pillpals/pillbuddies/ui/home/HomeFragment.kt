@@ -91,7 +91,9 @@ class HomeFragment : Fragment() {
         newCard.altText.text = medication.dosage
 
         newCard.button.setOnClickListener {
-            //Edit drug settings
+            val intent = Intent(context, AddDrugActivity::class.java)
+            intent.putExtra("medication-uid", medication.uid)
+            startActivityForResult(intent, 1)
         }
         newCard.button.text = "Edit"
         newCard.button.layoutParams.width = ViewGroup.LayoutParams.WRAP_CONTENT
@@ -106,6 +108,11 @@ class HomeFragment : Fragment() {
             medication.name = drugName
             medication.dosage = drugDose
         }
+        updateMedicationList()
+    }
+
+    override fun onActivityResult(requestCode:Int, resultCode:Int, data:Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
         updateMedicationList()
     }
 }

@@ -1,5 +1,6 @@
 package com.pillpals.pillbuddies.helpers
 
+import com.pillpals.pillbuddies.data.model.Medications
 import com.pillpals.pillbuddies.data.model.Schedules
 import io.realm.Realm
 import io.realm.RealmObject
@@ -12,6 +13,9 @@ class DatabaseHelper {
         }
         fun getScheduleByUid(uid: String): Schedules? {
             return Realm.getDefaultInstance().where(Schedules::class.java).equalTo("uid", uid).findFirst()
+        }
+        fun getMedicationByUid(uid: String): Medications? {
+            return Realm.getDefaultInstance().where(Medications::class.java).equalTo("uid", uid).findFirst()
         }
     }
 }
