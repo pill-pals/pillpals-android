@@ -8,5 +8,6 @@ open class Medications(
     @PrimaryKey var uid: String = "",
     var dosage: String = "",
     var name: String = "",
-    var schedules: RealmList<Schedules> = RealmList()
+    var schedules: RealmList<Schedules> = RealmList(),
+    var notes: String = ""
 ) : RealmObject(){}

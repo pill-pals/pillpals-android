@@ -21,6 +21,7 @@ class DateHelper {
                 3 -> Calendar.HOUR_OF_DAY
                 4 -> Calendar.MINUTE
                 5 -> Calendar.SECOND
+                6 -> Calendar.WEEK_OF_YEAR
                 else -> Calendar.DAY_OF_MONTH
             }
         }
@@ -32,6 +33,7 @@ class DateHelper {
                 Calendar.HOUR_OF_DAY -> 3
                 Calendar.MINUTE -> 4
                 Calendar.SECOND -> 5
+                Calendar.WEEK_OF_YEAR -> 6
                 else -> 2
             }
         }
