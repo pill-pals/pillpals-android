@@ -165,9 +165,9 @@ class AddDrugActivity : AppCompatActivity() {
     }
 
     private fun isWeeklyRecurrence(schedule: Schedules):Boolean {
-        //val a = (schedule.repetitionCount == 7 && DateHelper.getUnitByIndex(schedule.repetitionUnit!!) == Calendar.DATE)
-        //val b = (schedule.repetitionCount == 1 && DateHelper.getUnitByIndex(schedule.repetitionUnit!!) == Calendar.WEEK)
-        return (schedule.repetitionCount == 7 && DateHelper.getUnitByIndex(schedule.repetitionUnit!!) == Calendar.DATE)//a || b
+        val a = (schedule.repetitionCount == 7 && DateHelper.getUnitByIndex(schedule.repetitionUnit!!) == Calendar.DATE)
+        val b = (schedule.repetitionCount == 1 && DateHelper.getUnitByIndex(schedule.repetitionUnit!!) == Calendar.WEEK_OF_YEAR)
+        return (a || b)
     }
 
     private fun getRecurrenceString(repetitionUnit: Int, repetitionCount: Int):String {
@@ -175,6 +175,7 @@ class AddDrugActivity : AppCompatActivity() {
             return when (DateHelper.getUnitByIndex(repetitionUnit)) {
                 Calendar.YEAR -> "year"
                 Calendar.MONTH -> "month"
+                Calendar.WEEK_OF_YEAR -> "week"
                 Calendar.DATE -> "day"
                 Calendar.HOUR_OF_DAY -> "hour"
                 Calendar.MINUTE -> "minute"
@@ -185,6 +186,7 @@ class AddDrugActivity : AppCompatActivity() {
             return when (DateHelper.getUnitByIndex(repetitionUnit)) {
                 Calendar.YEAR -> "$repetitionCount years"
                 Calendar.MONTH -> "$repetitionCount months"
+                Calendar.WEEK_OF_YEAR -> "$repetitionCount weeks"
                 Calendar.DATE -> "$repetitionCount days"
                 Calendar.HOUR_OF_DAY -> "$repetitionCount hours"
                 Calendar.MINUTE -> "$repetitionCount minutes"
