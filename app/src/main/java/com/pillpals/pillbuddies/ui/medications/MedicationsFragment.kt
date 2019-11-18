@@ -16,11 +16,11 @@ import io.realm.Realm
 import kotlinx.android.synthetic.main.prompts.view.*
 import java.util.*
 import android.content.Intent
-
+import kotlinx.android.synthetic.main.prompts.*
+import android.util.Log
 class MedicationsFragment : Fragment() {
 
     public lateinit var drugButton: Button
-    public lateinit var btnNewActivity: Button
     public lateinit var stack: LinearLayout
 
     private lateinit var realm: Realm
@@ -31,43 +31,11 @@ class MedicationsFragment : Fragment() {
 
         realm = Realm.getDefaultInstance()
 
-        drugButton = view!!.findViewById(R.id.drugButton)
         stack = view!!.findViewById(R.id.stack)
 
-        drugButton.setOnClickListener{
+        drugButton = view!!.findViewById(R.id.drugButton)
 
-            //Inflate the dialog with custom view
-            val mDialogView = LayoutInflater.from(this.context).inflate(R.layout.prompts, null)
-            //AlertDialogBuilder
-            val mBuilder = AlertDialog.Builder(this.context)
-                .setView(mDialogView)
-                .setTitle("Medication Form")
-            //show dialog
-
-            //dialogAddBtn = mDialogView!!.findViewById(R.id.dialogAddBtn)
-            //dialogCancelBtn = mDialogView!!.findViewById(R.id.dialogCancelBtn)
-            //medNameUserInput = mDialogView!!.findViewById(R.id.medNameUserInput)
-            //dosageNameUserInput = mDialogView!!.findViewById(R.id.dosageNameUserInput)
-
-            val  mAlertDialog = mBuilder.show()
-            mDialogView.dialogAddBtn.setOnClickListener {
-                mAlertDialog.dismiss()
-                val name = mDialogView.medNameUserInput.text.toString()
-                val dosage = mDialogView.dosageNameUserInput.text.toString()
-                createMedicationData(name, dosage)
-                //Log.i("medications", DatabaseHelper.readAllData(Medications::class.java).toString())
-                //DatabaseHelper.readAllData(Medications::class.java)
-            }
-            //cancel button click of custom layout
-            mDialogView.dialogCancelBtn.setOnClickListener {
-                mAlertDialog.dismiss()
-            }
-
-        }
-
-        btnNewActivity = view!!.findViewById(R.id.btnNewActivity)
-
-        btnNewActivity.setOnClickListener {
+        drugButton.setOnClickListener {
             val intent = Intent(context, AddDrugActivity::class.java)
             startActivityForResult(intent, 1)
         }
@@ -80,6 +48,11 @@ class MedicationsFragment : Fragment() {
     private fun updateMedicationList() {
         stack.removeAllViews()
         for (drug in realm.where(Medications::class.java).findAll()) {
+            Log.i("drug", drug.toString())
+            if (drug.deleted) {
+                continue
+            }
+
             addDrugCard(realm.copyFromRealm(drug))
         }
     }

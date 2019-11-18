@@ -9,5 +9,6 @@ open class Medications(
     var dosage: String = "",
     var name: String = "",
     var schedules: RealmList<Schedules> = RealmList(),
-    var notes: String = ""
+    var notes: String = "",
+    var deleted: Boolean = false
 ) : RealmObject(){}

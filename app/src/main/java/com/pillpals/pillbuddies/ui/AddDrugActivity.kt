@@ -1,9 +1,9 @@
 package com.pillpals.pillbuddies.ui
 
 import android.os.Bundle
-import android.widget.Button
-import android.widget.EditText
-import android.widget.Toast
+import android.view.LayoutInflater
+import android.widget.*
+import androidx.appcompat.app.AlertDialog
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.findNavController
@@ -16,13 +16,18 @@ import com.pillpals.pillbuddies.helpers.DatabaseHelper.Companion.getMedicationBy
 import io.realm.Realm
 import kotlinx.android.synthetic.main.activity_add_drug.*
 import kotlinx.android.synthetic.main.bottom_options.*
+import kotlinx.android.synthetic.main.delete_prompt.view.*
+import kotlinx.android.synthetic.main.prompts.view.*
+import kotlinx.android.synthetic.main.prompts.view.dialogCancelBtn
 import java.util.*
 
+import android.util.Log
 class AddDrugActivity : AppCompatActivity() {
 
     public lateinit var editText: EditText
     public lateinit var editText2: EditText
     public lateinit var editText3: EditText
+    public lateinit var deleteButton: TextView
     public lateinit var bottomOptions: BottomOptions
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -33,6 +38,7 @@ class AddDrugActivity : AppCompatActivity() {
         editText = findViewById(R.id.editText)
         editText2 = findViewById(R.id.editText2)
         editText3 = findViewById(R.id.editText3)
+        deleteButton = findViewById(R.id.deleteButton)
         bottomOptions = findViewById(R.id.bottomOptions)
         bottomOptions.leftButton.text = "Save"
         bottomOptions.rightButton.text = "Cancel"
@@ -77,7 +83,35 @@ class AddDrugActivity : AppCompatActivity() {
             finish()
         }
 
+        if (intent.hasExtra("medication-uid")) {
+            val medID: String = intent.getStringExtra("medication-uid")
+            val medication = getMedicationByUid(medID) as Medications
+            // Delete button
+            deleteButton.setOnClickListener{
+                val deleteDialog = LayoutInflater.from(this).inflate(R.layout.delete_prompt, null)
 
+                val dialogBuilder = AlertDialog.Builder(this)
+                    .setView(deleteDialog)
+                    .setTitle("Delete " + medication.name)
+
+                val deleteDrugName = deleteDialog!!.findViewById<TextView>(R.id.deleteDrugName)
+                deleteDrugName.text = medication.name
+
+                val deleteAlertDialog = dialogBuilder.show()
+                deleteDialog.dialogConfirmBtn.setOnClickListener {
+                    deleteAlertDialog.dismiss()
+                    deleteMedication(medication)
+                    finish()
+                }
+
+                deleteDialog.dialogCancelBtn.setOnClickListener {
+                    deleteAlertDialog.dismiss()
+                }
+            }
+        }
+        else {
+            deleteButton.visibility = LinearLayout.GONE
+        }
     }
 
     private fun updateMedicationData(medication: Medications, drugName: String, drugDose: String, drugNote: String) {
@@ -94,6 +128,13 @@ class AddDrugActivity : AppCompatActivity() {
             medication.name = drugName
             medication.dosage = drugDose
             medication.notes = drugNote
+        }
+    }
+
+    private fun deleteMedication(medication: Medications) {
+        Log.i("oof", medication.toString())
+        Realm.getDefaultInstance().executeTransaction {
+            medication.deleted = true
         }
     }
 }
