@@ -8,7 +8,7 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/constraintLayout"
         android:layout_width="fill_parent"
-        android:layout_height="40dp"
+        android:layout_height="32dp"
         android:layout_marginBottom="8dp"
         app:layout_constraintBottom_toBottomOf="parent"
         tools:layout_editor_absoluteX="64dp">
@@ -19,34 +19,34 @@
             android:layout_height="0dp"
             android:text="8:00 AM"
             android:textColor="@color/colorDarkGrey"
-            android:textStyle="bold"
             android:textSize="18sp"
+            android:textStyle="bold"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
-            android:textSize="18sp"
-
             android:id="@+id/recurrenceText"
+
             android:layout_width="wrap_content"
             android:layout_height="0dp"
             android:layout_marginStart="4dp"
             android:text="on"
             android:textColor="@color/colorDarkGrey"
+            android:textSize="18sp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toEndOf="@+id/timeText"
             app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
-            android:textSize="18sp"
-
             android:id="@+id/dateText"
+
             android:layout_width="wrap_content"
             android:layout_height="0dp"
             android:layout_marginStart="4dp"
             android:text="Wed"
             android:textColor="@color/colorDarkGrey"
+            android:textSize="18sp"
             android:textStyle="bold"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toEndOf="@+id/recurrenceText"

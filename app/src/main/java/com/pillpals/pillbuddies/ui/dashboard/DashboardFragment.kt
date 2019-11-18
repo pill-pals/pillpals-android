@@ -201,8 +201,10 @@ class DashboardFragment : Fragment() {
         }
         var schedules = readAllData(Schedules::class.java) as RealmResults<Schedules>
         if (schedules.count() == 0) {
-            createTestSchedulesData(medications.first()!!)
-            schedules = readAllData(Schedules::class.java) as RealmResults<Schedules>
+            medications.forEach() {
+                createTestSchedulesData(it)
+                schedules = readAllData(Schedules::class.java) as RealmResults<Schedules>
+            }
         }
     }
 
@@ -214,43 +216,43 @@ class DashboardFragment : Fragment() {
 
     private fun createTestMedicationData() {
         realm.executeTransaction {
-            val medication = it.createObject(Medications::class.java, UUID.randomUUID().toString())
-            medication.name = "Database Drug 1"
-            medication.dosage = "50mg"
+            val medications = Array(3){Medications()}
+            val names = listOf("Database Drug 1", "Database Drug 2", "Database Drug 3")
+            val dosages = listOf("50mg", "25mg", "200ml")
+
+            for (i in medications.indices) {
+                medications[i] = it.createObject(Medications::class.java, UUID.randomUUID().toString())
+                medications[i].name = names[i]
+                medications[i].dosage = dosages[i]
+            }
         }
     }
 
     private fun createTestSchedulesData(medication: Medications) {
         realm.executeTransaction {
-            val firstSchedule = it.createObject(Schedules::class.java, UUID.randomUUID().toString())
+            val schedules = Array(4){Schedules()}
 
-            val date = Date()
-            val cal = Calendar.getInstance()
-            cal.time = date
-            cal.set(Calendar.MILLISECOND, 0)
-            cal.set(Calendar.SECOND, 0)
-            cal.set(Calendar.MINUTE, 0)
-            cal.set(Calendar.HOUR_OF_DAY, 8)
+            val dates = listOf(Date(), Date(), DateHelper.addUnitToDate(Date(),Calendar.DATE,1), Date())
+            val hours = listOf(22, 5, 13, 13)
+            val counts = listOf(1,2,7,1)
+            val units = listOf(2,2,2,6)
 
-            firstSchedule.occurrence = cal.time
+            for (i in schedules.indices) {
+                val cal = Calendar.getInstance()
 
-            firstSchedule.repetitionCount = 1
-            firstSchedule.repetitionUnit = DateHelper.getIndexByUnit(Calendar.DAY_OF_MONTH)
-            medication.schedules.add(firstSchedule)
+                cal.time = dates[i]
+                cal.set(Calendar.MILLISECOND, 0)
+                cal.set(Calendar.SECOND, 0)
+                cal.set(Calendar.MINUTE, 0)
+                cal.set(Calendar.HOUR_OF_DAY, hours[i])
 
-            val secondSchedule = it.createObject(Schedules::class.java, UUID.randomUUID().toString())
+                schedules[i] = it.createObject(Schedules::class.java, UUID.randomUUID().toString())
+                schedules[i].occurrence = cal.time
+                schedules[i].repetitionCount = counts[i]
+                schedules[i].repetitionUnit = units[i]
 
-            val cal2 = Calendar.getInstance()
-            cal2.time = date
-            cal2.set(Calendar.MILLISECOND, 0)
-            cal2.set(Calendar.SECOND, 0)
-            cal2.set(Calendar.MINUTE, 0)
-            cal2.set(Calendar.HOUR_OF_DAY, 22)
-            secondSchedule.occurrence = cal2.time
-
-            secondSchedule.repetitionCount = 1
-            secondSchedule.repetitionUnit = DateHelper.getIndexByUnit(Calendar.DAY_OF_MONTH)
-            medication.schedules.add(secondSchedule)
+                medication.schedules.add(schedules[i])
+            }
         }
     }
 }
