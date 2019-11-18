@@ -45,6 +45,7 @@ class DateHelper {
                 Calendar.HOUR_OF_DAY -> 1000 * 60 * 60
                 Calendar.MINUTE -> 1000 * 60
                 Calendar.SECOND -> 1000
+                Calendar.WEEK_OF_YEAR -> 1000 * 60 * 60 * 24 * 7
                 else -> 1000 * 60 * 60 * 24
             }
         }

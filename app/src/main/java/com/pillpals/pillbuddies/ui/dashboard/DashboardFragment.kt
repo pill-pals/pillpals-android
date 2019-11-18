@@ -69,6 +69,9 @@ class DashboardFragment : Fragment() {
 
     public fun setUpScheduleCards(schedules: RealmResults<out Schedules>) {
         for (databaseSchedule in schedules) {
+            if (databaseSchedule.medication!!.first()!!.deleted) {
+                continue
+            }
 
             var testSchedule = realm.copyFromRealm(databaseSchedule)
 

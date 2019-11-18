@@ -36,9 +36,9 @@ public class AlarmReceiver: BroadcastReceiver() {
         val mBuilder = NotificationCompat.Builder(context, context.getString(R.string.channel_id))
             .setSmallIcon(R.drawable.ic_pill_v5)
             .setContentTitle(title)
-            .setContentText("Notes...")
+            .setContentText("Notes:...")
             .setStyle(NotificationCompat.BigTextStyle()
-                .bigText("Notes: Placeholder for drug notes"))
+                .bigText("Notes: " + medication.notes))
             .setPriority(NotificationCompat.PRIORITY_MAX)
             .setContentIntent(pendingIntent)
 
