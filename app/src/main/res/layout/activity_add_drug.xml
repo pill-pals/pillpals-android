@@ -99,13 +99,13 @@
                     android:layout_width="wrap_content"
                     android:layout_height="30dp"
                     android:layout_marginStart="16dp"
-                    android:layout_marginTop="38dp"
+                    android:layout_marginTop="40dp"
                     android:text="Notes"
                     android:textAppearance="@style/TextAppearance.AppCompat.Large"
                     android:textColor="@color/colorBlack"
                     android:textSize="24dp"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/textView2" />
+                    app:layout_constraintTop_toBottomOf="@+id/scheduleStack" />
 
                 <EditText
                     android:id="@+id/editText3"
@@ -160,20 +160,20 @@
 
                 <TextView
                     android:id="@+id/deleteButton"
+                    android:layout_width="wrap_content"
                     android:layout_height="48dp"
-                    android:layout_width="88dp"
+                    android:layout_gravity="center"
                     android:layout_marginStart="128dp"
-                    android:layout_marginTop="16dp"
+                    android:layout_marginTop="32dp"
                     android:layout_marginEnd="128dp"
                     android:layout_marginBottom="16dp"
                     android:backgroundTint="@color/colorLightGrey"
                     android:drawableLeft="@drawable/delete_outline_24dp"
+                    android:gravity="center"
                     android:padding="8dp"
-                    android:text="Delete"
+                    android:text="Delete medication"
                     android:textColor="@color/colorRed"
                     android:textSize="16sp"
-                    android:layout_gravity="center"
-                    android:gravity="center"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"

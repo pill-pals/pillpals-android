@@ -42,7 +42,7 @@ class DashboardFragment : Fragment() {
 
         //region
         // Testing
-        //clearDatabase()
+        clearDatabase()
         createTestData()
         //populateAllStacks(8)
         //endregion

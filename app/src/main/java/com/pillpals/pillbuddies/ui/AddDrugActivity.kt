@@ -66,10 +66,11 @@ class AddDrugActivity : AppCompatActivity() {
 
                 } else {
                     val scheduleRecord = ScheduleRecord(this)
-                        scheduleRecord.timeText.text = DateHelper.dateToString(it.occurrence!!)
-                        scheduleRecord.recurrenceText.text = "every"
-                        scheduleRecord.dateText.text = getRecurrenceString(it.repetitionUnit!!,it.repetitionCount!!)
-                        scheduleRecords.add(scheduleRecord)
+
+                    scheduleRecord.timeText.text = DateHelper.dateToString(it.occurrence!!)
+                    scheduleRecord.recurrenceText.text = "every"
+                    scheduleRecord.dateText.text = getRecurrenceString(it.repetitionUnit!!,it.repetitionCount!!)
+                    scheduleRecords.add(scheduleRecord)
                 }
             }
 
