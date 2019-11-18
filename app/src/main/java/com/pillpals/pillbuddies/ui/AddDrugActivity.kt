@@ -4,6 +4,12 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.widget.*
 import androidx.appcompat.app.AlertDialog
+import android.widget.Button
+import android.widget.EditText
+import android.widget.LinearLayout
+import android.widget.Toast
+import java.util.Calendar
+
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.findNavController
@@ -14,12 +20,17 @@ import com.pillpals.pillbuddies.R
 import com.pillpals.pillbuddies.data.model.Medications
 import com.pillpals.pillbuddies.helpers.DatabaseHelper.Companion.getMedicationByUid
 import io.realm.Realm
+import io.realm.RealmObject
+import io.realm.RealmResults
 import kotlinx.android.synthetic.main.activity_add_drug.*
 import kotlinx.android.synthetic.main.bottom_options.*
 import kotlinx.android.synthetic.main.delete_prompt.view.*
 import kotlinx.android.synthetic.main.prompts.view.*
 import kotlinx.android.synthetic.main.prompts.view.dialogCancelBtn
 import java.util.*
+import kotlin.collections.ArrayList
+import com.pillpals.pillbuddies.data.model.Schedules
+import com.pillpals.pillbuddies.helpers.DateHelper
 
 import android.util.Log
 class AddDrugActivity : AppCompatActivity() {
@@ -28,6 +39,7 @@ class AddDrugActivity : AppCompatActivity() {
     public lateinit var editText2: EditText
     public lateinit var editText3: EditText
     public lateinit var deleteButton: TextView
+    public lateinit var scheduleStack: LinearLayout
     public lateinit var bottomOptions: BottomOptions
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -39,9 +51,14 @@ class AddDrugActivity : AppCompatActivity() {
         editText2 = findViewById(R.id.editText2)
         editText3 = findViewById(R.id.editText3)
         deleteButton = findViewById(R.id.deleteButton)
+        scheduleStack = findViewById(R.id.scheduleStack)
         bottomOptions = findViewById(R.id.bottomOptions)
         bottomOptions.leftButton.text = "Save"
         bottomOptions.rightButton.text = "Cancel"
+
+
+        val testSchedule = ScheduleRecord(this)
+        scheduleStack.addView(testSchedule)
 
         if (intent.hasExtra("medication-uid")) {
             val medID: String = intent.getStringExtra("medication-uid")
@@ -50,6 +67,19 @@ class AddDrugActivity : AppCompatActivity() {
             editText.setText(medication.name)
             editText2.setText(medication.dosage)
             editText3.setText(medication.notes)
+
+            var scheduleRecords = MutableList(0) { ScheduleRecord(this) }
+            medication.schedules.forEach {
+                if(isWeeklyRecurrence(it)) {
+
+                }
+            }
+            //group the medications by time if recurrence type is weekly
+            //create a ScheduleRecord for each group
+            //timeText => time with AM/PM
+            //recurrenceText => determined by recurrence type
+            //dateText => determined by recurrence type and entries in the group
+            //add all scheduleRecords to the stack
 
             bottomOptions.leftButton.setOnClickListener{
                 if (editText.text.toString().trim().isNotEmpty() and editText2.text.toString().trim().isNotEmpty()) {
@@ -64,7 +94,7 @@ class AddDrugActivity : AppCompatActivity() {
                     Toast.makeText(applicationContext, "Please set a name and dosage", Toast.LENGTH_SHORT).show()
                 }
             }
-        } else{
+        } else {
             bottomOptions.leftButton.setOnClickListener{
                 if (editText.text.toString().trim().isNotEmpty() and editText2.text.toString().trim().isNotEmpty()) {
                     createMedicationData(
@@ -136,6 +166,12 @@ class AddDrugActivity : AppCompatActivity() {
         Realm.getDefaultInstance().executeTransaction {
             medication.deleted = true
         }
+    }
+
+    private fun isWeeklyRecurrence(schedule: Schedules):Boolean {
+        //val a = (schedule.repetitionCount == 7 && DateHelper.getUnitByIndex(schedule.repetitionUnit!!) == Calendar.DATE)
+        //val b = (schedule.repetitionCount == 1 && DateHelper.getUnitByIndex(schedule.repetitionUnit!!) == Calendar.WEEK)
+        return (schedule.repetitionCount == 7 && DateHelper.getUnitByIndex(schedule.repetitionUnit!!) == Calendar.DATE)//a || b
     }
 }
 

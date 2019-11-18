@@ -55,7 +55,7 @@
                 app:layout_constraintStart_toEndOf="@+id/cardView">
 
                 <TextView
-                    android:id="@+id/altText"
+                    android:id="@+id/timeText"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="8:00 AM"
@@ -73,7 +73,7 @@
                     android:textColor="@color/colorRed"
 
                     app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintStart_toEndOf="@+id/altText" />
+                    app:layout_constraintStart_toEndOf="@+id/timeText" />
             </androidx.constraintlayout.widget.ConstraintLayout>
 
             <TextView
