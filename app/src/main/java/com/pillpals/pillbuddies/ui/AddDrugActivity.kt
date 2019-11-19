@@ -1,5 +1,6 @@
 package com.pillpals.pillbuddies.ui
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.widget.*
@@ -26,12 +27,14 @@ import kotlinx.android.synthetic.main.prompts.view.dialogCancelBtn
 import java.util.*
 import com.pillpals.pillbuddies.data.model.Schedules
 import com.pillpals.pillbuddies.helpers.DateHelper
+import com.google.android.material.button.MaterialButton
 
 class AddDrugActivity : AppCompatActivity() {
 
     public lateinit var editText: EditText
     public lateinit var editText2: EditText
     public lateinit var editText3: EditText
+    public lateinit var addScheduleButton : MaterialButton
     public lateinit var deleteButton: TextView
     public lateinit var scheduleStack: LinearLayout
     public lateinit var bottomOptions: BottomOptions
@@ -44,6 +47,7 @@ class AddDrugActivity : AppCompatActivity() {
         editText = findViewById(R.id.editText)
         editText2 = findViewById(R.id.editText2)
         editText3 = findViewById(R.id.editText3)
+        addScheduleButton = findViewById(R.id.addScheduleButton)
         deleteButton = findViewById(R.id.deleteButton)
         scheduleStack = findViewById(R.id.scheduleStack)
         bottomOptions = findViewById(R.id.bottomOptions)
@@ -169,7 +173,14 @@ class AddDrugActivity : AppCompatActivity() {
         else {
             deleteButton.visibility = LinearLayout.GONE
         }
-        // endregion
+        //endregion
+
+        //region Add schedule button
+        addScheduleButton.setOnClickListener {
+            val intent = Intent(this, EditScheduleActivity::class.java)
+            startActivityForResult(intent, 1)
+        }
+        //endregion
     }
 
     private fun updateMedicationData(medication: Medications, drugName: String, drugDose: String, drugNote: String) {

@@ -1,0 +1,415 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/container"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ui.EditScheduleActivity" >
+
+    <com.pillpals.pillbuddies.ui.BottomOptions
+        android:id="@+id/bottomOptions"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <ScrollView
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toTopOf="@+id/bottomOptions"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <TextView
+                    android:id="@+id/timelineEndText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="19dp"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="20dp"
+                    android:text="End Date"
+                    android:textColor="@color/colorBlack"
+                    android:textStyle="bold"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/timelineStartBox" />
+
+                <EditText
+                    android:id="@+id/timelineEndBox"
+                    android:layout_width="0dp"
+                    android:layout_height="40dp"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginEnd="16dp"
+                    android:background="@color/colorGrey"
+                    android:ems="10"
+                    android:inputType="date"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/timelineEndText" />
+
+                <TextView
+                    android:id="@+id/timelineStartText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="19dp"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="20dp"
+                    android:text="Start Date"
+                    android:textColor="@color/colorBlack"
+                    android:textStyle="bold"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/thirdSectionText" />
+
+                <TextView
+                    android:id="@+id/firstSectionText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="22dp"
+                    android:includeFontPadding="true"
+                    android:text="Time"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Large"
+                    android:textColor="@color/colorBlack"
+                    android:textSize="24sp"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <ImageButton
+                    android:id="@+id/addTimeButton"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:layout_marginTop="12dp"
+                    android:layout_marginEnd="12dp"
+                    android:background="@color/colorAccent"
+                    android:contentDescription="Add dosage time"
+                    android:padding="13dp"
+                    android:scaleType="fitCenter"
+                    app:layout_constraintDimensionRatio="1:1"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:srcCompat="@drawable/ic_add_24px" />
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/tableConstraintLayout"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:layout_marginTop="10dp"
+                    android:minHeight="40dp"
+                    app:layout_constraintEnd_toEndOf="@+id/addTimeButton"
+                    app:layout_constraintStart_toStartOf="@+id/firstSectionText"
+                    app:layout_constraintTop_toBottomOf="@+id/addTimeButton" />
+
+                <TextView
+                    android:id="@+id/secondSectionText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="0dp"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="36dp"
+                    android:includeFontPadding="true"
+                    android:text="Repeating"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Large"
+                    android:textColor="@color/colorBlack"
+                    android:textSize="24sp"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/tableConstraintLayout" />
+
+                <TextView
+                    android:id="@+id/thirdSectionText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="0dp"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="26dp"
+                    android:includeFontPadding="true"
+                    android:text="Timeline"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Large"
+                    android:textColor="@color/colorBlack"
+                    android:textSize="24sp"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/intervalOptions" />
+
+                <LinearLayout
+                    android:id="@+id/linearLayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginTop="20dp"
+                    android:orientation="horizontal"
+                    app:layout_constraintTop_toBottomOf="@+id/secondSectionText">
+
+                    <ToggleButton
+                        android:id="@+id/weekdayButton"
+                        android:layout_width="0dp"
+                        android:layout_height="60dp"
+                        android:layout_marginStart="16dp"
+                        android:layout_marginTop="0dp"
+                        android:layout_weight="1"
+                        android:background="@color/colorDarkGrey"
+                        android:checked="true"
+                        android:padding="0dp"
+                        android:text="By Weekday"
+                        android:textAllCaps="false"
+                        android:textOff="By Weekday"
+                        android:textOn="By Weekday"
+                        android:textSize="18sp" />
+
+                    <ToggleButton
+                        android:id="@+id/intervalButton"
+                        android:layout_width="0dp"
+                        android:layout_height="60dp"
+                        android:layout_marginStart="8dp"
+                        android:layout_marginTop="0dp"
+                        android:layout_marginEnd="16dp"
+                        android:layout_weight="1"
+                        android:background="@color/colorGrey"
+                        android:checked="false"
+                        android:text="By Interval"
+                        android:textAllCaps="false"
+                        android:textColor="@color/colorDarkGrey"
+                        android:textOff="By Interval"
+                        android:textOn="By Interval"
+                        android:textSize="18sp" />
+                </LinearLayout>
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/intervalOptions"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:visibility="invisible"
+                    app:layout_constraintBottom_toBottomOf="@+id/weekdayOptions"
+                    app:layout_constraintTop_toTopOf="@+id/weekdayOptions">
+
+                    <TextView
+                        android:id="@+id/intervalText"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="16dp"
+                        android:text="Repeat every"
+                        android:textColor="@color/colorBlack"
+                        android:textStyle="bold"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <EditText
+                        android:id="@+id/intervalNumBox"
+                        android:layout_width="63dp"
+                        android:layout_height="40dp"
+                        android:layout_marginStart="16dp"
+                        android:layout_marginTop="8dp"
+                        android:background="@color/colorGrey"
+                        android:ems="10"
+                        android:inputType="number"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/intervalText" />
+
+                    <Spinner
+                        android:id="@+id/intervalScaleList"
+                        android:layout_width="86dp"
+                        android:layout_height="0dp"
+                        android:layout_marginStart="8dp"
+                        android:background="@color/colorGrey"
+                        android:entries="@array/time_intervals"
+                        app:layout_constraintBottom_toBottomOf="@+id/intervalNumBox"
+                        app:layout_constraintStart_toEndOf="@+id/intervalNumBox"
+                        app:layout_constraintTop_toTopOf="@+id/intervalNumBox" />
+
+                    <ImageView
+                        android:id="@+id/intervalDropArrow"
+                        android:layout_width="8dp"
+                        android:layout_height="0dp"
+                        android:layout_marginTop="16dp"
+                        android:layout_marginEnd="8dp"
+                        android:scaleType="fitCenter"
+                        app:layout_constraintEnd_toEndOf="@+id/intervalScaleList"
+                        app:layout_constraintTop_toTopOf="@+id/intervalScaleList"
+                        app:srcCompat="@drawable/ic_down_arrow" />
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/weekdayOptions"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="20dp"
+                    android:visibility="visible"
+                    app:layout_constraintTop_toBottomOf="@+id/linearLayout">
+
+                    <LinearLayout
+                        android:id="@+id/weekdayLayout"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:orientation="horizontal">
+
+                        <ToggleButton
+                            android:id="@+id/mondayButton"
+                            android:layout_width="0dp"
+                            android:layout_height="60dp"
+                            android:layout_marginStart="16dp"
+                            android:layout_marginTop="0dp"
+                            android:layout_weight="1"
+                            android:background="@color/colorGrey"
+                            android:checked="false"
+                            android:text="M"
+                            android:textAllCaps="false"
+                            android:textColor="@color/colorDarkGrey"
+                            android:textOff="M"
+                            android:textOn="M"
+                            android:textSize="18sp" />
+
+                        <ToggleButton
+                            android:id="@+id/tuesdayButton"
+                            android:layout_width="0dp"
+                            android:layout_height="60dp"
+                            android:layout_marginStart="8dp"
+                            android:layout_marginTop="0dp"
+                            android:layout_weight="1"
+                            android:background="@color/colorGrey"
+                            android:checked="false"
+                            android:text="T"
+                            android:textAllCaps="false"
+                            android:textColor="@color/colorDarkGrey"
+                            android:textOff="T"
+                            android:textOn="T"
+                            android:textSize="18sp" />
+
+                        <ToggleButton
+                            android:id="@+id/wednesdayButton"
+                            android:layout_width="0dp"
+                            android:layout_height="60dp"
+                            android:layout_marginStart="8dp"
+                            android:layout_marginTop="0dp"
+                            android:layout_weight="1"
+                            android:background="@color/colorGrey"
+                            android:checked="false"
+                            android:text="W"
+                            android:textAllCaps="false"
+                            android:textColor="@color/colorDarkGrey"
+                            android:textOff="W"
+                            android:textOn="W"
+                            android:textSize="18sp" />
+
+                        <ToggleButton
+                            android:id="@+id/thursdayButton"
+                            android:layout_width="0dp"
+                            android:layout_height="60dp"
+                            android:layout_marginStart="8dp"
+                            android:layout_marginTop="0dp"
+                            android:layout_weight="1"
+                            android:background="@color/colorGrey"
+                            android:checked="false"
+                            android:text="Th"
+                            android:textAllCaps="false"
+                            android:textColor="@color/colorDarkGrey"
+                            android:textOff="Th"
+                            android:textOn="Th"
+                            android:textSize="18sp" />
+
+                        <ToggleButton
+                            android:id="@+id/fridayButton"
+                            android:layout_width="0dp"
+                            android:layout_height="60dp"
+                            android:layout_marginStart="8dp"
+                            android:layout_marginTop="0dp"
+                            android:layout_weight="1"
+                            android:background="@color/colorGrey"
+                            android:checked="false"
+                            android:text="F"
+                            android:textAllCaps="false"
+                            android:textColor="@color/colorDarkGrey"
+                            android:textOff="F"
+                            android:textOn="F"
+                            android:textSize="18sp" />
+
+                        <ToggleButton
+                            android:id="@+id/saturdayButton"
+                            android:layout_width="0dp"
+                            android:layout_height="60dp"
+                            android:layout_marginStart="8dp"
+                            android:layout_marginTop="0dp"
+                            android:layout_weight="1"
+                            android:background="@color/colorGrey"
+                            android:checked="false"
+                            android:text="Sa"
+                            android:textAllCaps="false"
+                            android:textColor="@color/colorDarkGrey"
+                            android:textOff="Sa"
+                            android:textOn="Sa"
+                            android:textSize="18sp" />
+
+                        <ToggleButton
+                            android:id="@+id/sundayButton"
+                            android:layout_width="0dp"
+                            android:layout_height="60dp"
+                            android:layout_marginStart="8dp"
+                            android:layout_marginTop="0dp"
+                            android:layout_marginEnd="16dp"
+                            android:layout_weight="1"
+                            android:background="@color/colorGrey"
+                            android:checked="false"
+                            android:text="Su"
+                            android:textAllCaps="false"
+                            android:textColor="@color/colorDarkGrey"
+                            android:textOff="Su"
+                            android:textOn="Su"
+                            android:textSize="18sp" />
+                    </LinearLayout>
+
+                    <ToggleButton
+                        android:id="@+id/dailyButton"
+                        android:layout_width="0dp"
+                        android:layout_height="42dp"
+                        android:layout_marginStart="16dp"
+                        android:layout_marginTop="10dp"
+                        android:layout_marginEnd="16dp"
+                        android:layout_weight="1"
+                        android:background="@color/colorGrey"
+                        android:checked="false"
+                        android:text="Daily"
+                        android:textAllCaps="false"
+                        android:textColor="@color/colorDarkGrey"
+                        android:textOff="Daily"
+                        android:textOn="Daily"
+                        android:textSize="18sp"
+                        app:layout_constraintEnd_toEndOf="@+id/weekdayLayout"
+                        app:layout_constraintStart_toStartOf="@+id/weekdayLayout"
+                        app:layout_constraintTop_toBottomOf="@+id/weekdayLayout" />
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+                <TextView
+                    android:id="@+id/thirdSectionTextExtra"
+                    android:layout_width="63dp"
+                    android:layout_height="16dp"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginBottom="4dp"
+                    android:text="(Optional)"
+                    android:textColor="@android:color/darker_gray"
+                    android:textSize="12sp"
+                    app:layout_constraintBottom_toBottomOf="@+id/thirdSectionText"
+                    app:layout_constraintStart_toEndOf="@+id/thirdSectionText" />
+
+                <EditText
+                    android:id="@+id/timelineStartBox"
+                    android:layout_width="0dp"
+                    android:layout_height="40dp"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginEnd="16dp"
+                    android:background="@color/colorGrey"
+                    android:ems="10"
+                    android:inputType="date"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/timelineStartText" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </LinearLayout>
+    </ScrollView>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
