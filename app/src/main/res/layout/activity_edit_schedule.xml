@@ -99,7 +99,7 @@
                     app:srcCompat="@drawable/ic_add_24px" />
 
                 <androidx.constraintlayout.widget.ConstraintLayout
-                    android:id="@+id/tableConstraintLayout"
+                    android:id="@+id/timeBoxConstraintLayout"
                     android:layout_width="0dp"
                     android:layout_height="0dp"
                     android:layout_marginTop="10dp"
@@ -120,7 +120,7 @@
                     android:textColor="@color/colorBlack"
                     android:textSize="24sp"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/tableConstraintLayout" />
+                    app:layout_constraintTop_toBottomOf="@id/timeBoxConstraintLayout" />
 
                 <TextView
                     android:id="@+id/thirdSectionText"
