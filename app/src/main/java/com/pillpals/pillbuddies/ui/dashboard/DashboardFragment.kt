@@ -232,7 +232,7 @@ class DashboardFragment : Fragment() {
         realm.executeTransaction {
             val schedules = Array(4){Schedules()}
 
-            val dates = listOf(Date(), Date(), DateHelper.addUnitToDate(Date(),Calendar.DATE,1), Date())
+            val dates = listOf(Date(), Date(), DateHelper.tomorrow(), Date())
             val hours = listOf(22, 5, 13, 13)
             val counts = listOf(1,2,7,1)
             val units = listOf(2,2,2,6)

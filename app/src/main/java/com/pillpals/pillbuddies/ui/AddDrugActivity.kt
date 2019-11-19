@@ -26,8 +26,8 @@ import kotlinx.android.synthetic.main.prompts.view.dialogCancelBtn
 import java.util.*
 import com.pillpals.pillbuddies.data.model.Schedules
 import com.pillpals.pillbuddies.helpers.DateHelper
+import android.util.Log;
 
-import android.util.Log
 class AddDrugActivity : AppCompatActivity() {
 
     public lateinit var editText: EditText
@@ -60,18 +60,41 @@ class AddDrugActivity : AppCompatActivity() {
             editText3.setText(medication.notes)
 
             var scheduleRecords = MutableList(0) { ScheduleRecord(this) }
+            var compiledScheduleRecords = MutableList(0) { CompiledScheduleRecord("")}
 
             medication.schedules.forEach {
+                val timeString = DateHelper.dateToString(it.occurrence!!)
                 if(isWeeklyRecurrence(it)) {
-
+                    val cal = Calendar.getInstance()
+                    cal.time = it.occurrence
+                    if(compiledScheduleRecordExists(timeString, compiledScheduleRecords)) {
+                        //add day of week to existing compiled schedule record
+                        val compiledScheduleRecord = compiledScheduleRecords.find {it.time == timeString}
+                        compiledScheduleRecord!!.daysOfWeek[cal.get(Calendar.DAY_OF_WEEK) - 1] = 1
+                    } else {
+                        //create new compiled schedule record
+                        val compiledScheduleRecord = CompiledScheduleRecord(timeString)
+                        compiledScheduleRecord.daysOfWeek[cal.get(Calendar.DAY_OF_WEEK) - 1] = 1
+                        compiledScheduleRecords.add(compiledScheduleRecord)
+                    }
                 } else {
                     val scheduleRecord = ScheduleRecord(this)
 
-                    scheduleRecord.timeText.text = DateHelper.dateToString(it.occurrence!!)
+                    scheduleRecord.timeText.text = timeString
                     scheduleRecord.recurrenceText.text = "every"
                     scheduleRecord.dateText.text = getRecurrenceString(it.repetitionUnit!!,it.repetitionCount!!)
                     scheduleRecords.add(scheduleRecord)
                 }
+            }
+
+            //create scheduleRecords from compiledScheduleRecords
+            compiledScheduleRecords.forEach {
+                val scheduleRecord = ScheduleRecord(this)
+
+                scheduleRecord.timeText.text = it.time
+                scheduleRecord.recurrenceText.text = "on"
+                scheduleRecord.dateText.text = getDaysOfWeekList(it.daysOfWeek)
+                scheduleRecords.add(scheduleRecord)
             }
 
             scheduleRecords.forEach {
@@ -196,5 +219,33 @@ class AddDrugActivity : AppCompatActivity() {
             }
         }
     }
+
+    private fun compiledScheduleRecordExists(timeString: String, compiledScheduleRecords: MutableList<CompiledScheduleRecord>):Boolean {
+        for (i in compiledScheduleRecords.indices) {
+            if(timeString == compiledScheduleRecords[i].time)
+                return true
+        }
+        return false
+    }
+
+    private fun getDaysOfWeekList(daysOfWeek: IntArray):String {
+        val daysOfWeekList = listOf("Sun","Mon","Tue","Wed","Thurs","Fri","Sat")
+        var list = ""
+        var firstVal = true
+        for (i in daysOfWeek.indices) {
+            if (daysOfWeek[i] == 1 && firstVal) {
+                list += daysOfWeekList[i]
+                firstVal = false
+            } else if (daysOfWeek[i] == 1) {
+                list += ", ${daysOfWeekList[i]}"
+            }
+        }
+        return list
+    }
 }
+
+data class CompiledScheduleRecord(val time: String) {
+    var daysOfWeek: IntArray = IntArray(7) {0}
+}
+
 
