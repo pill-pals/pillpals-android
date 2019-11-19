@@ -3,4 +3,10 @@
     <string name="channel_name">PillPalls Notifications</string>
     <string name="channel_description">Notifications for PillPals alarms</string>
     <string name="channel_id">PillPalsChannel0</string>
+    <string name="title_activity_edit_schedule">Edit Schedule</string>
+    <string-array name="time_intervals">
+        <item>Hours</item>
+        <item>Days</item>
+        <item>Weeks</item>
+    </string-array>
 </resources>

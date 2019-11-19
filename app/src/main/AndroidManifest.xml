@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.pillpals.pillbuddies" >
+    package="com.pillpals.pillbuddies">
+
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="com.android.alarm.permission.SET_ALARM" />
 
@@ -11,8 +12,17 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme" >
-        <activity android:name=".ui.MainActivity" >
+        android:theme="@style/AppTheme">
+        <activity
+            android:name=".ui.EditScheduleActivity"
+            android:label="@string/title_activity_edit_schedule"
+            android:parentActivityName=".ui.AddDrugActivity"
+            android:theme="@style/AppTheme.NoActionBar">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.pillpals.pillbuddies.ui.AddDrugActivity" />
+        </activity>
+        <activity android:name=".ui.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -20,7 +30,9 @@
             </intent-filter>
         </activity>
 
-        <receiver  android:process=":remote" android:name=".services.AlarmReceiver"></receiver>
+        <receiver
+            android:name=".services.AlarmReceiver"
+            android:process=":remote" />
         <receiver
             android:name=".services.BootupReceiver"
             android:enabled="true"
@@ -30,9 +42,7 @@
             </intent-filter>
         </receiver>
 
-        <activity android:name=".ui.AddDrugActivity" >
-
-        </activity>
+        <activity android:name=".ui.AddDrugActivity"></activity>
     </application>
 
 </manifest>
