@@ -30,8 +30,6 @@ import com.pillpals.pillbuddies.helpers.DateHelper
 import com.google.android.material.button.MaterialButton
 import com.pillpals.pillbuddies.helpers.DatabaseHelper
 
-
-import android.util.Log
 class AddDrugActivity : AppCompatActivity() {
 
     public lateinit var editText: EditText
