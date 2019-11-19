@@ -83,7 +83,6 @@ class AddDrugActivity : AppCompatActivity() {
                         val scheduleTexts = schedulesRecordsSetToDelete.map {
                            "${it.timeText.text} ${it.recurrenceText.text} ${it.dateText.text}"
                         }
-                        Log.i("uhhh", scheduleTexts.toString())
 
                         deleteSchedules.text = scheduleTexts.joinToString(separator = "\n")
 
