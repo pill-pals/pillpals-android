@@ -40,8 +40,7 @@ class AddDrugActivity : AppCompatActivity() {
     public lateinit var scheduleStack: LinearLayout
     public lateinit var bottomOptions: BottomOptions
 
-    public var schedulesSetToDelete = mutableListOf<Schedules>()
-    public var schedulesRecordsSetToDelete = mutableListOf<ScheduleRecord>()
+    public var scheduleRecordsSetToDelete = mutableListOf<ScheduleRecord>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -72,7 +71,7 @@ class AddDrugActivity : AppCompatActivity() {
             //region Bottom button listeners
             bottomOptions.leftButton.setOnClickListener{
                 if (editText.text.toString().trim().isNotEmpty() and editText2.text.toString().trim().isNotEmpty()) {
-                    if(schedulesSetToDelete.count() > 0) {
+                    if(scheduleRecordsSetToDelete.count() > 0) {
                         val deleteDialog = LayoutInflater.from(this).inflate(R.layout.delete_schedules_prompt, null)
 
                         val dialogBuilder = AlertDialog.Builder(this)
@@ -80,7 +79,7 @@ class AddDrugActivity : AppCompatActivity() {
                             .setTitle("Delete Schedules")
 
                         val deleteSchedules = deleteDialog!!.findViewById<TextView>(R.id.deleteSchedules)
-                        val scheduleTexts = schedulesRecordsSetToDelete.map {
+                        val scheduleTexts = scheduleRecordsSetToDelete.map {
                            "${it.timeText.text} ${it.recurrenceText.text} ${it.dateText.text}"
                         }
 
@@ -89,7 +88,8 @@ class AddDrugActivity : AppCompatActivity() {
                         val deleteAlertDialog = dialogBuilder.show()
                         deleteDialog.dialogConfirmBtn.setOnClickListener {
                             deleteAlertDialog.dismiss()
-                            DatabaseHelper.deleteSchedules(schedulesSetToDelete)
+                            val schedules = scheduleRecordsSetToDelete.flatMap { it.schedules }
+                            DatabaseHelper.deleteSchedules(schedules)
                             updateMedicationData(
                                 medication,
                                 editText.text.toString(),
@@ -119,7 +119,7 @@ class AddDrugActivity : AppCompatActivity() {
         } else {
             bottomOptions.leftButton.setOnClickListener{
                 if (editText.text.toString().trim().isNotEmpty() and editText2.text.toString().trim().isNotEmpty()) {
-                    if(schedulesSetToDelete.count() > 0) {
+                    if(scheduleRecordsSetToDelete.count() > 0) {
                         val deleteDialog = LayoutInflater.from(this).inflate(R.layout.delete_schedules_prompt, null)
 
                         val dialogBuilder = AlertDialog.Builder(this)
@@ -127,7 +127,7 @@ class AddDrugActivity : AppCompatActivity() {
                             .setTitle("Delete Schedules")
 
                         val deleteSchedules = deleteDialog!!.findViewById<TextView>(R.id.deleteSchedules)
-                        val scheduleTexts = schedulesRecordsSetToDelete.map {
+                        val scheduleTexts = scheduleRecordsSetToDelete.map {
                             "${it.dateText} ${it.recurrenceText} ${it.timeText}"
                         }
 
@@ -136,7 +136,8 @@ class AddDrugActivity : AppCompatActivity() {
                         val deleteAlertDialog = dialogBuilder.show()
                         deleteDialog.dialogConfirmBtn.setOnClickListener {
                             deleteAlertDialog.dismiss()
-                            DatabaseHelper.deleteSchedules(schedulesSetToDelete)
+                            val schedules = scheduleRecordsSetToDelete.flatMap { it.schedules }
+                            DatabaseHelper.deleteSchedules(schedules)
                             createMedicationData(
                                 editText.text.toString(),
                                 editText2.text.toString(),
@@ -219,7 +220,7 @@ class AddDrugActivity : AppCompatActivity() {
 
         medication.schedules.forEach {
             if (it.deleted ||
-                schedulesSetToDelete.filter {schedule -> it.uid == schedule.uid}.count() > 0) {
+                scheduleRecordExistsByUid(scheduleRecordsSetToDelete, it.uid!!)) {
                 return@forEach
             }
 
@@ -267,8 +268,7 @@ class AddDrugActivity : AppCompatActivity() {
     private fun addScheduleRecords(scheduleRecords: List<ScheduleRecord>, medication: Medications) {
         scheduleRecords.forEach { record ->
             record.deleteScheduleImage.setOnClickListener {
-                schedulesRecordsSetToDelete.add(record)
-                schedulesSetToDelete.addAll(record.schedules)
+                scheduleRecordsSetToDelete.add(record)
                 scheduleStack.removeAllViews()
                 calculateScheduleRecords(medication)
             }
@@ -333,6 +333,10 @@ class AddDrugActivity : AppCompatActivity() {
 
     private fun compiledScheduleRecordExists(timeString: String, compiledScheduleRecords: MutableList<CompiledScheduleRecord>):Boolean {
         return compiledScheduleRecords.filter { it.time == timeString }.count() > 0
+    }
+
+    private fun scheduleRecordExistsByUid(scheduleRecords: List<ScheduleRecord>, uid: String): Boolean {
+        return scheduleRecords.filter { scheduleRecord -> scheduleRecord.schedules.map { it.uid }.contains(uid) }.count() > 0
     }
 
     private fun getDaysOfWeekList(daysOfWeek: IntArray):String {
