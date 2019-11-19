@@ -4,9 +4,11 @@ import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Color
 import android.util.AttributeSet
+import android.widget.ImageView
 import android.widget.TextView
 import android.widget.LinearLayout
 import com.pillpals.pillbuddies.R
+import com.pillpals.pillbuddies.data.model.Schedules
 
 class ScheduleRecord : LinearLayout {
 
@@ -17,6 +19,8 @@ class ScheduleRecord : LinearLayout {
     public lateinit var timeText: TextView
     public lateinit var recurrenceText: TextView
     public lateinit var dateText: TextView
+    public lateinit var deleteScheduleImage: ImageView
+    public lateinit var schedules: List<Schedules>
 
     companion object {
         private var mSquareColor: Int = 0
@@ -47,6 +51,7 @@ class ScheduleRecord : LinearLayout {
         timeText = findViewById(R.id.timeText)
         recurrenceText = findViewById(R.id.recurrenceText)
         dateText = findViewById(R.id.dateText)
+        deleteScheduleImage = findViewById(R.id.deleteScheduleImage)
 
     }
 
