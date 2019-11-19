@@ -26,7 +26,6 @@ import kotlinx.android.synthetic.main.prompts.view.dialogCancelBtn
 import java.util.*
 import com.pillpals.pillbuddies.data.model.Schedules
 import com.pillpals.pillbuddies.helpers.DateHelper
-import android.util.Log;
 
 class AddDrugActivity : AppCompatActivity() {
 
@@ -51,6 +50,7 @@ class AddDrugActivity : AppCompatActivity() {
         bottomOptions.leftButton.text = "Save"
         bottomOptions.rightButton.text = "Cancel"
 
+
         if (intent.hasExtra("medication-uid")) {
             val medID: String = intent.getStringExtra("medication-uid")
             val medication = getMedicationByUid(medID) as Medications
@@ -59,8 +59,13 @@ class AddDrugActivity : AppCompatActivity() {
             editText2.setText(medication.dosage)
             editText3.setText(medication.notes)
 
-            var scheduleRecords = MutableList(0) { ScheduleRecord(this) }
-            var compiledScheduleRecords = MutableList(0) { CompiledScheduleRecord("")}
+            // region Schedule Records
+            // To contain all records that will be written to the view
+            var scheduleRecords = mutableListOf<ScheduleRecord>()
+
+            // The record set that contains the days of the week on which the medication is scheduled to reoccur weekly
+            // Eg. To result in the string '8:00 AM on Mon, Wed' when added to scheduleRecords
+            var compiledScheduleRecords = mutableListOf<CompiledScheduleRecord>()
 
             medication.schedules.forEach {
                 val timeString = DateHelper.dateToString(it.occurrence!!)
@@ -100,6 +105,7 @@ class AddDrugActivity : AppCompatActivity() {
             scheduleRecords.forEach {
                 scheduleStack.addView(it)
             }
+            //endregion
 
             bottomOptions.leftButton.setOnClickListener{
                 if (editText.text.toString().trim().isNotEmpty() and editText2.text.toString().trim().isNotEmpty()) {
@@ -133,6 +139,7 @@ class AddDrugActivity : AppCompatActivity() {
             finish()
         }
 
+        // region Delete button
         if (intent.hasExtra("medication-uid")) {
             val medID: String = intent.getStringExtra("medication-uid")
             val medication = getMedicationByUid(medID) as Medications
@@ -162,6 +169,7 @@ class AddDrugActivity : AppCompatActivity() {
         else {
             deleteButton.visibility = LinearLayout.GONE
         }
+        // endregion
     }
 
     private fun updateMedicationData(medication: Medications, drugName: String, drugDose: String, drugNote: String) {
@@ -182,7 +190,6 @@ class AddDrugActivity : AppCompatActivity() {
     }
 
     private fun deleteMedication(medication: Medications) {
-        Log.i("oof", medication.toString())
         Realm.getDefaultInstance().executeTransaction {
             medication.deleted = true
         }
@@ -221,26 +228,18 @@ class AddDrugActivity : AppCompatActivity() {
     }
 
     private fun compiledScheduleRecordExists(timeString: String, compiledScheduleRecords: MutableList<CompiledScheduleRecord>):Boolean {
-        for (i in compiledScheduleRecords.indices) {
-            if(timeString == compiledScheduleRecords[i].time)
-                return true
-        }
-        return false
+        return compiledScheduleRecords.filter { it.time == timeString }.count() > 0
     }
 
     private fun getDaysOfWeekList(daysOfWeek: IntArray):String {
         val daysOfWeekList = listOf("Sun","Mon","Tue","Wed","Thurs","Fri","Sat")
-        var list = ""
-        var firstVal = true
-        for (i in daysOfWeek.indices) {
-            if (daysOfWeek[i] == 1 && firstVal) {
-                list += daysOfWeekList[i]
-                firstVal = false
-            } else if (daysOfWeek[i] == 1) {
-                list += ", ${daysOfWeekList[i]}"
-            }
-        }
-        return list
+
+        val daysList = daysOfWeek.mapIndexed { index, value ->
+            if (value == 1) daysOfWeekList[index]
+            else null
+        }.filterNotNull()
+
+        return daysList.joinToString()
     }
 }
 
