@@ -48,7 +48,6 @@ class MedicationsFragment : Fragment() {
     private fun updateMedicationList() {
         stack.removeAllViews()
         for (drug in realm.where(Medications::class.java).findAll()) {
-            Log.i("drug", drug.toString())
             if (drug.deleted) {
                 continue
             }

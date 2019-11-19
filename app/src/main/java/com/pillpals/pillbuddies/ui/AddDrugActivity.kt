@@ -28,7 +28,10 @@ import java.util.*
 import com.pillpals.pillbuddies.data.model.Schedules
 import com.pillpals.pillbuddies.helpers.DateHelper
 import com.google.android.material.button.MaterialButton
+import com.pillpals.pillbuddies.helpers.DatabaseHelper
 
+
+import android.util.Log
 class AddDrugActivity : AppCompatActivity() {
 
     public lateinit var editText: EditText
@@ -38,6 +41,9 @@ class AddDrugActivity : AppCompatActivity() {
     public lateinit var deleteButton: TextView
     public lateinit var scheduleStack: LinearLayout
     public lateinit var bottomOptions: BottomOptions
+
+    public var schedulesSetToDelete = mutableListOf<Schedules>()
+    public var schedulesRecordsSetToDelete = mutableListOf<ScheduleRecord>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -54,7 +60,7 @@ class AddDrugActivity : AppCompatActivity() {
         bottomOptions.leftButton.text = "Save"
         bottomOptions.rightButton.text = "Cancel"
 
-
+        // region Bottom Button Listeners
         if (intent.hasExtra("medication-uid")) {
             val medID: String = intent.getStringExtra("medication-uid")
             val medication = getMedicationByUid(medID) as Medications
@@ -63,63 +69,52 @@ class AddDrugActivity : AppCompatActivity() {
             editText2.setText(medication.dosage)
             editText3.setText(medication.notes)
 
-            // region Schedule Records
-            // To contain all records that will be written to the view
-            var scheduleRecords = mutableListOf<ScheduleRecord>()
+            calculateScheduleRecords(medication)
 
-            // The record set that contains the days of the week on which the medication is scheduled to reoccur weekly
-            // Eg. To result in the string '8:00 AM on Mon, Wed' when added to scheduleRecords
-            var compiledScheduleRecords = mutableListOf<CompiledScheduleRecord>()
-
-            medication.schedules.forEach {
-                val timeString = DateHelper.dateToString(it.occurrence!!)
-                if(isWeeklyRecurrence(it)) {
-                    val cal = Calendar.getInstance()
-                    cal.time = it.occurrence
-                    if(compiledScheduleRecordExists(timeString, compiledScheduleRecords)) {
-                        //add day of week to existing compiled schedule record
-                        val compiledScheduleRecord = compiledScheduleRecords.find {it.time == timeString}
-                        compiledScheduleRecord!!.daysOfWeek[cal.get(Calendar.DAY_OF_WEEK) - 1] = 1
-                    } else {
-                        //create new compiled schedule record
-                        val compiledScheduleRecord = CompiledScheduleRecord(timeString)
-                        compiledScheduleRecord.daysOfWeek[cal.get(Calendar.DAY_OF_WEEK) - 1] = 1
-                        compiledScheduleRecords.add(compiledScheduleRecord)
-                    }
-                } else {
-                    val scheduleRecord = ScheduleRecord(this)
-
-                    scheduleRecord.timeText.text = timeString
-                    scheduleRecord.recurrenceText.text = "every"
-                    scheduleRecord.dateText.text = getRecurrenceString(it.repetitionUnit!!,it.repetitionCount!!)
-                    scheduleRecords.add(scheduleRecord)
-                }
-            }
-
-            //create scheduleRecords from compiledScheduleRecords
-            compiledScheduleRecords.forEach {
-                val scheduleRecord = ScheduleRecord(this)
-
-                scheduleRecord.timeText.text = it.time
-                scheduleRecord.recurrenceText.text = "on"
-                scheduleRecord.dateText.text = getDaysOfWeekList(it.daysOfWeek)
-                scheduleRecords.add(scheduleRecord)
-            }
-
-            scheduleRecords.forEach {
-                scheduleStack.addView(it)
-            }
-            //endregion
-
+            //region Bottom button listeners
             bottomOptions.leftButton.setOnClickListener{
                 if (editText.text.toString().trim().isNotEmpty() and editText2.text.toString().trim().isNotEmpty()) {
-                    updateMedicationData(
-                        medication,
-                        editText.text.toString(),
-                        editText2.text.toString(),
-                        editText3.text.toString()
-                    )
-                    finish()
+                    if(schedulesSetToDelete.count() > 0) {
+                        val deleteDialog = LayoutInflater.from(this).inflate(R.layout.delete_schedules_prompt, null)
+
+                        val dialogBuilder = AlertDialog.Builder(this)
+                            .setView(deleteDialog)
+                            .setTitle("Delete Schedules")
+
+                        val deleteSchedules = deleteDialog!!.findViewById<TextView>(R.id.deleteSchedules)
+                        val scheduleTexts = schedulesRecordsSetToDelete.map {
+                           "${it.timeText.text} ${it.recurrenceText.text} ${it.dateText.text}"
+                        }
+                        Log.i("uhhh", scheduleTexts.toString())
+
+                        deleteSchedules.text = scheduleTexts.joinToString(separator = "\n")
+
+                        val deleteAlertDialog = dialogBuilder.show()
+                        deleteDialog.dialogConfirmBtn.setOnClickListener {
+                            deleteAlertDialog.dismiss()
+                            DatabaseHelper.deleteSchedules(schedulesSetToDelete)
+                            updateMedicationData(
+                                medication,
+                                editText.text.toString(),
+                                editText2.text.toString(),
+                                editText3.text.toString()
+                            )
+                            finish()
+                        }
+
+                        deleteDialog.dialogCancelBtn.setOnClickListener {
+                            deleteAlertDialog.dismiss()
+                        }
+                    }
+                    else {
+                        updateMedicationData(
+                            medication,
+                            editText.text.toString(),
+                            editText2.text.toString(),
+                            editText3.text.toString()
+                        )
+                        finish()
+                    }
                 } else{
                     Toast.makeText(applicationContext, "Please set a name and dosage", Toast.LENGTH_SHORT).show()
                 }
@@ -127,12 +122,44 @@ class AddDrugActivity : AppCompatActivity() {
         } else {
             bottomOptions.leftButton.setOnClickListener{
                 if (editText.text.toString().trim().isNotEmpty() and editText2.text.toString().trim().isNotEmpty()) {
-                    createMedicationData(
-                        editText.text.toString(),
-                        editText2.text.toString(),
-                        editText3.text.toString()
-                    )
-                    finish()
+                    if(schedulesSetToDelete.count() > 0) {
+                        val deleteDialog = LayoutInflater.from(this).inflate(R.layout.delete_schedules_prompt, null)
+
+                        val dialogBuilder = AlertDialog.Builder(this)
+                            .setView(deleteDialog)
+                            .setTitle("Delete Schedules")
+
+                        val deleteSchedules = deleteDialog!!.findViewById<TextView>(R.id.deleteSchedules)
+                        val scheduleTexts = schedulesRecordsSetToDelete.map {
+                            "${it.dateText} ${it.recurrenceText} ${it.timeText}"
+                        }
+
+                        deleteSchedules.text = scheduleTexts.joinToString(separator = "\n")
+
+                        val deleteAlertDialog = dialogBuilder.show()
+                        deleteDialog.dialogConfirmBtn.setOnClickListener {
+                            deleteAlertDialog.dismiss()
+                            DatabaseHelper.deleteSchedules(schedulesSetToDelete)
+                            createMedicationData(
+                                editText.text.toString(),
+                                editText2.text.toString(),
+                                editText3.text.toString()
+                            )
+                            finish()
+                        }
+
+                        deleteDialog.dialogCancelBtn.setOnClickListener {
+                            deleteAlertDialog.dismiss()
+                        }
+                    }
+                    else {
+                        createMedicationData(
+                            editText.text.toString(),
+                            editText2.text.toString(),
+                            editText3.text.toString()
+                        )
+                        finish()
+                    }
                 } else{
                     Toast.makeText(applicationContext, "Please set a name and dosage", Toast.LENGTH_SHORT).show()
                 }
@@ -142,6 +169,8 @@ class AddDrugActivity : AppCompatActivity() {
         bottomOptions.rightButton.setOnClickListener{
             finish()
         }
+
+        // endregion
 
         // region Delete button
         if (intent.hasExtra("medication-uid")) {
@@ -181,6 +210,73 @@ class AddDrugActivity : AppCompatActivity() {
             startActivityForResult(intent, 1)
         }
         //endregion
+    }
+
+    private fun calculateScheduleRecords(medication: Medications) {
+        // To contain all records that will be written to the view
+        var scheduleRecords = mutableListOf<ScheduleRecord>()
+
+        // The record set that contains the days of the week on which the medication is scheduled to reoccur weekly
+        // Eg. To result in the string '8:00 AM on Mon, Wed' when added to scheduleRecords
+        var compiledScheduleRecords = mutableListOf<CompiledScheduleRecord>()
+
+        medication.schedules.forEach {
+            if (it.deleted ||
+                schedulesSetToDelete.filter {schedule -> it.uid == schedule.uid}.count() > 0) {
+                return@forEach
+            }
+
+            val timeString = DateHelper.dateToString(it.occurrence!!)
+            if(isWeeklyRecurrence(it)) {
+                val cal = Calendar.getInstance()
+                cal.time = it.occurrence
+                if(compiledScheduleRecordExists(timeString, compiledScheduleRecords)) {
+                    //add day of week to existing compiled schedule record
+                    val compiledScheduleRecord = compiledScheduleRecords.find {it.time == timeString}
+                    compiledScheduleRecord!!.daysOfWeek[cal.get(Calendar.DAY_OF_WEEK) - 1] = 1
+                    compiledScheduleRecord.schedules.add(it)
+                } else {
+                    //create new compiled schedule record
+                    val compiledScheduleRecord = CompiledScheduleRecord(timeString)
+                    compiledScheduleRecord.daysOfWeek[cal.get(Calendar.DAY_OF_WEEK) - 1] = 1
+                    compiledScheduleRecord.schedules.add(it)
+                    compiledScheduleRecords.add(compiledScheduleRecord)
+                }
+            } else {
+                val scheduleRecord = ScheduleRecord(this)
+
+                scheduleRecord.timeText.text = timeString
+                scheduleRecord.recurrenceText.text = "every"
+                scheduleRecord.dateText.text = getRecurrenceString(it.repetitionUnit!!,it.repetitionCount!!)
+                scheduleRecord.schedules = listOf(it)
+                scheduleRecords.add(scheduleRecord)
+            }
+        }
+
+        //create scheduleRecords from compiledScheduleRecords
+        compiledScheduleRecords.forEach {
+            val scheduleRecord = ScheduleRecord(this)
+
+            scheduleRecord.timeText.text = it.time
+            scheduleRecord.recurrenceText.text = "on"
+            scheduleRecord.dateText.text = getDaysOfWeekList(it.daysOfWeek)
+            scheduleRecord.schedules = it.schedules
+            scheduleRecords.add(scheduleRecord)
+        }
+
+        addScheduleRecords(scheduleRecords, medication)
+    }
+
+    private fun addScheduleRecords(scheduleRecords: List<ScheduleRecord>, medication: Medications) {
+        scheduleRecords.forEach { record ->
+            record.deleteScheduleImage.setOnClickListener {
+                schedulesRecordsSetToDelete.add(record)
+                schedulesSetToDelete.addAll(record.schedules)
+                scheduleStack.removeAllViews()
+                calculateScheduleRecords(medication)
+            }
+            scheduleStack.addView(record)
+        }
     }
 
     private fun updateMedicationData(medication: Medications, drugName: String, drugDose: String, drugNote: String) {
@@ -256,6 +352,7 @@ class AddDrugActivity : AppCompatActivity() {
 
 data class CompiledScheduleRecord(val time: String) {
     var daysOfWeek: IntArray = IntArray(7) {0}
+    var schedules: MutableList<Schedules> = mutableListOf()
 }
 
 

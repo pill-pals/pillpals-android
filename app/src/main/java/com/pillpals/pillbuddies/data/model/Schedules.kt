@@ -13,6 +13,7 @@ open class Schedules(
     var repetitionCount: Int? = null,
     var repetitionUnit: Int? = null,
     var logs: RealmList<Logs> = RealmList(),
+    var deleted: Boolean = false,
     @LinkingObjects("schedules")
     val medication: RealmResults<Medications>? = null
 ) : RealmObject(){}

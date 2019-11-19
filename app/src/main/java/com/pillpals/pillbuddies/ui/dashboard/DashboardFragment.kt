@@ -73,7 +73,7 @@ class DashboardFragment : Fragment() {
 
     public fun setUpScheduleCards(schedules: RealmResults<out Schedules>) {
         for (databaseSchedule in schedules) {
-            if (databaseSchedule.medication!!.first()!!.deleted) {
+            if (databaseSchedule.deleted || databaseSchedule.medication!!.first()!!.deleted) {
                 continue
             }
 

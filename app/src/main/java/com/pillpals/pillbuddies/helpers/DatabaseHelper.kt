@@ -17,5 +17,12 @@ class DatabaseHelper {
         fun getMedicationByUid(uid: String): Medications? {
             return Realm.getDefaultInstance().where(Medications::class.java).equalTo("uid", uid).findFirst()
         }
+        fun deleteSchedules(schedules: List<Schedules>) {
+            for (schedule in schedules) {
+                Realm.getDefaultInstance().executeTransaction {
+                    schedule.deleted = true
+                }
+            }
+        }
     }
 }
