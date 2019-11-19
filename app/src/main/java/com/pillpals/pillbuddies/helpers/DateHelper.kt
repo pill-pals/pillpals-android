@@ -82,13 +82,14 @@ class DateHelper {
             return format.format(date)
         }
         fun secondsToCountdown(seconds: Long): String {
-            if (seconds / 3600 < 1) {
-                return "" + (seconds / 60 + 1) + " min"
+            return if (seconds / 3600 < 1) {
+                "${(seconds / 60 + 1)}m"
             }
             else {
                 val hours = (seconds / 3600)
                 val minutes = (seconds / 60) % 60
-                return "${hours}:${minutes.toString().take(2)} hours"
+                val minutesString = if (minutes > 9) minutes.toString().take(2) else "0" + minutes.toString().take(2)
+                return "${hours}h ${minutesString}m"
             }
         }
     }

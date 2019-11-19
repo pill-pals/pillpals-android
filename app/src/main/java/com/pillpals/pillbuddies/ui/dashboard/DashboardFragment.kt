@@ -30,9 +30,13 @@ class DashboardFragment : Fragment() {
     public lateinit var completedStack: LinearLayout
     private lateinit var realm: Realm
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
         super.onCreateView(inflater, container, savedInstanceState)
-        val view = inflater!!.inflate(R.layout.fragment_dashboard, container,false)
+        val view = inflater!!.inflate(R.layout.fragment_dashboard, container, false)
 
         realm = Realm.getDefaultInstance()
 
@@ -42,7 +46,7 @@ class DashboardFragment : Fragment() {
 
         //region
         // Testing
-        //clearDatabase()
+        clearDatabase()
         createTestData()
         //populateAllStacks(8)
         //endregion
@@ -75,7 +79,9 @@ class DashboardFragment : Fragment() {
 
             var testSchedule = realm.copyFromRealm(databaseSchedule)
 
-            var loggedToday = testSchedule.logs.filter { it.occurrence!! > DateHelper.today() && it.occurrence!! < DateHelper.tomorrow() }.count()
+            var loggedToday =
+                testSchedule.logs.filter { it.occurrence!! > DateHelper.today() && it.occurrence!! < DateHelper.tomorrow() }
+                    .count()
 
             val n = testSchedule.repetitionCount!!
             val u = DateHelper.getUnitByIndex(testSchedule.repetitionUnit!!)
@@ -88,8 +94,8 @@ class DashboardFragment : Fragment() {
                 testSchedule.occurrence = DateHelper.addUnitToDate(testSchedule.occurrence!!, -n, u)
             }
 
-            while(testSchedule.occurrence!! < DateHelper.tomorrow()) {
-                if(testSchedule.occurrence!! > DateHelper.today()) {
+            while (testSchedule.occurrence!! < DateHelper.tomorrow()) {
+                if (testSchedule.occurrence!! > DateHelper.today()) {
                     val newSchedule = Schedules(
                         testSchedule.uid,
                         testSchedule.occurrence,
@@ -133,8 +139,7 @@ class DashboardFragment : Fragment() {
             newCard.doneImage.setVisibility(LinearLayout.VISIBLE)
             newCard.drugCard.setCardBackgroundColor(this.resources.getColor(R.color.colorGrey))
             completedStack.addView(newCard)
-        }
-        else if (currentDate.time >= schedule.occurrence!!) {
+        } else if (currentDate.time >= schedule.occurrence!!) {
             // Current
             newCard.button.setVisibility(LinearLayout.VISIBLE)
             if (lateDate.time >= schedule.occurrence!!) {
@@ -145,8 +150,7 @@ class DashboardFragment : Fragment() {
 
             // Send notification
             NotificationUtils.startAlarm(this.context!!, schedule)
-        }
-        else {
+        } else {
             // Upcoming
             newCard.countdownLabel.setVisibility(LinearLayout.VISIBLE)
             newCard.drugCard.setCardBackgroundColor(this.resources.getColor(R.color.colorWhite))
@@ -159,7 +163,8 @@ class DashboardFragment : Fragment() {
     }
 
     private fun drugLogFunction(schedule: Schedules) {
-        val databaseSchedule = realm.where(Schedules::class.java).equalTo("uid", schedule.uid).findFirst()!!
+        val databaseSchedule =
+            realm.where(Schedules::class.java).equalTo("uid", schedule.uid).findFirst()!!
         realm.executeTransaction {
             var newLog = it.createObject(Logs::class.java, UUID.randomUUID().toString())
             newLog.occurrence = Date()
@@ -185,7 +190,7 @@ class DashboardFragment : Fragment() {
 
         for (i in testCards.indices) {
             testCards[i].nameText.text = "Medication ${i + 1}"
-            when(i % 3) {
+            when (i % 3) {
                 0 -> currentStack.addView(testCards[i])
                 1 -> completedStack.addView(testCards[i])
                 2 -> upcomingStack.addView(testCards[i])
@@ -203,6 +208,11 @@ class DashboardFragment : Fragment() {
         if (schedules.count() == 0) {
             createTestSchedulesData(medications.first()!!)
             schedules = readAllData(Schedules::class.java) as RealmResults<Schedules>
+        }
+        var logs = readAllData(Logs::class.java) as RealmResults<Logs>
+        if (logs.count() == 0) {
+            createTestLogsData(schedules.first()!!)
+            logs = readAllData(Logs::class.java) as RealmResults<Logs>
         }
     }
 
@@ -238,7 +248,8 @@ class DashboardFragment : Fragment() {
             firstSchedule.repetitionUnit = DateHelper.getIndexByUnit(Calendar.DAY_OF_MONTH)
             medication.schedules.add(firstSchedule)
 
-            val secondSchedule = it.createObject(Schedules::class.java, UUID.randomUUID().toString())
+            val secondSchedule =
+                it.createObject(Schedules::class.java, UUID.randomUUID().toString())
 
             val cal2 = Calendar.getInstance()
             cal2.time = date
@@ -251,6 +262,24 @@ class DashboardFragment : Fragment() {
             secondSchedule.repetitionCount = 1
             secondSchedule.repetitionUnit = DateHelper.getIndexByUnit(Calendar.DAY_OF_MONTH)
             medication.schedules.add(secondSchedule)
+        }
+    }
+
+    private fun createTestLogsData(schedule: Schedules) {
+        realm.executeTransaction {
+            val n = schedule.repetitionCount!!
+            val u = DateHelper.getUnitByIndex(schedule.repetitionUnit!!)
+
+            for (i in 5.downTo(1)) {
+                val log = it.createObject(Logs::class.java, UUID.randomUUID().toString())
+                val due = DateHelper.addUnitToDate(schedule.occurrence!!, -i * n, u)
+                log.due = due
+                val cal = Calendar.getInstance()
+                cal.time = due
+                cal.add(Calendar.MINUTE, (-10..10).random())
+                log.occurrence = cal.time
+                schedule.logs.add(log)
+            }
         }
     }
 }
