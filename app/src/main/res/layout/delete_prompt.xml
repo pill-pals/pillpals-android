@@ -44,6 +44,7 @@
                 android:layout_marginTop="8dp"
                 android:layout_marginEnd="64dp"
                 android:text="Cancel"
+                android:backgroundTint="@color/colorDarkGrey"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
@@ -54,6 +55,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="64dp"
                 android:layout_marginTop="8dp"
+                android:backgroundTint="@color/colorRed"
                 android:text="Confirm"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
