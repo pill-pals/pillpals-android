@@ -43,6 +43,8 @@
         </receiver>
 
         <activity android:name=".ui.AddDrugActivity"></activity>
+
+        <activity android:name=".ui.EditMedicationIcon"></activity>
     </application>
 
 </manifest>

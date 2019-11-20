@@ -25,6 +25,7 @@ class DrugCard : LinearLayout {
     public lateinit var countdownLabel: TextView
     public lateinit var icon: ImageView
     public lateinit var doneImage: ImageView
+    public lateinit var iconBackground: CardView
 
     companion object {
         private var mSquareColor: Int = 0
@@ -60,6 +61,7 @@ class DrugCard : LinearLayout {
         countdownLabel = findViewById(R.id.countdownLabel)
         icon = findViewById(R.id.icon)
         doneImage = findViewById(R.id.doneImage)
+        iconBackground = findViewById(R.id.iconBackground)
 
         //Initialize elements
         button.visibility = GONE
