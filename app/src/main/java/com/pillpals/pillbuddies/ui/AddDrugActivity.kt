@@ -1,6 +1,8 @@
 package com.pillpals.pillbuddies.ui
 
 import android.content.Intent
+import android.content.res.ColorStateList
+import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.widget.*
@@ -70,6 +72,7 @@ class AddDrugActivity : AppCompatActivity() {
             editText.setText(medication.name)
             editText2.setText(medication.dosage)
             editText3.setText(medication.notes)
+            iconButton.backgroundTintList = ColorStateList.valueOf(Color.parseColor(medication.color))
 
             calculateScheduleRecords(medication)
 
@@ -122,6 +125,7 @@ class AddDrugActivity : AppCompatActivity() {
                 }
             }
         } else {
+            iconButton.backgroundTintList = ColorStateList.valueOf(Color.parseColor("#d3d3d3"))
             bottomOptions.leftButton.setOnClickListener{
                 if (editText.text.toString().trim().isNotEmpty() and editText2.text.toString().trim().isNotEmpty()) {
                     if(scheduleRecordsSetToDelete.count() > 0) {
@@ -303,6 +307,11 @@ class AddDrugActivity : AppCompatActivity() {
             medication.name = drugName
             medication.dosage = drugDose
             medication.notes = drugNote
+
+            // Temporary random color
+            val colors = listOf("#E08686", "#E8B57A", "#FBE297", "#ADE9C6", "#C1DCFF", "#DFC6F5")
+            medication.color = colors.random()
+
             if(::scheduleIdList.isInitialized){
                 toBeAdded.forEach {
                     medication.schedules.add(it)
