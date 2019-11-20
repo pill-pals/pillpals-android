@@ -1,5 +1,6 @@
 package com.pillpals.pillbuddies.ui.dashboard
 
+import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -116,6 +117,7 @@ class DashboardFragment : Fragment() {
 
         newCard.nameText.text = medication.name
         newCard.altText.text = DateHelper.dateToString(schedule.occurrence!!)
+        newCard.iconBackground.setCardBackgroundColor(Color.parseColor(medication.color))
         val diff = schedule.occurrence!!.time - Date().time
         val seconds = diff / 1000
         newCard.countdownLabel.text = DateHelper.secondsToCountdown(seconds)

@@ -39,6 +39,7 @@ class AddDrugActivity : AppCompatActivity() {
     public lateinit var deleteButton: TextView
     public lateinit var scheduleStack: LinearLayout
     public lateinit var bottomOptions: BottomOptions
+    public lateinit var iconButton: Button
 
     public var scheduleRecordsSetToDelete = mutableListOf<ScheduleRecord>()
 
@@ -53,6 +54,7 @@ class AddDrugActivity : AppCompatActivity() {
         addScheduleButton = findViewById(R.id.addScheduleButton)
         deleteButton = findViewById(R.id.deleteButton)
         scheduleStack = findViewById(R.id.scheduleStack)
+        iconButton = findViewById(R.id.iconButton)
         bottomOptions = findViewById(R.id.bottomOptions)
         bottomOptions.leftButton.text = "Save"
         bottomOptions.rightButton.text = "Cancel"
@@ -208,6 +210,11 @@ class AddDrugActivity : AppCompatActivity() {
             startActivityForResult(intent, 1)
         }
         //endregion
+
+        iconButton.setOnClickListener {
+            val intent = Intent(this, EditMedicationIcon::class.java)
+            startActivityForResult(intent, 1)
+        }
     }
 
     private fun calculateScheduleRecords(medication: Medications) {
