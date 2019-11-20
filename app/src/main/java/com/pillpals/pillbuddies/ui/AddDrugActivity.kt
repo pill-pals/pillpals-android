@@ -206,8 +206,11 @@ class AddDrugActivity : AppCompatActivity() {
 
         //region Add schedule button
         addScheduleButton.setOnClickListener {
-            val intent = Intent(this, EditScheduleActivity::class.java)
-            startActivityForResult(intent, 1)
+            val addIntent = Intent(this, EditScheduleActivity::class.java)
+            if(intent.hasExtra("medication-uid")) {
+                addIntent.putExtra("medication-uid", intent.getStringExtra("medication-uid"))
+            }
+            startActivityForResult(addIntent, 1)
         }
         //endregion
 
@@ -355,6 +358,11 @@ class AddDrugActivity : AppCompatActivity() {
         }.filterNotNull()
 
         return daysList.joinToString()
+    }
+    override fun onActivityResult(requestCode:Int, resultCode:Int, data:Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        scheduleStack.removeAllViews()
+        calculateScheduleRecords(getMedicationByUid(data!!.getStringExtra("medication-uid"))!!)
     }
 }
 
