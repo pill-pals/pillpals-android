@@ -71,7 +71,7 @@ class AddDrugActivity : AppCompatActivity() {
             editText2.setText(medication.dosage)
             editText3.setText(medication.notes)
 
-            calculateScheduleRecords(medication)
+            calculateScheduleRecords(medication.schedules)
 
             //region Bottom button listeners
             bottomOptions.leftButton.setOnClickListener{
@@ -223,7 +223,7 @@ class AddDrugActivity : AppCompatActivity() {
         }
     }
 
-    private fun calculateScheduleRecords(medication: Medications) {
+    private fun calculateScheduleRecords(schedules: List<Schedules>) {
         // To contain all records that will be written to the view
         var scheduleRecords = mutableListOf<ScheduleRecord>()
 
@@ -231,7 +231,7 @@ class AddDrugActivity : AppCompatActivity() {
         // Eg. To result in the string '8:00 AM on Mon, Wed' when added to scheduleRecords
         var compiledScheduleRecords = mutableListOf<CompiledScheduleRecord>()
 
-        medication.schedules.forEach {
+        schedules.forEach {
             if (it.deleted ||
                 scheduleRecordExistsByUid(scheduleRecordsSetToDelete, it.uid!!)) {
                 return@forEach
@@ -275,15 +275,15 @@ class AddDrugActivity : AppCompatActivity() {
             scheduleRecords.add(scheduleRecord)
         }
 
-        addScheduleRecords(scheduleRecords, medication)
+        addScheduleRecords(scheduleRecords, schedules)
     }
 
-    private fun addScheduleRecords(scheduleRecords: List<ScheduleRecord>, medication: Medications) {
+    private fun addScheduleRecords(scheduleRecords: List<ScheduleRecord>, schedules: List<Schedules>) {
         scheduleRecords.forEach { record ->
             record.deleteScheduleImage.setOnClickListener {
                 scheduleRecordsSetToDelete.add(record)
                 scheduleStack.removeAllViews()
-                calculateScheduleRecords(medication)
+                calculateScheduleRecords(schedules)
             }
             scheduleStack.addView(record)
         }
@@ -373,12 +373,13 @@ class AddDrugActivity : AppCompatActivity() {
         if(data != null) {
             if(data.hasExtra("medication-uid")) {
                 scheduleStack.removeAllViews()
-                calculateScheduleRecords(getMedicationByUid(data.getStringExtra("medication-uid")!!)!!)
+                calculateScheduleRecords((getMedicationByUid(data.getStringExtra("medication-uid")!!)!!).schedules)
             } else if(data.hasExtra("schedule-id-list")){
                 scheduleIdList = data.getStringArrayListExtra("schedule-id-list")
                 scheduleIdList.forEach {
                     toBeAdded.add(getScheduleByUid(it)!!)
                 }
+                calculateScheduleRecords(toBeAdded)
             }
         }
     }
