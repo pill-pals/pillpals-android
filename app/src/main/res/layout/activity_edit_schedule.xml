@@ -98,29 +98,30 @@
                     app:layout_constraintTop_toTopOf="parent"
                     app:srcCompat="@drawable/ic_add_24px" />
 
-                <androidx.constraintlayout.widget.ConstraintLayout
-                    android:id="@+id/timeBoxConstraintLayout"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
-                    android:minHeight="40dp"
-                    app:layout_constraintEnd_toEndOf="@+id/addTimeButton"
-                    app:layout_constraintStart_toStartOf="@+id/firstSectionText"
-                    app:layout_constraintTop_toBottomOf="@+id/addTimeButton" />
+                <LinearLayout
+                    android:id="@+id/timeBoxList"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginEnd="16dp"
+                    android:orientation="horizontal"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/firstSectionText"></LinearLayout>
 
                 <TextView
                     android:id="@+id/secondSectionText"
                     android:layout_width="wrap_content"
                     android:layout_height="0dp"
                     android:layout_marginStart="16dp"
-                    android:layout_marginTop="36dp"
                     android:includeFontPadding="true"
                     android:text="Repeating"
                     android:textAppearance="@style/TextAppearance.AppCompat.Large"
                     android:textColor="@color/colorBlack"
                     android:textSize="24sp"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/timeBoxConstraintLayout" />
+                    tools:layout_editor_absoluteY="98dp" />
 
                 <TextView
                     android:id="@+id/thirdSectionText"
