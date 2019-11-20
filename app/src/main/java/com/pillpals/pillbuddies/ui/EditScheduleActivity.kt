@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.widget.Button
 import android.widget.ImageButton
+import android.widget.LinearLayout
 import android.widget.TimePicker
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -21,7 +22,7 @@ class EditScheduleActivity : AppCompatActivity() {
 
     public lateinit var addTimeButton : ImageButton
     public lateinit var bottomOptions: BottomOptions
-    public lateinit var timeBoxConstraintLayout : ConstraintLayout
+    public lateinit var timeBoxList : LinearLayout
     public lateinit var simpleTimePicker : TimePicker
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -33,7 +34,7 @@ class EditScheduleActivity : AppCompatActivity() {
         bottomOptions = findViewById(R.id.bottomOptions)
         bottomOptions.leftButton.text = "Save"
         bottomOptions.rightButton.text = "Cancel"
-        timeBoxConstraintLayout = findViewById(R.id.timeBoxConstraintLayout)
+        timeBoxList = findViewById(R.id.timeBoxList)
 
         addTimeButton.setOnClickListener {
             val timeDialog = LayoutInflater.from(this).inflate(R.layout.time_prompt, null)
@@ -49,7 +50,7 @@ class EditScheduleActivity : AppCompatActivity() {
                 val timeObject = DosageTimeBox(this)
                 val timeData = simpleTimePicker.hour.toString()+":"+simpleTimePicker.minute.toString()
                 timeObject.timeBoxText.text= timeData
-                timeBoxConstraintLayout.addView(timeObject)
+                timeBoxList.addView(timeObject)
             }
 
             timeDialog.dialogCancelBtn.setOnClickListener {
