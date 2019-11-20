@@ -29,6 +29,7 @@ import com.pillpals.pillbuddies.data.model.Schedules
 import com.pillpals.pillbuddies.helpers.DateHelper
 import com.google.android.material.button.MaterialButton
 import com.pillpals.pillbuddies.helpers.DatabaseHelper
+import com.pillpals.pillbuddies.helpers.DatabaseHelper.Companion.getScheduleByUid
 
 class AddDrugActivity : AppCompatActivity() {
 
@@ -42,6 +43,8 @@ class AddDrugActivity : AppCompatActivity() {
     public lateinit var iconButton: Button
 
     public var scheduleRecordsSetToDelete = mutableListOf<ScheduleRecord>()
+    public lateinit var scheduleIdList: ArrayList<String>
+    public val toBeAdded: MutableList<Schedules> = ArrayList()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -300,6 +303,11 @@ class AddDrugActivity : AppCompatActivity() {
             medication.name = drugName
             medication.dosage = drugDose
             medication.notes = drugNote
+            if(::scheduleIdList.isInitialized){
+                toBeAdded.forEach {
+                    medication.schedules.add(it)
+                }
+            }
         }
     }
 
@@ -363,8 +371,15 @@ class AddDrugActivity : AppCompatActivity() {
     override fun onActivityResult(requestCode:Int, resultCode:Int, data:Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if(data != null) {
-            scheduleStack.removeAllViews()
-            calculateScheduleRecords(getMedicationByUid(data.getStringExtra("medication-uid")!!)!!)
+            if(data.hasExtra("medication-uid")) {
+                scheduleStack.removeAllViews()
+                calculateScheduleRecords(getMedicationByUid(data.getStringExtra("medication-uid")!!)!!)
+            } else if(data.hasExtra("schedule-id-list")){
+                scheduleIdList = data.getStringArrayListExtra("schedule-id-list")
+                scheduleIdList.forEach {
+                    toBeAdded.add(getScheduleByUid(it)!!)
+                }
+            }
         }
     }
 }

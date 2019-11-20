@@ -174,6 +174,14 @@ class EditScheduleActivity : AppCompatActivity() {
                     val resultIntent = Intent(this, EditScheduleActivity::class.java)
                     resultIntent.putExtra("medication-uid", intent.getStringExtra("medication-uid"))
                     setResult(Activity.RESULT_OK, resultIntent)
+                } else{
+                    val strings: MutableList<String> = ArrayList()
+                    schedules.forEach {
+                        strings.add(it.uid!!)
+                    }
+                    val resultIntent = Intent(this, EditScheduleActivity::class.java)
+                    resultIntent.putStringArrayListExtra("schedule-id-list", ArrayList(strings))
+                    setResult(Activity.RESULT_OK, resultIntent)
                 }
             }
             finish()
