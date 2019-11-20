@@ -9,6 +9,7 @@
         android:id="@+id/TimeBoxCard"
         android:layout_width="105dp"
         android:layout_height="40dp"
+        android:layout_marginRight="16dp"
         android:background="@color/colorGrey"
         app:cardBackgroundColor="@color/colorGrey"
         app:cardCornerRadius="0dp"
