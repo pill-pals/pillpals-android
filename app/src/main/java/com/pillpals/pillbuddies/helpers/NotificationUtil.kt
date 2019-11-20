@@ -20,7 +20,7 @@ class NotificationUtils {
                 context,
                 schedule.uid!!.hashCode(),
                 intent,
-                PendingIntent.FLAG_UPDATE_CURRENT
+                0
             )
 
             val c = Calendar.getInstance()

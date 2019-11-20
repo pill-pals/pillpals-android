@@ -30,7 +30,7 @@ public class AlarmReceiver: BroadcastReceiver() {
             occurrence
         )
 
-        val pendingIntent = PendingIntent.getActivity(context, schedule.uid!!.hashCode(), intent, PendingIntent.FLAG_CANCEL_CURRENT)
+        val pendingIntent = PendingIntent.getActivity(context, schedule.uid!!.hashCode(), intent, PendingIntent.FLAG_UPDATE_CURRENT)
 
         // Set the notification content
         val mBuilder = NotificationCompat.Builder(context, context.getString(R.string.channel_id))
