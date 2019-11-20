@@ -359,10 +359,13 @@ class AddDrugActivity : AppCompatActivity() {
 
         return daysList.joinToString()
     }
+
     override fun onActivityResult(requestCode:Int, resultCode:Int, data:Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        scheduleStack.removeAllViews()
-        calculateScheduleRecords(getMedicationByUid(data!!.getStringExtra("medication-uid"))!!)
+        if(data != null) {
+            scheduleStack.removeAllViews()
+            calculateScheduleRecords(getMedicationByUid(data.getStringExtra("medication-uid")!!)!!)
+        }
     }
 }
 
