@@ -16,6 +16,7 @@ import io.realm.Realm
 import kotlinx.android.synthetic.main.prompts.view.*
 import java.util.*
 import android.content.Intent
+import android.graphics.Color
 import kotlinx.android.synthetic.main.prompts.*
 import android.util.Log
 class MedicationsFragment : Fragment() {
@@ -61,6 +62,7 @@ class MedicationsFragment : Fragment() {
 
         newCard.nameText.text = medication.name
         newCard.altText.text = medication.dosage
+        newCard.iconBackground.setCardBackgroundColor(Color.parseColor(medication.color))
 
         newCard.button.setOnClickListener {
             val intent = Intent(context, AddDrugActivity::class.java)
