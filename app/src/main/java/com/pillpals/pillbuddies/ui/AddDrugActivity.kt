@@ -310,8 +310,7 @@ class AddDrugActivity : AppCompatActivity() {
         scheduleRecords.forEach { record ->
             record.deleteScheduleImage.setOnClickListener {
                 scheduleRecordsSetToDelete.add(record)
-                scheduleStack.removeAllViews()
-                calculateScheduleRecords(schedules)
+                updateScheduleList()
             }
             scheduleStack.addView(record)
         }
@@ -407,6 +406,14 @@ class AddDrugActivity : AppCompatActivity() {
         return daysList.joinToString()
     }
 
+    private fun updateScheduleList() {
+        scheduleStack.removeAllViews()
+        if (intent.hasExtra("medication-uid")) {
+            calculateScheduleRecords(getMedicationByUid(intent.getStringExtra("medication-uid"))!!.schedules)
+        }
+        calculateScheduleRecords(toBeAdded)
+    }
+
     override fun onActivityResult(requestCode:Int, resultCode:Int, data:Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if(data != null) {
@@ -418,11 +425,7 @@ class AddDrugActivity : AppCompatActivity() {
                 scheduleIdList.forEach {
                     toBeAdded.add(getScheduleByUid(it)!!)
                 }
-                scheduleStack.removeAllViews()
-                if (intent.hasExtra("medication-uid")) {
-                    calculateScheduleRecords(getMedicationByUid(intent.getStringExtra("medication-uid"))!!.schedules)
-                }
-                calculateScheduleRecords(toBeAdded)
+                updateScheduleList()
             }
         }
     }
