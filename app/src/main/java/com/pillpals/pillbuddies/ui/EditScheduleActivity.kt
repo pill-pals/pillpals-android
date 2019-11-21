@@ -166,7 +166,7 @@ class EditScheduleActivity : AppCompatActivity() {
                         }
                     }
                 }
-                if(intent.hasExtra("medication-uid")){
+                /*if(intent.hasExtra("medication-uid")){
                     val medication = getMedicationByUid(intent.getStringExtra("medication-uid"))
                     schedules.forEach{
                         medication!!.schedules.add(it)
@@ -174,7 +174,7 @@ class EditScheduleActivity : AppCompatActivity() {
                     val resultIntent = Intent(this, EditScheduleActivity::class.java)
                     resultIntent.putExtra("medication-uid", intent.getStringExtra("medication-uid"))
                     setResult(Activity.RESULT_OK, resultIntent)
-                } else{
+                } else{*/
                     val strings: MutableList<String> = ArrayList()
                     schedules.forEach {
                         strings.add(it.uid!!)
@@ -182,7 +182,7 @@ class EditScheduleActivity : AppCompatActivity() {
                     val resultIntent = Intent(this, EditScheduleActivity::class.java)
                     resultIntent.putStringArrayListExtra("schedule-id-list", ArrayList(strings))
                     setResult(Activity.RESULT_OK, resultIntent)
-                }
+                //}
             }
             finish()
         }
