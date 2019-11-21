@@ -6,7 +6,6 @@ import android.content.Context
 import android.content.Intent
 import com.pillpals.pillbuddies.data.model.Schedules
 import java.util.*
-import android.util.Log
 import com.pillpals.pillbuddies.services.AlarmReceiver
 
 class NotificationUtils {

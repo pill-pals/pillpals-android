@@ -13,6 +13,7 @@ import com.pillpals.pillbuddies.helpers.DatabaseHelper
 import com.pillpals.pillbuddies.helpers.DateHelper
 import java.util.*
 import android.util.Log
+import com.pillpals.pillbuddies.ui.MainActivity
 import java.time.LocalDateTime
 import java.time.ZoneId
 
@@ -30,7 +31,9 @@ public class AlarmReceiver: BroadcastReceiver() {
             occurrence
         )
 
-        val pendingIntent = PendingIntent.getActivity(context, schedule.uid!!.hashCode(), intent, PendingIntent.FLAG_UPDATE_CURRENT)
+        val mainIntent = Intent(context, MainActivity::class.java)
+
+        val pendingIntent = PendingIntent.getActivity(context, schedule.uid!!.hashCode(), mainIntent, PendingIntent.FLAG_UPDATE_CURRENT)
 
         // Set the notification content
         val mBuilder = NotificationCompat.Builder(context, context.getString(R.string.channel_id))
