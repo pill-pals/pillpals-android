@@ -32,6 +32,7 @@ import com.pillpals.pillbuddies.helpers.DateHelper
 import com.google.android.material.button.MaterialButton
 import com.pillpals.pillbuddies.helpers.DatabaseHelper
 import com.pillpals.pillbuddies.helpers.DatabaseHelper.Companion.getScheduleByUid
+import io.realm.RealmObject.deleteFromRealm
 
 class AddDrugActivity : AppCompatActivity() {
 
@@ -174,7 +175,30 @@ class AddDrugActivity : AppCompatActivity() {
         }
 
         bottomOptions.rightButton.setOnClickListener{
-            finish()
+            if(::scheduleIdList.isInitialized){
+                val deleteDialog = LayoutInflater.from(this).inflate(R.layout.unsaved_schedules_prompt, null)
+
+                val dialogBuilder = AlertDialog.Builder(this)
+                    .setView(deleteDialog)
+                    .setTitle("Discard Changes")
+
+                val deleteAlertDialog = dialogBuilder.show()
+                deleteDialog.dialogConfirmBtn.setOnClickListener {
+                    deleteAlertDialog.dismiss()
+                    Realm.getDefaultInstance().executeTransaction {
+                        toBeAdded.forEach {
+                            deleteFromRealm(it)
+                        }
+                    }
+                    finish()
+                }
+
+                deleteDialog.dialogCancelBtn.setOnClickListener {
+                    deleteAlertDialog.dismiss()
+                }
+            } else{
+                finish()
+            }
         }
 
         // endregion
@@ -298,6 +322,12 @@ class AddDrugActivity : AppCompatActivity() {
             medication.name = drugName
             medication.dosage = drugDose
             medication.notes = drugNote
+
+            if(::scheduleIdList.isInitialized){
+                toBeAdded.forEach {
+                    medication.schedules.add(it)
+                }
+            }
         }
     }
 
@@ -387,6 +417,10 @@ class AddDrugActivity : AppCompatActivity() {
                 scheduleIdList = data.getStringArrayListExtra("schedule-id-list")
                 scheduleIdList.forEach {
                     toBeAdded.add(getScheduleByUid(it)!!)
+                }
+                scheduleStack.removeAllViews()
+                if (intent.hasExtra("medication-uid")) {
+                    calculateScheduleRecords(getMedicationByUid(intent.getStringExtra("medication-uid"))!!.schedules)
                 }
                 calculateScheduleRecords(toBeAdded)
             }
