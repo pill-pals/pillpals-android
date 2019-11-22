@@ -55,6 +55,8 @@
                     android:padding="7dp"
                     android:textColor="@color/colorBlack"
                     android:textSize="20sp"
+                    android:hint="Drug Name"
+                    android:textColorHint="@color/colorDarkGrey"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toEndOf="@+id/button"
                     app:layout_constraintTop_toTopOf="parent" />
@@ -153,6 +155,8 @@
                     android:padding="7dp"
                     android:textColor="@color/colorBlack"
                     android:textSize="20sp"
+                    android:hint="Drug Dosage"
+                    android:textColorHint="@color/colorDarkGrey"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toEndOf="@+id/button"
                     app:layout_constraintTop_toBottomOf="@+id/editText" />
