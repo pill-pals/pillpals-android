@@ -48,6 +48,7 @@ class AddDrugActivity : AppCompatActivity() {
     public var scheduleRecordsSetToDelete = mutableListOf<ScheduleRecord>()
     public lateinit var scheduleIdList: ArrayList<String>
     public val toBeAdded: MutableList<Schedules> = ArrayList()
+    public lateinit var colorString: String
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -73,6 +74,7 @@ class AddDrugActivity : AppCompatActivity() {
             editText.setText(medication.name)
             editText2.setText(medication.dosage)
             editText3.setText(medication.notes)
+            colorString = medication.color
             iconButton.backgroundTintList = ColorStateList.valueOf(Color.parseColor(medication.color))
 
             calculateScheduleRecords(medication.schedules)
@@ -238,7 +240,7 @@ class AddDrugActivity : AppCompatActivity() {
         //region Add schedule button
         addScheduleButton.setOnClickListener {
             val addIntent = Intent(this, EditScheduleActivity::class.java)
-            if(intent.hasExtra("medication-uid")) {
+            if (intent.hasExtra("medication-uid")) {
                 addIntent.putExtra("medication-uid", intent.getStringExtra("medication-uid"))
             }
             startActivityForResult(addIntent, 1)
@@ -246,8 +248,11 @@ class AddDrugActivity : AppCompatActivity() {
         //endregion
 
         iconButton.setOnClickListener {
-            val intent = Intent(this, EditMedicationIcon::class.java)
-            startActivityForResult(intent, 1)
+            val addIntent = Intent(this, EditMedicationIcon::class.java)
+            if (intent.hasExtra("medication-uid")) {
+                addIntent.putExtra("medication-uid", intent.getStringExtra("medication-uid"))
+            }
+            startActivityForResult(addIntent, 2)
         }
     }
 
@@ -321,6 +326,7 @@ class AddDrugActivity : AppCompatActivity() {
             medication.name = drugName
             medication.dosage = drugDose
             medication.notes = drugNote
+            medication.color = colorString
 
             if(::scheduleIdList.isInitialized){
                 toBeAdded.forEach {
@@ -336,10 +342,7 @@ class AddDrugActivity : AppCompatActivity() {
             medication.name = drugName
             medication.dosage = drugDose
             medication.notes = drugNote
-
-            // Temporary random color
-            val colors = listOf("#E08686", "#E8B57A", "#FBE297", "#ADE9C6", "#C1DCFF", "#DFC6F5")
-            medication.color = colors.random()
+            medication.color = colorString
 
             if(::scheduleIdList.isInitialized){
                 toBeAdded.forEach {
@@ -416,18 +419,29 @@ class AddDrugActivity : AppCompatActivity() {
 
     override fun onActivityResult(requestCode:Int, resultCode:Int, data:Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        if(data != null) {
-            if(data.hasExtra("medication-uid")) {
-                scheduleStack.removeAllViews()
-                calculateScheduleRecords((getMedicationByUid(data.getStringExtra("medication-uid")!!)!!).schedules)
-            } else if(data.hasExtra("schedule-id-list")){
-                scheduleIdList = data.getStringArrayListExtra("schedule-id-list")
-                scheduleIdList.forEach {
-                    toBeAdded.add(getScheduleByUid(it)!!)
+        if(requestCode == 1) { // Schedules
+            if(data != null) {
+                if(data.hasExtra("medication-uid")) {
+                    scheduleStack.removeAllViews()
+                    calculateScheduleRecords((getMedicationByUid(data.getStringExtra("medication-uid")!!)!!).schedules)
+                } else if(data.hasExtra("schedule-id-list")){
+                    scheduleIdList = data.getStringArrayListExtra("schedule-id-list")
+                    scheduleIdList.forEach {
+                        toBeAdded.add(getScheduleByUid(it)!!)
+                    }
+                    updateScheduleList()
                 }
-                updateScheduleList()
             }
         }
+        else if (requestCode == 2) { // Icon
+            if(data != null) {
+                if(data.hasExtra("color-string")) {
+                    colorString = data.getStringExtra("color-string")!!
+                    iconButton.backgroundTintList = ColorStateList.valueOf(Color.parseColor(colorString))
+                }
+            }
+        }
+
     }
 }
 
