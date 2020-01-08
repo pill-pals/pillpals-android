@@ -1,5 +1,6 @@
 package com.pillpals.pillbuddies.ui.statistics
 
+import android.content.res.ColorStateList
 import android.util.Log
 import android.graphics.Color
 import android.os.Bundle
@@ -19,6 +20,9 @@ import android.graphics.drawable.Drawable
 import com.github.mikephil.charting.utils.Utils.getSDKInt
 import android.graphics.DashPathEffect
 import android.icu.text.SimpleDateFormat
+import android.widget.CheckBox
+import android.widget.LinearLayout
+import android.widget.ToggleButton
 import com.github.mikephil.charting.components.MarkerView
 import com.github.mikephil.charting.data.BarDataSet
 import com.github.mikephil.charting.utils.Utils
@@ -39,6 +43,8 @@ class StatisticsFragment : Fragment() {
 
     private lateinit var realm: Realm
 
+    public lateinit var legendStack: LinearLayout
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         super.onCreateView(inflater, container, savedInstanceState)
         val view = inflater!!.inflate(R.layout.fragment_statistics, container, false)
@@ -46,9 +52,19 @@ class StatisticsFragment : Fragment() {
 
         realm = Realm.getDefaultInstance()
 
+        legendStack = view!!.findViewById(R.id.legendStack)
+
         val medications = DatabaseHelper.readAllData(Medications::class.java) as RealmResults<out Medications>
 
         var medicationSets = mutableListOf<IBarDataSet>()
+
+        medications.forEach {
+            val legendItem = CheckBox(this.context!!)
+            legendItem.text = it.name
+            legendItem.setTextAppearance(R.style.TextAppearance_baseText)
+            legendItem.buttonTintList = (ColorStateList.valueOf(Color.parseColor(it.color)))
+            legendStack.addView(legendItem)
+        }
 
         medications.forEach {
             val schedule = it.schedules.first()!!
