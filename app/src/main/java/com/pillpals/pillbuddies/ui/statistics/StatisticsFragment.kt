@@ -70,17 +70,22 @@ class StatisticsFragment : Fragment() {
         lineChart.setTouchEnabled(true)
         lineChart.setPinchZoom(true)
         lineChart.xAxis.valueFormatter = IndexAxisValueFormatter(dateStringList)
-
-        lineChart.description.text = "Minutes missed from drug logs"
-        lineChart.description.textSize = 12f
         lineChart.setDrawMarkers(true)
         //lineChart.marker = marker
         lineChart.xAxis.position = XAxis.XAxisPosition.BOTTOM
-        lineChart.animateY(1000)
+        lineChart.animateY(400)
         lineChart.xAxis.isGranularityEnabled = true
         lineChart.xAxis.granularity = 1.0f
         lineChart.xAxis.labelCount = set.entryCount
+        lineChart.xAxis.textSize = 16f
+        lineChart.axisLeft.textSize = 16f
+
+        lineChart.description.isEnabled = false
+        lineChart.axisRight.isEnabled = false
+        lineChart.legend.isEnabled = false
+
         lineChart.data = LineData(set)
+        lineChart.data.setValueTextSize(12f)
         return view
     }
 }
