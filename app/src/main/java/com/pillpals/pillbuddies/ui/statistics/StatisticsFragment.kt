@@ -1,5 +1,6 @@
 package com.pillpals.pillbuddies.ui.statistics
 
+import android.util.Log
 import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -32,7 +33,6 @@ import io.realm.RealmResults
 import java.util.*
 import kotlin.collections.ArrayList
 
-
 class StatisticsFragment : Fragment() {
 
 
@@ -47,44 +47,53 @@ class StatisticsFragment : Fragment() {
 
         val medications = DatabaseHelper.readAllData(Medications::class.java) as RealmResults<out Medications>
 
-        // For loop, hide each medication under something
-        val medication = medications.first()!!
-        // Another for loop for each schedule
-        val schedule = medication.schedules.first()!!
-        val logs = schedule.logs!!
+        var medicationSets = mutableListOf<ILineDataSet>()
 
-        val entries = ArrayList<Entry>()
-        val dateStringList = ArrayList<String>()
+        medications.forEach {
+            val schedule = it.schedules.last()!!
+            val logs = schedule.logs!!
 
-        for ((index, log) in logs.withIndex()) {
-            val timeDifference = (log.occurrence!!.time - log.due!!.time) / 1000 / 60 // Minutes
-            val dateString = SimpleDateFormat("dd-MM", Locale.getDefault()).format(log.due!!)
-            dateStringList.add(dateString)
-            val currentEntry = Entry(index.toFloat(), timeDifference.toFloat())
-            entries.add(currentEntry)
+            val entries = ArrayList<Entry>()
+            val dateStringList = ArrayList<String>()
+
+            for ((index, log) in logs.withIndex()) {
+                val timeDifference = (log.occurrence!!.time - log.due!!.time) / 1000 / 60 // Minutes
+                val dateString = SimpleDateFormat("dd-MM", Locale.getDefault()).format(log.due!!)
+                dateStringList.add(dateString)
+                val currentEntry = Entry(index.toFloat(), timeDifference.toFloat())
+                entries.add(currentEntry)
+            }
+
+            val set = LineDataSet(entries, "${it.name} schedule")
+            set.circleRadius = 8f
+            set.lineWidth = 4f
+            set.setCircleColor(Color.parseColor(it.color))
+            set.setColor(Color.parseColor(it.color))
+
+            medicationSets.add(set)
+            //Log.d("TAG", medicationSets.toString())
         }
 
-        val set = LineDataSet(entries, "${medication.name} schedule")
 
         val lineChart = view.findViewById(R.id.chart) as LineChart
         lineChart.setTouchEnabled(true)
         lineChart.setPinchZoom(true)
-        lineChart.xAxis.valueFormatter = IndexAxisValueFormatter(dateStringList)
+        //lineChart.xAxis.valueFormatter = IndexAxisValueFormatter(dateStringList)
         lineChart.setDrawMarkers(true)
         //lineChart.marker = marker
         lineChart.xAxis.position = XAxis.XAxisPosition.BOTTOM
         lineChart.animateY(400)
         lineChart.xAxis.isGranularityEnabled = true
         lineChart.xAxis.granularity = 1.0f
-        lineChart.xAxis.labelCount = set.entryCount
+        //lineChart.xAxis.labelCount = set.entryCount
         lineChart.xAxis.textSize = 16f
         lineChart.axisLeft.textSize = 16f
 
         lineChart.description.isEnabled = false
         lineChart.axisRight.isEnabled = false
-        lineChart.legend.isEnabled = false
+        //lineChart.legend.isEnabled = false
 
-        lineChart.data = LineData(set)
+        lineChart.data = LineData(medicationSets)
         lineChart.data.setValueTextSize(12f)
         return view
     }
