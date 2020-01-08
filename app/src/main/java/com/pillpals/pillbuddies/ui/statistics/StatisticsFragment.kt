@@ -50,7 +50,7 @@ class StatisticsFragment : Fragment() {
         var medicationSets = mutableListOf<ILineDataSet>()
 
         medications.forEach {
-            val schedule = it.schedules.last()!!
+            val schedule = it.schedules.first()!!
             val logs = schedule.logs!!
 
             val entries = ArrayList<Entry>()
