@@ -129,6 +129,7 @@ class AddDrugActivity : AppCompatActivity() {
             }
         } else {
             iconButton.backgroundTintList = ColorStateList.valueOf(Color.parseColor("#d3d3d3"))
+            colorString = "#d3d3d3"
             bottomOptions.leftButton.setOnClickListener{
                 if (editText.text.toString().trim().isNotEmpty() and editText2.text.toString().trim().isNotEmpty()) {
                     if(scheduleRecordsSetToDelete.count() > 0) {
