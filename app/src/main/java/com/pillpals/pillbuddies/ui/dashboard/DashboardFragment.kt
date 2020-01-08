@@ -216,8 +216,10 @@ class DashboardFragment : Fragment() {
         }
         var logs = readAllData(Logs::class.java) as RealmResults<Logs>
         if (logs.count() == 0) {
-            createTestLogsData(schedules.first()!!)
-            logs = readAllData(Logs::class.java) as RealmResults<Logs>
+            schedules.forEach() {
+                createTestLogsData(it)
+                logs = readAllData(Logs::class.java) as RealmResults<Logs>
+            }
         }
     }
 
