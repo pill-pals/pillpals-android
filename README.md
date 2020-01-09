@@ -21,6 +21,6 @@ Each layout, either for a fragment or for a layout intent, is placed under res/l
 
 # Screenshots
 
-<img alt="First Screenshot" src="https://drive.google.com/uc?export=download&id=1A9BcJOHIx1b5q9HgdVmKYAqxRWOOubAN"></img>
-<img alt="Second Screenshot" src="https://drive.google.com/uc?export=download&id=1ZBsKhoxMNi-m1w-3Re9yV3dimducvFXv"></img>
-<img alt="Third Screenshot" src="https://drive.google.com/uc?export=download&id=1UrpKN3n2ZmNNYWMF0tuvCPdJ1TKv62c5"></img>
+<img alt="First Screenshot" src="https://drive.google.com/uc?export=download&id=1A9BcJOHIx1b5q9HgdVmKYAqxRWOOubAN" width="250px"></img>
+<img alt="Second Screenshot" src="https://drive.google.com/uc?export=download&id=1ZBsKhoxMNi-m1w-3Re9yV3dimducvFXv" width="250px"></img>
+<img alt="Third Screenshot" src="https://drive.google.com/uc?export=download&id=1UrpKN3n2ZmNNYWMF0tuvCPdJ1TKv62c5" width="250px"></img>
