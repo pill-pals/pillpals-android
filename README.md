@@ -10,7 +10,8 @@ https://github.com/PhilJay/MPAndroidChart
 
 # Structure
 
-Each navigation page is a Fragment, placed under pillbuddies/ui/<fragment-name>
+Each navigation page is a Fragment, placed under pillbuddies/ui/\<fragment-name\>
+
 These fragments leverage:
 * layout intents, placed under pillbuddies/ui, which inflate layouts in res/layout
 * service intents, placed under pillbuddies/services
