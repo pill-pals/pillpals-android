@@ -37,13 +37,14 @@ import com.pillpals.pillbuddies.helpers.DatabaseHelper.Companion.getColorStringB
 import io.realm.RealmResults
 import java.util.*
 import kotlin.collections.ArrayList
+import kotlin.collections.HashMap
 import kotlin.math.abs
 
 class StatisticsFragment : Fragment() {
 
 
     private lateinit var realm: Realm
-
+    private var repeatingColorHash = HashMap<String, Int?>()
     public lateinit var legendStack: LinearLayout
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -57,38 +58,11 @@ class StatisticsFragment : Fragment() {
 
         val medications = DatabaseHelper.readAllData(Medications::class.java) as RealmResults<out Medications>
 
-        var medicationSets = mutableListOf<IBarDataSet>()
+        determineRepeatingColors(medications)
+        populateLegendStack(medications)
+        var medicationSets = createMedicationSetData(medications)
 
-        medications.forEach {
-            val legendItem = CheckBox(this.context!!)
-            legendItem.text = it.name
-            legendItem.setTextAppearance(R.style.TextAppearance_baseText)
-            legendItem.buttonTintList = (ColorStateList.valueOf(Color.parseColor(getColorStringByID(it.color_id))))
-            legendStack.addView(legendItem)
-        }
-
-        medications.forEach {
-            val schedule = it.schedules.first()!!
-            val logs = schedule.logs!!
-
-            val entries = ArrayList<BarEntry>()
-            val dateStringList = ArrayList<String>()
-
-            for ((index, log) in logs.withIndex()) {
-                val timeDifference = abs(log.occurrence!!.time - log.due!!.time) / 1000 / 60 // Minutes
-                val dateString = SimpleDateFormat("dd-MM", Locale.getDefault()).format(log.due!!)
-                dateStringList.add(dateString)
-                val currentEntry = BarEntry(index.toFloat(), timeDifference.toFloat())
-                entries.add(currentEntry)
-            }
-
-            val set = BarDataSet(entries, "${it.name} schedule")
-            set.setColor(Color.parseColor(getColorStringByID(it.color_id)))
-
-            medicationSets.add(set)
-            //Log.d("TAG", medicationSets.toString())
-        }
-
+        Log.d("HEY",repeatingColorHash.toString())
 
         val barChart = view.findViewById(R.id.chart) as BarChart
         barChart.setTouchEnabled(true)
@@ -120,5 +94,54 @@ class StatisticsFragment : Fragment() {
         barChart.setScaleEnabled(false)
         barChart.setDoubleTapToZoomEnabled(false)
         return view
+    }
+
+    private fun populateLegendStack(medications: RealmResults<out Medications>) {
+        medications.forEach {
+            val legendItem = CheckBox(this.context!!)
+            legendItem.text = it.name
+            legendItem.setTextAppearance(R.style.TextAppearance_baseText)
+            legendItem.buttonTintList = (ColorStateList.valueOf(Color.parseColor(getColorStringByID(it.color_id))))
+            legendStack.addView(legendItem)
+        }
+    }
+
+    private fun createMedicationSetData(medications: RealmResults<out Medications>):MutableList<IBarDataSet> {
+        var medicationSets = mutableListOf<IBarDataSet>()
+        medications.forEach {
+            val schedule = it.schedules.first()!!
+            val logs = schedule.logs!!
+
+            val entries = ArrayList<BarEntry>()
+            val dateStringList = ArrayList<String>()
+
+            for ((index, log) in logs.withIndex()) {
+                val timeDifference = abs(log.occurrence!!.time - log.due!!.time) / 1000 / 60 // Minutes
+                val dateString = SimpleDateFormat("dd-MM", Locale.getDefault()).format(log.due!!)
+                dateStringList.add(dateString)
+                val currentEntry = BarEntry(index.toFloat(), timeDifference.toFloat())
+                entries.add(currentEntry)
+            }
+
+            val set = BarDataSet(entries, "${it.name} schedule")
+            set.setColor(Color.parseColor(getColorStringByID(it.color_id)))
+
+            medicationSets.add(set)
+        }
+        return medicationSets
+    }
+
+    private fun determineRepeatingColors(medications: RealmResults<out Medications>) {
+        var colorOccurrences = HashMap<Int,Int>()
+
+        medications.forEach{
+            if (colorOccurrences[it.color_id] != null) {
+                repeatingColorHash[it.uid] = colorOccurrences?.get(it.color_id)
+                colorOccurrences[it.color_id] = colorOccurrences.getOrElse(it.color_id,{0}) + 1
+            } else {
+                repeatingColorHash[it.uid] = 0
+                colorOccurrences[it.color_id] = 1
+            }
+        }
     }
 }
