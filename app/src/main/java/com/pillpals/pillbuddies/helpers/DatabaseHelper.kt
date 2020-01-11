@@ -26,6 +26,9 @@ class DatabaseHelper {
         fun getColorIDByString(color: String): Int {
             return Realm.getDefaultInstance().where(Colors::class.java).equalTo("color", color).findFirst()!!.id
         }
+        fun getRandomColorString(): String {
+            return Realm.getDefaultInstance().where(Colors::class.java).findAll().random().color
+        }
         fun deleteSchedules(schedules: List<Schedules>) {
             for (schedule in schedules) {
                 Realm.getDefaultInstance().executeTransaction {

@@ -31,6 +31,9 @@ class EditMedicationIcon : AppCompatActivity() {
         Realm.init(this)
         setContentView(R.layout.activity_edit_medication_icon)
 
+        if(intent.hasExtra("color-string")) {
+            colorString = intent.getStringExtra("color-string")
+        }
         if(intent.hasExtra("medication-uid")) {
             val medID: String = intent.getStringExtra("medication-uid")
             val medication = DatabaseHelper.getMedicationByUid(medID) as Medications
