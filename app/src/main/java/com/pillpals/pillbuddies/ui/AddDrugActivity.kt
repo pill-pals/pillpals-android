@@ -32,6 +32,7 @@ import com.pillpals.pillbuddies.helpers.DateHelper
 import com.google.android.material.button.MaterialButton
 import com.pillpals.pillbuddies.helpers.DatabaseHelper
 import com.pillpals.pillbuddies.helpers.DatabaseHelper.Companion.getColorIDByString
+import com.pillpals.pillbuddies.helpers.DatabaseHelper.Companion.getRandomColorString
 import com.pillpals.pillbuddies.helpers.DatabaseHelper.Companion.getScheduleByUid
 import io.realm.RealmObject.deleteFromRealm
 
@@ -134,9 +135,12 @@ class AddDrugActivity : AppCompatActivity() {
                 }
             }
         } else {
-            iconButton.backgroundTintList = ColorStateList.valueOf(Color.parseColor("#d3d3d3"))
+            colorString = getRandomColorString()
+            while(colorString == "#000000") { // Let's not let black be selected randomly
+                colorString = getRandomColorString()
+            }
+            iconButton.backgroundTintList = ColorStateList.valueOf(Color.parseColor(colorString))
             iconButton.icon = resources.getDrawable(DatabaseHelper.getDrawableIconById(this, 0), theme)
-            colorString = "#d3d3d3"
             bottomOptions.leftButton.setOnClickListener{
                 if (editText.text.toString().trim().isNotEmpty() and editText2.text.toString().trim().isNotEmpty()) {
                     if(scheduleRecordsSetToDelete.count() > 0) {
@@ -257,7 +261,8 @@ class AddDrugActivity : AppCompatActivity() {
 
         iconButton.setOnClickListener {
             val addIntent = Intent(this, EditMedicationIcon::class.java)
-            if (intent.hasExtra("medication-uid")) {
+            addIntent.putExtra("color-string", colorString)
+            if(intent.hasExtra("medication-uid")) {
                 addIntent.putExtra("medication-uid", intent.getStringExtra("medication-uid"))
             }
             startActivityForResult(addIntent, 2)
