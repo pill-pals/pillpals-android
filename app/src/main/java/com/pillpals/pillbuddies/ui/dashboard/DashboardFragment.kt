@@ -21,6 +21,8 @@ import com.pillpals.pillbuddies.ui.DrugCard
 
 import com.pillpals.pillbuddies.helpers.NotificationUtils
 import android.os.Handler
+import com.pillpals.pillbuddies.helpers.DatabaseHelper.Companion.getColorStringByID
+import com.pillpals.pillbuddies.helpers.DatabaseHelper.Companion.getDrawableIconById
 import java.util.*
 
 
@@ -117,7 +119,8 @@ class DashboardFragment : Fragment() {
 
         newCard.nameText.text = medication.name
         newCard.altText.text = DateHelper.dateToString(schedule.occurrence!!)
-        newCard.iconBackground.setCardBackgroundColor(Color.parseColor(medication.color))
+        newCard.iconBackground.setCardBackgroundColor(Color.parseColor(getColorStringByID(medication.color_id)))
+        newCard.icon.setImageResource(getDrawableIconById(this.context!!, medication.icon_id))
 
         val diff = schedule.occurrence!!.time - Date().time
         val seconds = diff / 1000

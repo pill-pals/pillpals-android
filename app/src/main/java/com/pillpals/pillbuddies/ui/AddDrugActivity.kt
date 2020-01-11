@@ -31,6 +31,7 @@ import com.pillpals.pillbuddies.data.model.Schedules
 import com.pillpals.pillbuddies.helpers.DateHelper
 import com.google.android.material.button.MaterialButton
 import com.pillpals.pillbuddies.helpers.DatabaseHelper
+import com.pillpals.pillbuddies.helpers.DatabaseHelper.Companion.getColorIDByString
 import com.pillpals.pillbuddies.helpers.DatabaseHelper.Companion.getScheduleByUid
 import io.realm.RealmObject.deleteFromRealm
 
@@ -43,7 +44,7 @@ class AddDrugActivity : AppCompatActivity() {
     public lateinit var deleteButton: TextView
     public lateinit var scheduleStack: LinearLayout
     public lateinit var bottomOptions: BottomOptions
-    public lateinit var iconButton: Button
+    public lateinit var iconButton: MaterialButton
 
     public var scheduleRecordsSetToDelete = mutableListOf<ScheduleRecord>()
     public lateinit var scheduleIdList: ArrayList<String>
@@ -74,8 +75,13 @@ class AddDrugActivity : AppCompatActivity() {
             editText.setText(medication.name)
             editText2.setText(medication.dosage)
             editText3.setText(medication.notes)
-            colorString = medication.color
-            iconButton.backgroundTintList = ColorStateList.valueOf(Color.parseColor(medication.color))
+            colorString = DatabaseHelper.getColorStringByID(medication.color_id)
+            iconButton.backgroundTintList = ColorStateList.valueOf(Color.parseColor(
+                DatabaseHelper.getColorStringByID(
+                    medication.color_id
+                )
+            ))
+            iconButton.icon = resources.getDrawable(DatabaseHelper.getDrawableIconById(this, medication.icon_id), theme)
 
             calculateScheduleRecords(medication.schedules)
 
@@ -129,6 +135,7 @@ class AddDrugActivity : AppCompatActivity() {
             }
         } else {
             iconButton.backgroundTintList = ColorStateList.valueOf(Color.parseColor("#d3d3d3"))
+            iconButton.icon = resources.getDrawable(DatabaseHelper.getDrawableIconById(this, 0), theme)
             colorString = "#d3d3d3"
             bottomOptions.leftButton.setOnClickListener{
                 if (editText.text.toString().trim().isNotEmpty() and editText2.text.toString().trim().isNotEmpty()) {
@@ -327,7 +334,7 @@ class AddDrugActivity : AppCompatActivity() {
             medication.name = drugName
             medication.dosage = drugDose
             medication.notes = drugNote
-            medication.color = colorString
+            medication.color_id = getColorIDByString(colorString)
 
             if(::scheduleIdList.isInitialized){
                 toBeAdded.forEach {
@@ -343,7 +350,7 @@ class AddDrugActivity : AppCompatActivity() {
             medication.name = drugName
             medication.dosage = drugDose
             medication.notes = drugNote
-            medication.color = colorString
+            medication.color_id = getColorIDByString(colorString)
 
             if(::scheduleIdList.isInitialized){
                 toBeAdded.forEach {

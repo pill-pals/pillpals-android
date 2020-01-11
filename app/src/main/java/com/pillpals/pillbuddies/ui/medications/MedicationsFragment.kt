@@ -19,6 +19,9 @@ import android.content.Intent
 import android.graphics.Color
 import kotlinx.android.synthetic.main.prompts.*
 import android.util.Log
+import com.pillpals.pillbuddies.helpers.DatabaseHelper
+import com.pillpals.pillbuddies.helpers.DatabaseHelper.Companion.getColorStringByID
+
 class MedicationsFragment : Fragment() {
 
     public lateinit var drugButton: Button
@@ -62,7 +65,13 @@ class MedicationsFragment : Fragment() {
 
         newCard.nameText.text = medication.name
         newCard.altText.text = medication.dosage
-        newCard.iconBackground.setCardBackgroundColor(Color.parseColor(medication.color))
+        newCard.iconBackground.setCardBackgroundColor(Color.parseColor(getColorStringByID(medication.color_id)))
+        newCard.icon.setImageResource(
+            DatabaseHelper.getDrawableIconById(
+                this.context!!,
+                medication.icon_id
+            )
+        )
 
         newCard.button.setOnClickListener {
             val intent = Intent(context, AddDrugActivity::class.java)
