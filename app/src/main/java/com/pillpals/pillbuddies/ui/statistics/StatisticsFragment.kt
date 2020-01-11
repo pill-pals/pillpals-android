@@ -33,6 +33,7 @@ import com.pillpals.pillbuddies.data.model.Logs
 import com.pillpals.pillbuddies.data.model.Medications
 import com.pillpals.pillbuddies.data.model.Schedules
 import com.pillpals.pillbuddies.helpers.DatabaseHelper
+import com.pillpals.pillbuddies.helpers.DatabaseHelper.Companion.getColorStringByID
 import io.realm.RealmResults
 import java.util.*
 import kotlin.collections.ArrayList
@@ -62,7 +63,7 @@ class StatisticsFragment : Fragment() {
             val legendItem = CheckBox(this.context!!)
             legendItem.text = it.name
             legendItem.setTextAppearance(R.style.TextAppearance_baseText)
-            legendItem.buttonTintList = (ColorStateList.valueOf(Color.parseColor(it.color)))
+            legendItem.buttonTintList = (ColorStateList.valueOf(Color.parseColor(getColorStringByID(it.color_id))))
             legendStack.addView(legendItem)
         }
 
@@ -82,7 +83,7 @@ class StatisticsFragment : Fragment() {
             }
 
             val set = BarDataSet(entries, "${it.name} schedule")
-            set.setColor(Color.parseColor(it.color))
+            set.setColor(Color.parseColor(getColorStringByID(it.color_id)))
 
             medicationSets.add(set)
             //Log.d("TAG", medicationSets.toString())

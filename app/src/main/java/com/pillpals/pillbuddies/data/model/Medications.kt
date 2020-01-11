@@ -10,6 +10,7 @@ open class Medications(
     var name: String = "",
     var schedules: RealmList<Schedules> = RealmList(),
     var notes: String = "",
-    var color: String = "#FFFFFF",
+    var color_id: Int = 0,
+    var icon_id: Int = 0,
     var deleted: Boolean = false
 ) : RealmObject(){}

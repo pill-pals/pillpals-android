@@ -12,6 +12,8 @@ import android.graphics.Color
 import android.util.Log
 import io.realm.Realm
 import androidx.cardview.widget.CardView
+import com.pillpals.pillbuddies.helpers.DatabaseHelper.Companion.getColorStringByID
+import kotlinx.android.synthetic.main.activity_edit_medication_icon.*
 
 
 class EditMedicationIcon : AppCompatActivity() {
@@ -21,6 +23,7 @@ class EditMedicationIcon : AppCompatActivity() {
     public lateinit var lightColorList : LinearLayout
     public lateinit var mediumColorList : LinearLayout
     public lateinit var heavyColorList : LinearLayout
+    public lateinit var shadesColorList : LinearLayout
     var colorString = "#FFFFFF"
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -31,7 +34,7 @@ class EditMedicationIcon : AppCompatActivity() {
         if(intent.hasExtra("medication-uid")) {
             val medID: String = intent.getStringExtra("medication-uid")
             val medication = DatabaseHelper.getMedicationByUid(medID) as Medications
-            colorString = medication.color
+            colorString = getColorStringByID(medication.color_id)
         }
 
         colorLists = findViewById(R.id.colorLists)
@@ -41,6 +44,7 @@ class EditMedicationIcon : AppCompatActivity() {
         lightColorList = findViewById(R.id.lightColorList)
         mediumColorList = findViewById(R.id.mediumColorList)
         heavyColorList = findViewById(R.id.heavyColorList)
+        shadesColorList = findViewById(R.id.shadesColorList)
 
         addBorderToCards()
         for (i in 0 until lightColorList.getChildCount()) {
@@ -63,6 +67,15 @@ class EditMedicationIcon : AppCompatActivity() {
         }
         for (i in 0 until heavyColorList.getChildCount()) {
             val borderCard = heavyColorList.getChildAt(i) as CardView
+            val card = borderCard.getChildAt(0) as CardView
+
+            card.setOnClickListener {
+                colorString = String.format("#%06X", 0xFFFFFF and (it as CardView).cardBackgroundColor.defaultColor)
+                addBorderToCards()
+            }
+        }
+        for (i in 0 until shadesColorList.getChildCount()) {
+            val borderCard = shadesColorList.getChildAt(i) as CardView
             val card = borderCard.getChildAt(0) as CardView
 
             card.setOnClickListener {
@@ -108,6 +121,17 @@ class EditMedicationIcon : AppCompatActivity() {
         }
         for (i in 0 until heavyColorList.getChildCount()) {
             val borderCard = heavyColorList.getChildAt(i) as CardView
+            val card = borderCard.getChildAt(0) as CardView
+            val cardColorString = String.format("#%06X", 0xFFFFFF and card.cardBackgroundColor.defaultColor)
+            if (cardColorString == colorString) {
+                borderCard.setCardBackgroundColor(Color.parseColor("#FFFFFF"))
+            }
+            else {
+                borderCard.setCardBackgroundColor(Color.parseColor("#00FFFFFF"))
+            }
+        }
+        for (i in 0 until shadesColorList.getChildCount()) {
+            val borderCard = shadesColorList.getChildAt(i) as CardView
             val card = borderCard.getChildAt(0) as CardView
             val cardColorString = String.format("#%06X", 0xFFFFFF and card.cardBackgroundColor.defaultColor)
             if (cardColorString == colorString) {
