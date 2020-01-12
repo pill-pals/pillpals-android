@@ -47,25 +47,79 @@ class StatisticsFragment : Fragment() {
     private lateinit var realm: Realm
     private var repeatingColorHash = HashMap<String, Int>()
     public lateinit var legendStack: LinearLayout
+    public var filteredMedications = HashMap<String, Boolean>()
+    public lateinit var barChart: BarChart
+    public lateinit var medications: RealmResults<out Medications>
+    public var medicationSets = mutableListOf<IBarDataSet>()
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
         super.onCreateView(inflater, container, savedInstanceState)
         val view = inflater!!.inflate(R.layout.fragment_statistics, container, false)
         val marker = MarkerView(this.context, R.layout.custom_marker_view)
+
+        barChart = view.findViewById(R.id.chart) as BarChart
 
         realm = Realm.getDefaultInstance()
 
         legendStack = view!!.findViewById(R.id.legendStack)
 
-        val medications = DatabaseHelper.readAllData(Medications::class.java) as RealmResults<out Medications>
+        medications = DatabaseHelper.readAllData(Medications::class.java) as RealmResults<out Medications>
 
-        determineRepeatingColors(medications)
-        populateLegendStack(medications)
-        var medicationSets = createMedicationSetData(medications)
+        determineRepeatingColors()
+        populateLegendStack()
+        renderBarChart()
 
-        Log.d("HEY",repeatingColorHash.toString())
+        return view
+    }
 
-        val barChart = view.findViewById(R.id.chart) as BarChart
+    private fun populateLegendStack() {
+        medications.forEach {
+            val legendItem = CheckBox(this.context!!)
+            legendItem.text = it.name
+            legendItem.setTextAppearance(R.style.TextAppearance_baseText)
+            legendItem.isChecked = true
+            legendItem.setOnCheckedChangeListener { view, isChecked ->
+                updateFilteredMedications(view.text.toString(), isChecked)
+            }
+            legendItem.buttonTintList = (ColorStateList.valueOf(getMutatedColor(it)))
+            legendStack.addView(legendItem)
+        }
+    }
+
+    private fun determineMedicationSetData(){
+        medicationSets.clear()
+        medications.forEach {
+            if (filteredMedications[it.name] != false) {
+                val schedule = it.schedules.first()!!
+                val logs = schedule.logs!!
+
+                val entries = ArrayList<BarEntry>()
+                val dateStringList = ArrayList<String>()
+
+                for ((index, log) in logs.withIndex()) {
+                    val timeDifference =
+                        abs(log.occurrence!!.time - log.due!!.time) / 1000 / 60 // Minutes
+                    val dateString =
+                        SimpleDateFormat("dd-MM", Locale.getDefault()).format(log.due!!)
+                    dateStringList.add(dateString)
+                    val currentEntry = BarEntry(index.toFloat(), timeDifference.toFloat())
+                    entries.add(currentEntry)
+                }
+
+                val set = BarDataSet(entries, "${it.name} schedule")
+                set.setColor(getMutatedColor(it))
+
+                medicationSets.add(set)
+            }
+        }
+    }
+
+    private fun renderBarChart() {
+        determineMedicationSetData()
         barChart.setTouchEnabled(true)
         barChart.setPinchZoom(true)
         //barChart.xAxis.valueFormatter = IndexAxisValueFormatter(dateStringList)
@@ -86,59 +140,28 @@ class StatisticsFragment : Fragment() {
 
         barChart.data = BarData(medicationSets)
         barChart.data.setValueTextSize(0f)
-        barChart.data.barWidth = 0.15f
 
         barChart.data.setHighlightEnabled(false)
-        barChart.groupBars(0f,0.3f,0.02f)
-        barChart.invalidate()
         barChart.setPinchZoom(false)
         barChart.setScaleEnabled(false)
         barChart.setDoubleTapToZoomEnabled(false)
-        return view
-    }
 
-    private fun populateLegendStack(medications: RealmResults<out Medications>) {
-        medications.forEach {
-            val legendItem = CheckBox(this.context!!)
-            legendItem.text = it.name
-            legendItem.setTextAppearance(R.style.TextAppearance_baseText)
-            legendItem.buttonTintList = (ColorStateList.valueOf(getMutatedColor(it)))
-            legendStack.addView(legendItem)
+        val groupWidth = 0.7f
+        val barWidthRatio = 0.875f
+
+        barChart.data.barWidth = (groupWidth * barWidthRatio)/medicationSets.size
+        if(medicationSets.size > 1) {
+            barChart.groupBars(-0.5f, 1 - groupWidth, (groupWidth * (1 - barWidthRatio))/medicationSets.size)
         }
     }
 
-    private fun createMedicationSetData(medications: RealmResults<out Medications>):MutableList<IBarDataSet> {
-        var medicationSets = mutableListOf<IBarDataSet>()
+    private fun determineRepeatingColors() {
+        var colorOccurrences = HashMap<Int, Int>()
+
         medications.forEach {
-            val schedule = it.schedules.first()!!
-            val logs = schedule.logs!!
-
-            val entries = ArrayList<BarEntry>()
-            val dateStringList = ArrayList<String>()
-
-            for ((index, log) in logs.withIndex()) {
-                val timeDifference = abs(log.occurrence!!.time - log.due!!.time) / 1000 / 60 // Minutes
-                val dateString = SimpleDateFormat("dd-MM", Locale.getDefault()).format(log.due!!)
-                dateStringList.add(dateString)
-                val currentEntry = BarEntry(index.toFloat(), timeDifference.toFloat())
-                entries.add(currentEntry)
-            }
-
-            val set = BarDataSet(entries, "${it.name} schedule")
-            set.setColor(getMutatedColor(it))
-
-            medicationSets.add(set)
-        }
-        return medicationSets
-    }
-
-    private fun determineRepeatingColors(medications: RealmResults<out Medications>) {
-        var colorOccurrences = HashMap<Int,Int>()
-
-        medications.forEach{
             if (colorOccurrences[it.color_id] != null) {
-                repeatingColorHash[it.uid] = colorOccurrences.getOrElse(it.color_id,{0})
-                colorOccurrences[it.color_id] = colorOccurrences.getOrElse(it.color_id,{0}) + 1
+                repeatingColorHash[it.uid] = colorOccurrences.getOrElse(it.color_id, { 0 })
+                colorOccurrences[it.color_id] = colorOccurrences.getOrElse(it.color_id, { 0 }) + 1
             } else {
                 repeatingColorHash[it.uid] = 0
                 colorOccurrences[it.color_id] = 1
@@ -146,12 +169,12 @@ class StatisticsFragment : Fragment() {
         }
     }
 
-    private fun getMutatedColor(medication: Medications):Int {
+    private fun getMutatedColor(medication: Medications): Int {
         var newColor = Color.parseColor(getColorStringByID(medication.color_id))
 
         var brighten = ColorUtils.calculateLuminance(newColor) < 0.5
 
-        for (i in 1..repeatingColorHash.getOrElse(medication.uid,{0})) {
+        for (i in 1..repeatingColorHash.getOrElse(medication.uid, { 0 })) {
             newColor = if (brighten) {
                 ColorUtils.blendARGB(newColor, Color.WHITE, 0.3f)
             } else {
@@ -159,5 +182,11 @@ class StatisticsFragment : Fragment() {
             }
         }
         return newColor
+    }
+
+    private fun updateFilteredMedications(name: String, isChecked: Boolean) {
+        filteredMedications[name] = isChecked
+        renderBarChart()
+        Log.v("HEY", filteredMedications.toString())
     }
 }
