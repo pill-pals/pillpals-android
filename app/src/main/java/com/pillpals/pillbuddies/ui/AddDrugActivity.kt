@@ -32,7 +32,9 @@ import com.pillpals.pillbuddies.helpers.DateHelper
 import com.google.android.material.button.MaterialButton
 import com.pillpals.pillbuddies.helpers.DatabaseHelper
 import com.pillpals.pillbuddies.helpers.DatabaseHelper.Companion.getColorIDByString
+import com.pillpals.pillbuddies.helpers.DatabaseHelper.Companion.getIconIDByString
 import com.pillpals.pillbuddies.helpers.DatabaseHelper.Companion.getRandomColorString
+import com.pillpals.pillbuddies.helpers.DatabaseHelper.Companion.getRandomIcon
 import com.pillpals.pillbuddies.helpers.DatabaseHelper.Companion.getScheduleByUid
 import io.realm.RealmObject.deleteFromRealm
 
@@ -51,6 +53,7 @@ class AddDrugActivity : AppCompatActivity() {
     public lateinit var scheduleIdList: ArrayList<String>
     public val toBeAdded: MutableList<Schedules> = ArrayList()
     public lateinit var colorString: String
+    public lateinit var imageDrawable: String
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -139,8 +142,10 @@ class AddDrugActivity : AppCompatActivity() {
             while(colorString == "#000000") { // Let's not let black be selected randomly
                 colorString = getRandomColorString()
             }
+            imageDrawable = getRandomIcon()
             iconButton.backgroundTintList = ColorStateList.valueOf(Color.parseColor(colorString))
-            iconButton.icon = resources.getDrawable(DatabaseHelper.getDrawableIconById(this, 0), theme)
+            iconButton.icon = resources.getDrawable(DatabaseHelper.getDrawableIconById(this, getIconIDByString(imageDrawable)), theme)
+
             bottomOptions.leftButton.setOnClickListener{
                 if (editText.text.toString().trim().isNotEmpty() and editText2.text.toString().trim().isNotEmpty()) {
                     if(scheduleRecordsSetToDelete.count() > 0) {
@@ -340,6 +345,7 @@ class AddDrugActivity : AppCompatActivity() {
             medication.dosage = drugDose
             medication.notes = drugNote
             medication.color_id = getColorIDByString(colorString)
+            medication.icon_id = getIconIDByString(imageDrawable)
 
             if(::scheduleIdList.isInitialized){
                 toBeAdded.forEach {
@@ -356,6 +362,7 @@ class AddDrugActivity : AppCompatActivity() {
             medication.dosage = drugDose
             medication.notes = drugNote
             medication.color_id = getColorIDByString(colorString)
+            medication.icon_id = getIconIDByString(imageDrawable)
 
             if(::scheduleIdList.isInitialized){
                 toBeAdded.forEach {
@@ -450,7 +457,9 @@ class AddDrugActivity : AppCompatActivity() {
             if(data != null) {
                 if(data.hasExtra("color-string")) {
                     colorString = data.getStringExtra("color-string")!!
+                    imageDrawable = data.getStringExtra("image-string")!!
                     iconButton.backgroundTintList = ColorStateList.valueOf(Color.parseColor(colorString))
+                    iconButton.icon = resources.getDrawable(DatabaseHelper.getDrawableIconById(this, getIconIDByString(imageDrawable)), theme)
                 }
             }
         }

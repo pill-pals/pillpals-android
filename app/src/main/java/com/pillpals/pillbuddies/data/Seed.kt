@@ -104,6 +104,18 @@ class Seed : Realm.Transaction {
         var icon = Icons(0)
         icon.icon = "ic_pill_v5"
         realm.insertOrUpdate(icon)
+
+        icon = Icons(1)
+        icon.icon = "ic_tablet"
+        realm.insertOrUpdate(icon)
+
+        icon = Icons(2)
+        icon.icon = "ic_dropper"
+        realm.insertOrUpdate(icon)
+
+        icon = Icons(3)
+        icon.icon = "ic_syringe"
+        realm.insertOrUpdate(icon)
     }
 
     override fun hashCode(): Int {

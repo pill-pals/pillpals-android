@@ -10,8 +10,11 @@ import com.pillpals.pillbuddies.data.model.Medications
 import com.pillpals.pillbuddies.helpers.DatabaseHelper
 import android.graphics.Color
 import android.util.Log
+import android.view.View
+import android.widget.ImageView
 import io.realm.Realm
 import androidx.cardview.widget.CardView
+import com.google.android.material.card.MaterialCardView
 import com.pillpals.pillbuddies.helpers.DatabaseHelper.Companion.getColorStringByID
 import kotlinx.android.synthetic.main.activity_edit_medication_icon.*
 
@@ -24,7 +27,9 @@ class EditMedicationIcon : AppCompatActivity() {
     public lateinit var mediumColorList : LinearLayout
     public lateinit var heavyColorList : LinearLayout
     public lateinit var shadesColorList : LinearLayout
+    public lateinit var firstIconList: LinearLayout
     var colorString = "#FFFFFF"
+    var imageDrawable = "ic_pill_v5"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -48,6 +53,8 @@ class EditMedicationIcon : AppCompatActivity() {
         mediumColorList = findViewById(R.id.mediumColorList)
         heavyColorList = findViewById(R.id.heavyColorList)
         shadesColorList = findViewById(R.id.shadesColorList)
+
+        firstIconList = findViewById(R.id.firstIconList)
 
         addBorderToCards()
         for (i in 0 until lightColorList.getChildCount()) {
@@ -87,9 +94,21 @@ class EditMedicationIcon : AppCompatActivity() {
             }
         }
 
+        for (i in 0 until firstIconList.getChildCount()) {
+            val borderCard = firstIconList.getChildAt(i) as CardView
+            val card = borderCard.getChildAt(0) as CardView
+            val image = card.getChildAt(0) as ImageView
+
+            card.setOnClickListener {
+                imageDrawable = image.tag as String
+                addBorderToCards()
+            }
+        }
+
         bottomOptions.leftButton.setOnClickListener{
             val resultIntent = Intent(this, EditScheduleActivity::class.java)
             resultIntent.putExtra("color-string", colorString)
+            resultIntent.putExtra("image-string", imageDrawable)
             setResult(Activity.RESULT_OK, resultIntent)
             finish()
         }
@@ -138,6 +157,19 @@ class EditMedicationIcon : AppCompatActivity() {
             val card = borderCard.getChildAt(0) as CardView
             val cardColorString = String.format("#%06X", 0xFFFFFF and card.cardBackgroundColor.defaultColor)
             if (cardColorString == colorString) {
+                borderCard.setCardBackgroundColor(Color.parseColor("#FFFFFF"))
+            }
+            else {
+                borderCard.setCardBackgroundColor(Color.parseColor("#00FFFFFF"))
+            }
+        }
+
+        for (i in 0 until firstIconList.getChildCount()) {
+            val borderCard = firstIconList.getChildAt(i) as CardView
+            val card = borderCard.getChildAt(0) as CardView
+            val image = card.getChildAt(0) as ImageView
+            val cardImageDrawable = image.tag
+            if (cardImageDrawable == imageDrawable) {
                 borderCard.setCardBackgroundColor(Color.parseColor("#FFFFFF"))
             }
             else {
