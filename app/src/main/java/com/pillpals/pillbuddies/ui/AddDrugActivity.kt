@@ -32,6 +32,8 @@ import com.pillpals.pillbuddies.helpers.DateHelper
 import com.google.android.material.button.MaterialButton
 import com.pillpals.pillbuddies.helpers.DatabaseHelper
 import com.pillpals.pillbuddies.helpers.DatabaseHelper.Companion.getColorIDByString
+import com.pillpals.pillbuddies.helpers.DatabaseHelper.Companion.getColorStringByID
+import com.pillpals.pillbuddies.helpers.DatabaseHelper.Companion.getIconByID
 import com.pillpals.pillbuddies.helpers.DatabaseHelper.Companion.getIconIDByString
 import com.pillpals.pillbuddies.helpers.DatabaseHelper.Companion.getRandomColorString
 import com.pillpals.pillbuddies.helpers.DatabaseHelper.Companion.getRandomIcon
@@ -79,9 +81,10 @@ class AddDrugActivity : AppCompatActivity() {
             editText.setText(medication.name)
             editText2.setText(medication.dosage)
             editText3.setText(medication.notes)
-            colorString = DatabaseHelper.getColorStringByID(medication.color_id)
+            colorString = getColorStringByID(medication.color_id)
+            imageDrawable = getIconByID(medication.icon_id)
             iconButton.backgroundTintList = ColorStateList.valueOf(Color.parseColor(
-                DatabaseHelper.getColorStringByID(
+                getColorStringByID(
                     medication.color_id
                 )
             ))
@@ -267,6 +270,7 @@ class AddDrugActivity : AppCompatActivity() {
         iconButton.setOnClickListener {
             val addIntent = Intent(this, EditMedicationIcon::class.java)
             addIntent.putExtra("color-string", colorString)
+            addIntent.putExtra("image-string", imageDrawable)
             if(intent.hasExtra("medication-uid")) {
                 addIntent.putExtra("medication-uid", intent.getStringExtra("medication-uid"))
             }
