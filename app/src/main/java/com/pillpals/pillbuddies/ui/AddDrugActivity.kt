@@ -4,6 +4,7 @@ import android.content.Intent
 import android.content.res.ColorStateList
 import android.graphics.Color
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.widget.*
 import androidx.appcompat.app.AlertDialog
@@ -461,8 +462,10 @@ class AddDrugActivity : AppCompatActivity() {
             if(data != null) {
                 if(data.hasExtra("color-string")) {
                     colorString = data.getStringExtra("color-string")!!
-                    imageDrawable = data.getStringExtra("image-string")!!
                     iconButton.backgroundTintList = ColorStateList.valueOf(Color.parseColor(colorString))
+                }
+                if(data.hasExtra("image-string")) {
+                    imageDrawable = data.getStringExtra("image-string")!!
                     iconButton.icon = resources.getDrawable(DatabaseHelper.getDrawableIconById(this, getIconIDByString(imageDrawable)), theme)
                 }
             }

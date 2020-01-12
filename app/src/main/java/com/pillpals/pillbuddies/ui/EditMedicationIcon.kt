@@ -43,13 +43,7 @@ class EditMedicationIcon : AppCompatActivity() {
         if(intent.hasExtra("image-string")) {
             imageDrawable = intent.getStringExtra("image-string")
         }
-        if(intent.hasExtra("medication-uid")) {
-            val medID: String = intent.getStringExtra("medication-uid")
-            val medication = DatabaseHelper.getMedicationByUid(medID) as Medications
-            colorString = getColorStringByID(medication.color_id)
-            imageDrawable = getIconByID(medication.icon_id)
-        }
-
+        
         colorLists = findViewById(R.id.colorLists)
         bottomOptions = findViewById(R.id.bottomOptions)
         bottomOptions.leftButton.text = "Apply"
