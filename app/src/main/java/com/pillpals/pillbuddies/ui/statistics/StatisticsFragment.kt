@@ -23,6 +23,7 @@ import android.icu.text.SimpleDateFormat
 import android.widget.CheckBox
 import android.widget.LinearLayout
 import android.widget.ToggleButton
+import androidx.core.graphics.ColorUtils
 import com.github.mikephil.charting.components.MarkerView
 import com.github.mikephil.charting.data.BarDataSet
 import com.github.mikephil.charting.utils.Utils
@@ -44,7 +45,7 @@ class StatisticsFragment : Fragment() {
 
 
     private lateinit var realm: Realm
-    private var repeatingColorHash = HashMap<String, Int?>()
+    private var repeatingColorHash = HashMap<String, Int>()
     public lateinit var legendStack: LinearLayout
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -101,7 +102,7 @@ class StatisticsFragment : Fragment() {
             val legendItem = CheckBox(this.context!!)
             legendItem.text = it.name
             legendItem.setTextAppearance(R.style.TextAppearance_baseText)
-            legendItem.buttonTintList = (ColorStateList.valueOf(Color.parseColor(getColorStringByID(it.color_id))))
+            legendItem.buttonTintList = (ColorStateList.valueOf(getMutatedColor(it)))
             legendStack.addView(legendItem)
         }
     }
@@ -124,7 +125,7 @@ class StatisticsFragment : Fragment() {
             }
 
             val set = BarDataSet(entries, "${it.name} schedule")
-            set.setColor(Color.parseColor(getColorStringByID(it.color_id)))
+            set.setColor(getMutatedColor(it))
 
             medicationSets.add(set)
         }
@@ -136,12 +137,27 @@ class StatisticsFragment : Fragment() {
 
         medications.forEach{
             if (colorOccurrences[it.color_id] != null) {
-                repeatingColorHash[it.uid] = colorOccurrences?.get(it.color_id)
+                repeatingColorHash[it.uid] = colorOccurrences.getOrElse(it.color_id,{0})
                 colorOccurrences[it.color_id] = colorOccurrences.getOrElse(it.color_id,{0}) + 1
             } else {
                 repeatingColorHash[it.uid] = 0
                 colorOccurrences[it.color_id] = 1
             }
         }
+    }
+
+    private fun getMutatedColor(medication: Medications):Int {
+        var newColor = Color.parseColor(getColorStringByID(medication.color_id))
+
+        var brighten = ColorUtils.calculateLuminance(newColor) < 0.5
+
+        for (i in 1..repeatingColorHash.getOrElse(medication.uid,{0})) {
+            newColor = if (brighten) {
+                ColorUtils.blendARGB(newColor, Color.WHITE, 0.3f)
+            } else {
+                ColorUtils.blendARGB(newColor, Color.BLACK, 0.3f)
+            }
+        }
+        return newColor
     }
 }
