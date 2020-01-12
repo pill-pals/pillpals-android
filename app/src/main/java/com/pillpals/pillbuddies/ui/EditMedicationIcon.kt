@@ -16,6 +16,7 @@ import io.realm.Realm
 import androidx.cardview.widget.CardView
 import com.google.android.material.card.MaterialCardView
 import com.pillpals.pillbuddies.helpers.DatabaseHelper.Companion.getColorStringByID
+import com.pillpals.pillbuddies.helpers.DatabaseHelper.Companion.getIconByID
 import kotlinx.android.synthetic.main.activity_edit_medication_icon.*
 
 
@@ -39,10 +40,14 @@ class EditMedicationIcon : AppCompatActivity() {
         if(intent.hasExtra("color-string")) {
             colorString = intent.getStringExtra("color-string")
         }
+        if(intent.hasExtra("image-string")) {
+            imageDrawable = intent.getStringExtra("image-string")
+        }
         if(intent.hasExtra("medication-uid")) {
             val medID: String = intent.getStringExtra("medication-uid")
             val medication = DatabaseHelper.getMedicationByUid(medID) as Medications
             colorString = getColorStringByID(medication.color_id)
+            imageDrawable = getIconByID(medication.icon_id)
         }
 
         colorLists = findViewById(R.id.colorLists)

@@ -36,7 +36,7 @@ class DatabaseHelper {
                 }
             }
         }
-        fun getIconById(id: Int): String {
+        fun getIconByID(id: Int): String {
             return Realm.getDefaultInstance().where(Icons::class.java).equalTo("id", id).findFirst()!!.icon
         }
         fun getIconIDByString(icon: String): Int {
@@ -46,7 +46,7 @@ class DatabaseHelper {
             return Realm.getDefaultInstance().where(Icons::class.java).findAll().random().icon
         }
         fun getDrawableIconById(context: Context, id: Int): Int {
-            val icon = getIconById(id)
+            val icon = getIconByID(id)
             return context.getResources()
                 .getIdentifier("drawable/$icon", null, context.packageName)
         }
