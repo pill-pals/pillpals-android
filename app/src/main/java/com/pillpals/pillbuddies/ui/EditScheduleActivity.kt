@@ -5,6 +5,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
+import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -38,6 +39,11 @@ class EditScheduleActivity : AppCompatActivity() {
     public lateinit var sundayButton : ToggleButton
     public lateinit var dailyButton : ToggleButton
 
+    public lateinit var weekdayButton : ToggleButton
+    public lateinit var intervalButton : ToggleButton
+    public lateinit var weekdayOptions : ConstraintLayout
+    public lateinit var intervalOptions : ConstraintLayout
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Realm.init(this)
@@ -57,9 +63,30 @@ class EditScheduleActivity : AppCompatActivity() {
         sundayButton = findViewById(R.id.sundayButton)
         dailyButton = findViewById(R.id.dailyButton)
 
+        weekdayButton = findViewById(R.id.weekdayButton)
+        intervalButton = findViewById(R.id.intervalButton)
+        weekdayOptions = findViewById(R.id.weekdayOptions)
+        intervalOptions = findViewById(R.id.intervalOptions)
+
         bottomOptions.leftButton.text = "Save"
         bottomOptions.rightButton.text = "Cancel"
         timeBoxList = findViewById(R.id.timeBoxList)
+
+        weekdayButton.setOnClickListener{
+            if(weekdayButton.isChecked){
+                intervalButton.setChecked(false)
+                weekdayOptions.visibility = View.VISIBLE
+                intervalOptions.visibility = View.INVISIBLE
+            }
+        }
+
+        intervalButton.setOnClickListener{
+            if(intervalButton.isChecked){
+                weekdayButton.setChecked(false)
+                intervalOptions.visibility = View.VISIBLE
+                weekdayOptions.visibility = View.INVISIBLE
+            }
+        }
 
         addTimeButton.setOnClickListener {
             val timeDialog = LayoutInflater.from(this).inflate(R.layout.time_prompt, null)
@@ -97,7 +124,7 @@ class EditScheduleActivity : AppCompatActivity() {
         bottomOptions.leftButton.setOnClickListener {
             val schedules: MutableList<Schedules> = ArrayList()
             Realm.getDefaultInstance().executeTransaction {realm->
-                if(dailyButton.isChecked){
+                if(dailyButton.isChecked || (sundayButton.isChecked && mondayButton.isChecked && tuesdayButton.isChecked && wednesdayButton.isChecked && thursdayButton.isChecked && fridayButton.isChecked && saturdayButton.isChecked)){
                     calList.forEach {
                         val schedule = realm.createObject(Schedules::class.java, UUID.randomUUID().toString())
                         schedule.occurrence=it.time
@@ -191,6 +218,20 @@ class EditScheduleActivity : AppCompatActivity() {
             finish()
         }
 
+    }
+
+    public fun buttonClicked(view: View){
+        if(view == findViewById(R.id.dailyButton)){
+            mondayButton.setChecked(false)
+            tuesdayButton.setChecked(false)
+            wednesdayButton.setChecked(false)
+            thursdayButton.setChecked(false)
+            fridayButton.setChecked(false)
+            saturdayButton.setChecked(false)
+            sundayButton.setChecked(false)
+        }else{
+            dailyButton.setChecked(false)
+        }
     }
 
 }
