@@ -7,13 +7,13 @@
 
     <androidx.cardview.widget.CardView
         android:id="@+id/TimeBoxCard"
-        android:layout_width="105dp"
+        android:layout_width="wrap_content"
         android:layout_height="40dp"
         android:layout_marginRight="16dp"
         android:background="@color/colorGrey"
         app:cardBackgroundColor="@color/colorGrey"
-        app:cardCornerRadius="0dp"
-        app:cardElevation="0dp" >
+        app:cardCornerRadius="8dp"
+         >
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
@@ -27,7 +27,7 @@
                 android:layout_marginTop="10dp"
                 android:layout_marginBottom="10dp"
                 android:gravity="fill_vertical"
-                android:text="8:00 AM"
+                android:text="10:00 AM"
                 android:textColor="@color/colorBlack"
                 android:textSize="18sp"
                 app:layout_constraintBottom_toBottomOf="parent"
@@ -38,6 +38,7 @@
                 android:id="@+id/timeBoxCloseButton"
                 android:layout_width="11dp"
                 android:layout_height="11dp"
+                android:layout_marginStart="8dp"
                 android:layout_marginTop="14dp"
                 android:layout_marginEnd="8dp"
                 android:layout_marginBottom="14dp"
@@ -45,6 +46,7 @@
                 android:scaleType="fitCenter"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/timeBoxText"
                 app:layout_constraintTop_toTopOf="parent"
                 app:srcCompat="@drawable/ic_clear_24px" />
         </androidx.constraintlayout.widget.ConstraintLayout>

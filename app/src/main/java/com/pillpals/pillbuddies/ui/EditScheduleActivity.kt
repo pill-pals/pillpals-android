@@ -13,6 +13,7 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import com.pillpals.pillbuddies.R
 import com.pillpals.pillbuddies.data.model.Schedules
 import com.pillpals.pillbuddies.helpers.DatabaseHelper.Companion.getMedicationByUid
+import com.pillpals.pillbuddies.helpers.DateHelper
 import com.pillpals.pillbuddies.helpers.DateHelper.Companion.dateToString
 import io.realm.Realm
 import kotlinx.android.synthetic.main.activity_add_drug.*
@@ -46,6 +47,7 @@ class EditScheduleActivity : AppCompatActivity() {
 
     public lateinit var intervalNumBox : EditText
     public lateinit var intervalScaleList : Spinner
+    public lateinit var startDatePicker: DatePicker
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -76,6 +78,8 @@ class EditScheduleActivity : AppCompatActivity() {
         bottomOptions.leftButton.text = "Save"
         bottomOptions.rightButton.text = "Cancel"
         timeBoxList = findViewById(R.id.timeBoxList)
+
+        startDatePicker = findViewById(R.id.startDatePicker)
 
         weekdayButton.setOnClickListener{
             if(weekdayButton.isChecked){
@@ -117,7 +121,7 @@ class EditScheduleActivity : AppCompatActivity() {
                 val timeData = dateToString(cal.time)
                 list.add(DosageTimeBox(this))
                 calList.add(cal)
-                list.last().timeBoxText.text= timeData
+                list.last().timeBoxText.text = timeData
                 timeBoxList.removeAllViews()
                 list.forEach {
                     //Log.i("test", it.timeBoxText.text.toString())
@@ -203,31 +207,31 @@ class EditScheduleActivity : AppCompatActivity() {
                             }
                         }
                     }
-                } else{
+                } else {
                     calList.forEach {
                         val schedule = realm.createObject(Schedules::class.java, UUID.randomUUID().toString())
-                        schedule.occurrence=it.time
+                        val cal = Calendar.getInstance()
+                        cal.time = it.time
+                        cal.set(Calendar.MILLISECOND, 0)
+                        cal.set(Calendar.SECOND, 0)
+                        cal.set(Calendar.DAY_OF_MONTH, startDatePicker.dayOfMonth)
+                        cal.set(Calendar.MONTH, startDatePicker.month)
+                        cal.set(Calendar.YEAR, startDatePicker.year)
+
+                        schedule.occurrence=cal.time
                         schedule.repetitionCount = intervalNumBox.text.toString().toInt()
-                        if(intervalScaleList.selectedItem == "Hours"){
-                            schedule.repetitionUnit = 3
-                        }else if(intervalScaleList.selectedItem == "Days"){
-                            schedule.repetitionUnit = 2
-                        }else if(intervalScaleList.selectedItem == "Weeks"){
-                            schedule.repetitionUnit = 6
+
+                        schedule.repetitionUnit = when(intervalScaleList.selectedItem) {
+                            "Hours" -> DateHelper.getIndexByUnit(Calendar.HOUR_OF_DAY)
+                            "Days" -> DateHelper.getIndexByUnit(Calendar.DATE)
+                            "Weeks" -> DateHelper.getIndexByUnit(Calendar.WEEK_OF_YEAR)
+                            else -> DateHelper.getIndexByUnit(Calendar.HOUR_OF_DAY)
                         }
-                        //schedule.repetitionUnit = intervalScaleList.selectedItem
+
                         schedules.add(schedule)
                     }
                 }
-                /*if(intent.hasExtra("medication-uid")){
-                    val medication = getMedicationByUid(intent.getStringExtra("medication-uid"))
-                    schedules.forEach{
-                        medication!!.schedules.add(it)
-                    }
-                    val resultIntent = Intent(this, EditScheduleActivity::class.java)
-                    resultIntent.putExtra("medication-uid", intent.getStringExtra("medication-uid"))
-                    setResult(Activity.RESULT_OK, resultIntent)
-                } else{*/
+
                 val strings: MutableList<String> = ArrayList()
                 schedules.forEach {
                     strings.add(it.uid!!)
@@ -235,7 +239,6 @@ class EditScheduleActivity : AppCompatActivity() {
                 val resultIntent = Intent(this, EditScheduleActivity::class.java)
                 resultIntent.putStringArrayListExtra("schedule-id-list", ArrayList(strings))
                 setResult(Activity.RESULT_OK, resultIntent)
-                //}
             }
             finish()
         }
@@ -246,7 +249,7 @@ class EditScheduleActivity : AppCompatActivity() {
 
     }
 
-    public fun buttonClicked(view: View){
+    fun buttonClicked(view: View){
         if(view == findViewById(R.id.dailyButton)){
             mondayButton.setChecked(false)
             tuesdayButton.setChecked(false)
