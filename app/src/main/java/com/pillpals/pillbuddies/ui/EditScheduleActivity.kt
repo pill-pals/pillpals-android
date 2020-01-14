@@ -44,6 +44,9 @@ class EditScheduleActivity : AppCompatActivity() {
     public lateinit var weekdayOptions : ConstraintLayout
     public lateinit var intervalOptions : ConstraintLayout
 
+    public lateinit var intervalNumBox : EditText
+    public lateinit var intervalScaleList : Spinner
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Realm.init(this)
@@ -67,6 +70,8 @@ class EditScheduleActivity : AppCompatActivity() {
         intervalButton = findViewById(R.id.intervalButton)
         weekdayOptions = findViewById(R.id.weekdayOptions)
         intervalOptions = findViewById(R.id.intervalOptions)
+        intervalNumBox = findViewById(R.id.intervalNumBox)
+        intervalScaleList = findViewById(R.id.intervalScaleList)
 
         bottomOptions.leftButton.text = "Save"
         bottomOptions.rightButton.text = "Cancel"
@@ -77,6 +82,8 @@ class EditScheduleActivity : AppCompatActivity() {
                 intervalButton.setChecked(false)
                 weekdayOptions.visibility = View.VISIBLE
                 intervalOptions.visibility = View.INVISIBLE
+            }else{
+                weekdayButton.setChecked(true)
             }
         }
 
@@ -85,6 +92,8 @@ class EditScheduleActivity : AppCompatActivity() {
                 weekdayButton.setChecked(false)
                 intervalOptions.visibility = View.VISIBLE
                 weekdayOptions.visibility = View.INVISIBLE
+            }else{
+                intervalButton.setChecked(true)
             }
         }
 
@@ -124,73 +133,90 @@ class EditScheduleActivity : AppCompatActivity() {
         bottomOptions.leftButton.setOnClickListener {
             val schedules: MutableList<Schedules> = ArrayList()
             Realm.getDefaultInstance().executeTransaction {realm->
-                if(dailyButton.isChecked || (sundayButton.isChecked && mondayButton.isChecked && tuesdayButton.isChecked && wednesdayButton.isChecked && thursdayButton.isChecked && fridayButton.isChecked && saturdayButton.isChecked)){
+                if(weekdayButton.isChecked){
+                    if(dailyButton.isChecked || (sundayButton.isChecked && mondayButton.isChecked && tuesdayButton.isChecked && wednesdayButton.isChecked && thursdayButton.isChecked && fridayButton.isChecked && saturdayButton.isChecked)){
+                        calList.forEach {
+                            val schedule = realm.createObject(Schedules::class.java, UUID.randomUUID().toString())
+                            schedule.occurrence=it.time
+                            schedule.repetitionCount = 1
+                            schedule.repetitionUnit = 2
+                            schedules.add(schedule)
+                        }
+                    }
+                    else{
+                        calList.forEach {
+                            if(sundayButton.isChecked){
+                                val schedule = realm.createObject(Schedules::class.java, UUID.randomUUID().toString())
+                                it.set(Calendar.DAY_OF_WEEK, 1)
+                                schedule.occurrence=it.time
+                                schedule.repetitionCount = 1
+                                schedule.repetitionUnit = 6
+                                schedules.add(schedule)
+                            }
+                            if(mondayButton.isChecked){
+                                val schedule = realm.createObject(Schedules::class.java, UUID.randomUUID().toString())
+                                it.set(Calendar.DAY_OF_WEEK, 2)
+                                schedule.occurrence=it.time
+                                schedule.repetitionCount = 1
+                                schedule.repetitionUnit = 6
+                                schedules.add(schedule)
+                            }
+                            if(tuesdayButton.isChecked){
+                                val schedule = realm.createObject(Schedules::class.java, UUID.randomUUID().toString())
+                                it.set(Calendar.DAY_OF_WEEK, 3)
+                                schedule.occurrence=it.time
+                                schedule.repetitionCount = 1
+                                schedule.repetitionUnit = 6
+                                schedules.add(schedule)
+                            }
+                            if(wednesdayButton.isChecked){
+                                val schedule = realm.createObject(Schedules::class.java, UUID.randomUUID().toString())
+                                it.set(Calendar.DAY_OF_WEEK, 4)
+                                schedule.occurrence=it.time
+                                schedule.repetitionCount = 1
+                                schedule.repetitionUnit = 6
+                                schedules.add(schedule)
+                            }
+                            if(thursdayButton.isChecked){
+                                val schedule = realm.createObject(Schedules::class.java, UUID.randomUUID().toString())
+                                it.set(Calendar.DAY_OF_WEEK, 5)
+                                schedule.occurrence=it.time
+                                schedule.repetitionCount = 1
+                                schedule.repetitionUnit = 6
+                                schedules.add(schedule)
+                            }
+                            if(fridayButton.isChecked){
+                                val schedule = realm.createObject(Schedules::class.java, UUID.randomUUID().toString())
+                                it.set(Calendar.DAY_OF_WEEK, 6)
+                                schedule.occurrence=it.time
+                                schedule.repetitionCount = 1
+                                schedule.repetitionUnit = 6
+                                schedules.add(schedule)
+                            }
+                            if(saturdayButton.isChecked){
+                                val schedule = realm.createObject(Schedules::class.java, UUID.randomUUID().toString())
+                                it.set(Calendar.DAY_OF_WEEK, 7)
+                                schedule.occurrence=it.time
+                                schedule.repetitionCount = 1
+                                schedule.repetitionUnit = 6
+                                schedules.add(schedule)
+                            }
+                        }
+                    }
+                } else{
                     calList.forEach {
                         val schedule = realm.createObject(Schedules::class.java, UUID.randomUUID().toString())
                         schedule.occurrence=it.time
-                        schedule.repetitionCount = 1
-                        schedule.repetitionUnit = 2
+                        schedule.repetitionCount = intervalNumBox.text.toString().toInt()
+                        if(intervalScaleList.selectedItem == "Hours"){
+                            schedule.repetitionUnit = 3
+                        }else if(intervalScaleList.selectedItem == "Days"){
+                            schedule.repetitionUnit = 2
+                        }else if(intervalScaleList.selectedItem == "Weeks"){
+                            schedule.repetitionUnit = 6
+                        }
+                        //schedule.repetitionUnit = intervalScaleList.selectedItem
                         schedules.add(schedule)
-                    }
-                }
-                else{
-                    calList.forEach {
-                        if(sundayButton.isChecked){
-                            val schedule = realm.createObject(Schedules::class.java, UUID.randomUUID().toString())
-                            it.set(Calendar.DAY_OF_WEEK, 1)
-                            schedule.occurrence=it.time
-                            schedule.repetitionCount = 1
-                            schedule.repetitionUnit = 6
-                            schedules.add(schedule)
-                        }
-                        if(mondayButton.isChecked){
-                            val schedule = realm.createObject(Schedules::class.java, UUID.randomUUID().toString())
-                            it.set(Calendar.DAY_OF_WEEK, 2)
-                            schedule.occurrence=it.time
-                            schedule.repetitionCount = 1
-                            schedule.repetitionUnit = 6
-                            schedules.add(schedule)
-                        }
-                        if(tuesdayButton.isChecked){
-                            val schedule = realm.createObject(Schedules::class.java, UUID.randomUUID().toString())
-                            it.set(Calendar.DAY_OF_WEEK, 3)
-                            schedule.occurrence=it.time
-                            schedule.repetitionCount = 1
-                            schedule.repetitionUnit = 6
-                            schedules.add(schedule)
-                        }
-                        if(wednesdayButton.isChecked){
-                            val schedule = realm.createObject(Schedules::class.java, UUID.randomUUID().toString())
-                            it.set(Calendar.DAY_OF_WEEK, 4)
-                            schedule.occurrence=it.time
-                            schedule.repetitionCount = 1
-                            schedule.repetitionUnit = 6
-                            schedules.add(schedule)
-                        }
-                        if(thursdayButton.isChecked){
-                            val schedule = realm.createObject(Schedules::class.java, UUID.randomUUID().toString())
-                            it.set(Calendar.DAY_OF_WEEK, 5)
-                            schedule.occurrence=it.time
-                            schedule.repetitionCount = 1
-                            schedule.repetitionUnit = 6
-                            schedules.add(schedule)
-                        }
-                        if(fridayButton.isChecked){
-                            val schedule = realm.createObject(Schedules::class.java, UUID.randomUUID().toString())
-                            it.set(Calendar.DAY_OF_WEEK, 6)
-                            schedule.occurrence=it.time
-                            schedule.repetitionCount = 1
-                            schedule.repetitionUnit = 6
-                            schedules.add(schedule)
-                        }
-                        if(saturdayButton.isChecked){
-                            val schedule = realm.createObject(Schedules::class.java, UUID.randomUUID().toString())
-                            it.set(Calendar.DAY_OF_WEEK, 7)
-                            schedule.occurrence=it.time
-                            schedule.repetitionCount = 1
-                            schedule.repetitionUnit = 6
-                            schedules.add(schedule)
-                        }
                     }
                 }
                 /*if(intent.hasExtra("medication-uid")){
@@ -202,13 +228,13 @@ class EditScheduleActivity : AppCompatActivity() {
                     resultIntent.putExtra("medication-uid", intent.getStringExtra("medication-uid"))
                     setResult(Activity.RESULT_OK, resultIntent)
                 } else{*/
-                    val strings: MutableList<String> = ArrayList()
-                    schedules.forEach {
-                        strings.add(it.uid!!)
-                    }
-                    val resultIntent = Intent(this, EditScheduleActivity::class.java)
-                    resultIntent.putStringArrayListExtra("schedule-id-list", ArrayList(strings))
-                    setResult(Activity.RESULT_OK, resultIntent)
+                val strings: MutableList<String> = ArrayList()
+                schedules.forEach {
+                    strings.add(it.uid!!)
+                }
+                val resultIntent = Intent(this, EditScheduleActivity::class.java)
+                resultIntent.putStringArrayListExtra("schedule-id-list", ArrayList(strings))
+                setResult(Activity.RESULT_OK, resultIntent)
                 //}
             }
             finish()
