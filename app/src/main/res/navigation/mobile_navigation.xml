@@ -22,4 +22,10 @@
         android:name="com.pillpals.pillbuddies.ui.statistics.StatisticsFragment"
         android:label="Statistics"
         tools:layout="@layout/fragment_statistics" />
+
+    <fragment
+        android:id="@+id/navigation_search"
+        android:name="com.pillpals.pillbuddies.ui.search.SearchFragment"
+        android:label="Search"
+        tools:layout="@layout/fragment_search" />
 </navigation>

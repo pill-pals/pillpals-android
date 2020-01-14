@@ -2,14 +2,19 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
-        android:id="@+id/navigation_medications"
-        android:icon="@drawable/ic_list_24px"
-        android:title="Medications" />
-
-    <item
         android:id="@+id/navigation_dashboard"
         android:icon="@drawable/ic_pill_v5"
         android:title="Dashboard" />
+
+    <item
+        android:id="@+id/navigation_search"
+        android:icon="@drawable/ic_search_24px"
+        android:title="Search" />
+
+    <item
+        android:id="@+id/navigation_medications"
+        android:icon="@drawable/ic_list_24px"
+        android:title="Medications" />
 
     <item
         android:id="@+id/navigation_statistics"

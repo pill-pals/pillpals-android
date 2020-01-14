@@ -30,4 +30,23 @@
 
     <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 
+    <style name="MedicationSearchStyle" parent="Widget.AppCompat.SearchView">
+        <!-- Gets rid of the search icon -->
+        <item name="searchIcon">@drawable/ic_search_24px</item>
+        <!-- Gets rid of the "underline" in the text
+        <item name="queryBackground">@color/white</item>-->
+        <!-- Text Size -->
+        <item name="android:textSize">20sp</item>
+        <!-- Query Text Color -->
+        <item name="android:textColorPrimary">@color/colorPrimaryDark</item>
+        <!-- Hint Color -->
+        <item name="android:textColorHint">@color/colorDarkGrey</item>
+        <!-- Icon Color -->
+        <item name="android:tint">@color/colorPrimaryDark</item>
+        <!-- Gets rid of the search icon when the SearchView is expanded -->
+        <item name="searchHintIcon">@null</item>
+        <!-- The hint text that appears when the user has not typed anything -->
+        <item name="queryHint">@string/medication_search_hint</item>
+    </style>
+
 </resources>

@@ -33,7 +33,7 @@
                     android:insetTop="0dp"
                     android:insetBottom="0dp"
                     android:textSize="0sp"
-                    app:cornerRadius="0dp"
+                    app:cornerRadius="16dp"
                     app:icon="@drawable/ic_pill_v5"
                     app:iconGravity="textStart"
                     app:iconPadding="0dp"
