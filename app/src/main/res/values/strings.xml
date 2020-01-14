@@ -4,6 +4,7 @@
     <string name="channel_description">Notifications for PillPals alarms</string>
     <string name="channel_id">PillPalsChannel0</string>
     <string name="title_activity_edit_schedule">Edit Schedule</string>
+    <string name="medication_search_hint">Search medications</string>
     <string-array name="time_intervals">
         <item>Hours</item>
         <item>Days</item>
