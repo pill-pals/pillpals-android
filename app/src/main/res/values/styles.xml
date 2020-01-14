@@ -38,15 +38,23 @@
         <!-- Text Size -->
         <item name="android:textSize">20sp</item>
         <!-- Query Text Color -->
-        <item name="android:textColorPrimary">@color/colorPrimaryDark</item>
+        <item name="android:textColorPrimary">@color/colorPrimary</item>
         <!-- Hint Color -->
         <item name="android:textColorHint">@color/colorDarkGrey</item>
         <!-- Icon Color -->
-        <item name="android:tint">@color/colorPrimaryDark</item>
+        <item name="android:tint">@color/colorPrimary</item>
         <!-- Gets rid of the search icon when the SearchView is expanded -->
         <item name="searchHintIcon">@null</item>
         <!-- The hint text that appears when the user has not typed anything -->
         <item name="queryHint">@string/medication_search_hint</item>
     </style>
 
+    <style name="SpinnerStyle" parent="ThemeOverlay.AppCompat.Light">
+        <item name="android:textColor">@color/colorPrimary</item>
+        <item name="android:color">@color/colorPrimary</item>
+    </style>
+
+    <style name="DateSelectorStyle" parent="ThemeOverlay.AppCompat.Light">
+        <item name="android:textColorPrimary">@color/colorPrimary</item>
+    </style>
 </resources>

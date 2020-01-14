@@ -31,43 +31,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent">
 
-                <TextView
-                    android:id="@+id/timelineEndText"
-                    android:layout_width="wrap_content"
-                    android:layout_height="19dp"
-                    android:layout_marginStart="16dp"
-                    android:layout_marginTop="20dp"
-                    android:text="End Date"
-                    android:textColor="@color/colorBlack"
-                    android:textStyle="bold"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/timelineStartBox" />
 
-                <EditText
-                    android:id="@+id/timelineEndBox"
-                    android:layout_width="0dp"
-                    android:layout_height="40dp"
-                    android:layout_marginStart="16dp"
-                    android:layout_marginTop="16dp"
-                    android:layout_marginEnd="16dp"
-                    android:background="@color/colorGrey"
-                    android:ems="10"
-                    android:inputType="date"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/timelineEndText" />
 
-                <TextView
-                    android:id="@+id/timelineStartText"
-                    android:layout_width="wrap_content"
-                    android:layout_height="19dp"
-                    android:layout_marginStart="16dp"
-                    android:layout_marginTop="20dp"
-                    android:text="Start Date"
-                    android:textColor="@color/colorBlack"
-                    android:textStyle="bold"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/thirdSectionText" />
+
 
                 <TextView
                     android:id="@+id/firstSectionText"
@@ -108,7 +74,8 @@
                     android:orientation="horizontal"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/firstSectionText"></LinearLayout>
+                    app:layout_constraintTop_toBottomOf="@+id/firstSectionText">
+                </LinearLayout>
 
                 <TextView
                     android:id="@+id/secondSectionText"
@@ -124,19 +91,7 @@
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@id/timeBoxList" />
 
-                <TextView
-                    android:id="@+id/thirdSectionText"
-                    android:layout_width="wrap_content"
-                    android:layout_height="0dp"
-                    android:layout_marginStart="16dp"
-                    android:layout_marginTop="26dp"
-                    android:includeFontPadding="true"
-                    android:text="Timeline"
-                    android:textAppearance="@style/TextAppearance.AppCompat.Large"
-                    android:textColor="@color/colorBlack"
-                    android:textSize="24sp"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/intervalOptions" />
+
 
                 <LinearLayout
                     android:id="@+id/linearLayout"
@@ -184,18 +139,19 @@
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:id="@+id/intervalOptions"
                     android:layout_width="match_parent"
-                    android:layout_height="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="20dp"
                     android:visibility="invisible"
-                    app:layout_constraintBottom_toBottomOf="@+id/weekdayOptions"
-                    app:layout_constraintTop_toTopOf="@+id/weekdayOptions">
+                    app:layout_constraintTop_toBottomOf="@+id/linearLayout">
 
                     <TextView
                         android:id="@+id/intervalText"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="16dp"
+                        android:layout_marginTop="0dp"
                         android:text="Repeat every"
-                        android:textColor="@color/colorBlack"
+                        android:textColor="@color/colorPrimary"
                         android:textStyle="bold"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent" />
@@ -206,9 +162,14 @@
                         android:layout_height="40dp"
                         android:layout_marginStart="16dp"
                         android:layout_marginTop="8dp"
+                        android:autofillHints="Number"
                         android:background="@color/colorGrey"
                         android:ems="10"
+                        android:hint="#"
                         android:inputType="number"
+                        android:padding="10dp"
+                        android:textColor="@color/colorPrimary"
+                        android:textColorHint="@color/colorDarkGrey"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toBottomOf="@+id/intervalText" />
 
@@ -219,6 +180,7 @@
                         android:layout_marginStart="8dp"
                         android:background="@color/colorGrey"
                         android:entries="@array/time_intervals"
+                        android:theme="@style/SpinnerStyle"
                         app:layout_constraintBottom_toBottomOf="@+id/intervalNumBox"
                         app:layout_constraintStart_toEndOf="@+id/intervalNumBox"
                         app:layout_constraintTop_toTopOf="@+id/intervalNumBox" />
@@ -229,10 +191,39 @@
                         android:layout_height="0dp"
                         android:layout_marginTop="16dp"
                         android:layout_marginEnd="8dp"
+                        android:contentDescription="Dropdown Button"
                         android:scaleType="fitCenter"
                         app:layout_constraintEnd_toEndOf="@+id/intervalScaleList"
                         app:layout_constraintTop_toTopOf="@+id/intervalScaleList"
                         app:srcCompat="@drawable/ic_down_arrow" />
+
+                    <TextView
+                        android:id="@+id/timelineStartText"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="16dp"
+                        android:layout_marginTop="20dp"
+                        android:text="Start Date"
+                        android:textColor="@color/colorBlack"
+                        android:textStyle="bold"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/intervalNumBox" />
+
+                    <DatePicker
+                        android:id="@+id/startDatePicker"
+                        android:datePickerMode="spinner"
+                        android:calendarViewShown="false"
+                        android:theme="@style/DateSelectorStyle"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="16dp"
+                        android:layout_marginTop="8dp"
+                        android:layout_marginEnd="16dp"
+                        android:inputType="date"
+                        android:background="@color/colorLightGrey"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/timelineStartText" />
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
                 <androidx.constraintlayout.widget.ConstraintLayout
@@ -247,7 +238,8 @@
                         android:id="@+id/weekdayLayout"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:orientation="horizontal">
+                        android:orientation="horizontal"
+                        app:layout_constraintStart_toStartOf="parent">
 
                         <ToggleButton
                             android:id="@+id/mondayButton"
@@ -393,31 +385,6 @@
 
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
-                <TextView
-                    android:id="@+id/thirdSectionTextExtra"
-                    android:layout_width="63dp"
-                    android:layout_height="16dp"
-                    android:layout_marginStart="8dp"
-                    android:layout_marginBottom="4dp"
-                    android:text="(Optional)"
-                    android:textColor="@android:color/darker_gray"
-                    android:textSize="12sp"
-                    app:layout_constraintBottom_toBottomOf="@+id/thirdSectionText"
-                    app:layout_constraintStart_toEndOf="@+id/thirdSectionText" />
-
-                <EditText
-                    android:id="@+id/timelineStartBox"
-                    android:layout_width="0dp"
-                    android:layout_height="40dp"
-                    android:layout_marginStart="16dp"
-                    android:layout_marginTop="8dp"
-                    android:layout_marginEnd="16dp"
-                    android:background="@color/colorGrey"
-                    android:ems="10"
-                    android:inputType="date"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/timelineStartText" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
         </LinearLayout>
