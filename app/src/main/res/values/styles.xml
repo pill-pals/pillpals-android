@@ -8,6 +8,7 @@
         <item name="colorAccent">@color/colorAccent</item>
         <item name="android:colorBackground">@color/colorLightGrey</item>
         <item name="textAppearanceButton">@style/TextAppearance.Button</item>
+        <item name="android:textColor">@color/colorPrimary</item>
     </style>
 
     <style name="TextAppearance.Button" parent="TextAppearance.MaterialComponents.Button">
@@ -56,5 +57,12 @@
 
     <style name="DateSelectorStyle" parent="ThemeOverlay.AppCompat.Light">
         <item name="android:textColorPrimary">@color/colorPrimary</item>
+    </style>
+
+
+    <style name="ActionButton" parent="@android:style/Widget.ActionButton">
+        <item name="android:paddingStart">0dp</item>
+        <item name="android:paddingEnd">0dp</item>
+        <item name="android:minWidth">0dp</item>
     </style>
 </resources>

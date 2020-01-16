@@ -4,6 +4,7 @@ import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Color
 import android.util.AttributeSet
+import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.LinearLayout
@@ -26,13 +27,7 @@ class DrugCard : LinearLayout {
     public lateinit var icon: ImageView
     public lateinit var doneImage: ImageView
     public lateinit var iconBackground: CardView
-
-    companion object {
-        private var mSquareColor: Int = 0
-        private var mPadding = 0
-        private val originX = 0
-        private val originY = 0
-    }
+    public lateinit var overflowMenu: ImageButton
 
     constructor(context: Context) : super(context) {
         init()
@@ -62,15 +57,12 @@ class DrugCard : LinearLayout {
         icon = findViewById(R.id.icon)
         doneImage = findViewById(R.id.doneImage)
         iconBackground = findViewById(R.id.iconBackground)
+        overflowMenu = findViewById(R.id.overflowMenu)
 
         //Initialize elements
         button.visibility = GONE
         doneImage.visibility = GONE
         countdownLabel.visibility = GONE
         lateText.visibility = GONE
-    }
-
-    override fun onDraw(canvas: Canvas) {
-        super.onDraw(canvas)
     }
 }

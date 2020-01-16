@@ -4,6 +4,9 @@ import android.content.Intent
 import android.content.res.ColorStateList
 import android.graphics.Color
 import android.os.Bundle
+import android.text.SpannableString
+import android.text.Spanned
+import android.text.style.ForegroundColorSpan
 import android.util.Log
 import android.view.LayoutInflater
 import android.widget.*
@@ -234,9 +237,16 @@ class AddDrugActivity : AppCompatActivity() {
             deleteButton.setOnClickListener{
                 val deleteDialog = LayoutInflater.from(this).inflate(R.layout.delete_prompt, null)
 
-                val dialogBuilder = AlertDialog.Builder(this)
+                val title = SpannableString("Delete " + medication.name)
+                title.setSpan(
+                    ForegroundColorSpan(this!!.resources.getColor(R.color.colorLightGrey)),
+                    0,
+                    title.length,
+                    Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+                )
+                val dialogBuilder = AlertDialog.Builder(this!!)
                     .setView(deleteDialog)
-                    .setTitle("Delete " + medication.name)
+                    .setTitle(title)
 
                 val deleteDrugName = deleteDialog!!.findViewById<TextView>(R.id.deleteDrugName)
                 deleteDrugName.text = medication.name

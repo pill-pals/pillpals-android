@@ -17,10 +17,19 @@ import kotlinx.android.synthetic.main.prompts.view.*
 import java.util.*
 import android.content.Intent
 import android.graphics.Color
+import android.text.SpannableString
+import android.text.Spanned
+import android.text.style.ForegroundColorSpan
 import kotlinx.android.synthetic.main.prompts.*
 import android.util.Log
+import android.view.MenuInflater
+import android.widget.PopupMenu
+import android.widget.TextView
 import com.pillpals.pillbuddies.helpers.DatabaseHelper
 import com.pillpals.pillbuddies.helpers.DatabaseHelper.Companion.getColorStringByID
+import kotlinx.android.synthetic.main.delete_prompt.view.*
+import kotlinx.android.synthetic.main.drug_card.view.*
+import kotlinx.android.synthetic.main.prompts.view.dialogCancelBtn
 
 class MedicationsFragment : Fragment() {
 
@@ -47,6 +56,46 @@ class MedicationsFragment : Fragment() {
         updateMedicationList()
 
         return view
+    }
+
+    private fun popoverMenuMedication(v: View, medication: Medications) {
+        val popup = PopupMenu(context, v.overflowMenu)
+        val inflater: MenuInflater = popup.menuInflater
+        inflater.inflate(R.menu.medication, popup.menu)
+        popup.setOnMenuItemClickListener { item ->
+            when(item.itemId) {
+                R.id.medicationDelete -> {
+                    val deleteDialog = LayoutInflater.from(this.context).inflate(R.layout.delete_prompt, null)
+
+                    val title = SpannableString("Delete " + medication.name)
+                    title.setSpan(
+                        ForegroundColorSpan(this!!.resources.getColor(R.color.colorLightGrey)),
+                        0,
+                        title.length,
+                        Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+                    )
+                    val dialogBuilder = androidx.appcompat.app.AlertDialog.Builder(context!!)
+                        .setView(deleteDialog)
+                        .setTitle(title)
+
+                    val deleteDrugName = deleteDialog!!.findViewById<TextView>(R.id.deleteDrugName)
+                    deleteDrugName.text = medication.name
+
+                    val deleteAlertDialog = dialogBuilder.show()
+                    deleteDialog.dialogConfirmBtn.setOnClickListener {
+                        deleteAlertDialog.dismiss()
+                        deleteMedication(medication)
+                        updateMedicationList()
+                    }
+
+                    deleteDialog.dialogCancelBtn.setOnClickListener {
+                        deleteAlertDialog.dismiss()
+                    }
+                }
+            }
+            true
+        }
+        popup.show()
     }
 
     private fun updateMedicationList() {
@@ -81,6 +130,10 @@ class MedicationsFragment : Fragment() {
         newCard.button.text = "Edit"
         newCard.button.layoutParams.width = ViewGroup.LayoutParams.WRAP_CONTENT
         newCard.button.visibility = View.VISIBLE
+
+        newCard.overflowMenu.setOnClickListener {
+            popoverMenuMedication(newCard, medication)
+        }
         
         stack.addView(newCard)
     }
@@ -92,6 +145,14 @@ class MedicationsFragment : Fragment() {
             medication.dosage = drugDose
         }
         updateMedicationList()
+    }
+
+    private fun deleteMedication(medication: Medications) {
+        realm.executeTransaction {
+            // medication is copied from realm, not the real object
+            val databaseDrug = realm.where(Medications::class.java).equalTo("uid", medication.uid).findFirst()!!
+            databaseDrug.deleted = true
+        }
     }
 
     override fun onActivityResult(requestCode:Int, resultCode:Int, data:Intent?) {
