@@ -285,9 +285,6 @@ class DashboardFragment : Fragment() {
     }
 
     private fun addDrugCard(schedule: Schedules, medication: Medications) {
-        // Send notification
-        NotificationUtils.startAlarm(this.context!!, schedule)
-
         var newCard = DrugCard(this.context!!)
 
         newCard.nameText.text = medication.name
@@ -338,6 +335,8 @@ class DashboardFragment : Fragment() {
                 popoverMenuCurrent(newCard, schedule)
             }
             currentStack.addView(newCard)
+            // Send notification
+            NotificationUtils.startAlarm(this.context!!, schedule)
         } else {
             // Upcoming
             newCard.countdownLabel.setVisibility(LinearLayout.VISIBLE)
