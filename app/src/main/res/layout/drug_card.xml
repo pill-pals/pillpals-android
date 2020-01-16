@@ -92,11 +92,11 @@
                 android:layout_width="132dp"
                 android:layout_height="32dp"
                 android:layout_marginTop="20dp"
-                android:layout_marginEnd="16dp"
                 android:gravity="end"
                 android:text="Countdown"
                 android:textAppearance="@style/TextAppearance.baseText"
-                app:layout_constraintEnd_toEndOf="parent"
+                android:layout_marginEnd="16dp"
+                app:layout_constraintEnd_toStartOf="@+id/overflowMenu"
                 app:layout_constraintTop_toTopOf="parent" />
 
             <Button
@@ -104,7 +104,6 @@
                 android:layout_width="68dp"
                 android:layout_height="48dp"
                 android:layout_marginTop="8dp"
-                android:layout_marginEnd="8dp"
                 android:layout_marginRight="8dp"
                 android:layout_marginBottom="8dp"
                 android:gravity="center"
@@ -114,7 +113,8 @@
                 app:backgroundTint="@color/colorGreen"
                 app:cornerRadius="8dp"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
+                android:layout_marginEnd="16dp"
+                app:layout_constraintEnd_toStartOf="@+id/overflowMenu"
                 app:layout_constraintTop_toTopOf="parent" />
 
             <ImageView
@@ -122,9 +122,22 @@
                 android:layout_width="80dp"
                 android:layout_height="40dp"
                 android:layout_marginTop="12dp"
-                app:layout_constraintEnd_toEndOf="parent"
+                android:layout_marginEnd="16dp"
+                app:layout_constraintEnd_toStartOf="@+id/overflowMenu"
                 app:layout_constraintTop_toTopOf="parent"
                 app:srcCompat="@drawable/ic_done_outline_24dp" />
+
+            <ImageButton
+                android:id="@+id/overflowMenu"
+                android:layout_width="16dp"
+                android:layout_height="match_parent"
+                android:layout_marginTop="0dp"
+                android:layout_marginEnd="8dp"
+                android:contentDescription="Overflow Menu"
+                android:src="@drawable/ic_more_vert_black_24dp"
+                android:background="@null"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 

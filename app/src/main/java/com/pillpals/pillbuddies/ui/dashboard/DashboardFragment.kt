@@ -2,12 +2,8 @@ package com.pillpals.pillbuddies.ui.dashboard
 
 import android.graphics.Color
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import com.pillpals.pillbuddies.R
-import android.widget.LinearLayout
 import io.realm.Realm
 import io.realm.RealmObject
 import com.pillpals.pillbuddies.data.model.Medications
@@ -21,9 +17,33 @@ import com.pillpals.pillbuddies.ui.DrugCard
 
 import com.pillpals.pillbuddies.helpers.NotificationUtils
 import android.os.Handler
+import android.text.SpannableString
+import android.text.Spanned
+import android.text.style.ForegroundColorSpan
+import android.view.*
+import android.widget.*
+import androidx.appcompat.app.AlertDialog
 import com.pillpals.pillbuddies.helpers.DatabaseHelper.Companion.getColorStringByID
 import com.pillpals.pillbuddies.helpers.DatabaseHelper.Companion.getDrawableIconById
+import com.pillpals.pillbuddies.ui.DosageTimeBox
+import kotlinx.android.synthetic.main.delete_prompt.view.*
+import kotlinx.android.synthetic.main.drug_card.view.*
+import kotlinx.android.synthetic.main.time_prompt.view.*
+import kotlinx.android.synthetic.main.time_prompt.view.dialogCancelBtn
 import java.util.*
+import androidx.core.widget.PopupWindowCompat.showAsDropDown
+import android.graphics.drawable.Drawable
+import android.widget.FrameLayout
+import android.widget.PopupWindow
+import android.view.View.MeasureSpec
+import android.view.View.MeasureSpec.UNSPECIFIED
+import android.widget.TextView
+import android.content.Context.LAYOUT_INFLATER_SERVICE
+import androidx.core.content.ContextCompat.getSystemService
+import android.view.LayoutInflater
+import android.content.Context
+import android.content.Intent
+import com.pillpals.pillbuddies.ui.AddDrugActivity
 
 
 class DashboardFragment : Fragment() {
@@ -74,7 +94,157 @@ class DashboardFragment : Fragment() {
         return view
     }
 
-    public fun setUpScheduleCards(schedules: RealmResults<out Schedules>) {
+    //Popover menus
+    //region
+    private fun popoverMenuCurrent(v: View, schedule: Schedules) {
+        val popup = PopupMenu(context, v.overflowMenu)
+        val inflater: MenuInflater = popup.menuInflater
+        inflater.inflate(R.menu.current_schedule, popup.menu)
+        popup.setOnMenuItemClickListener { item ->
+            when(item.itemId) {
+                R.id.currentLogAtTime -> {
+                    val timeDialog = LayoutInflater.from(this.context).inflate(R.layout.time_prompt, null)
+                    val simpleTimePicker = timeDialog.findViewById<TimePicker>(R.id.simpleTimePicker)
+
+                    val title = SpannableString("Time Picker")
+                    title.setSpan(
+                        ForegroundColorSpan(this.context!!.resources.getColor(R.color.colorLightGrey)),
+                        0,
+                        title.length,
+                        Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+                    )
+                    val dialogBuilder = AlertDialog.Builder(this.context!!)
+                        .setView(timeDialog)
+                        .setTitle(title)
+
+                    timeDialog.findViewById<TextView>(R.id.timeTextPrompt).text = "Select log time"
+                    timeDialog.findViewById<Button>(R.id.dialogAddBtn).text = "Log"
+
+                    val timeAlertDialog = dialogBuilder.show()
+                    timeDialog.dialogAddBtn.setOnClickListener {
+                        timeAlertDialog.dismiss()
+                        val cal = Calendar.getInstance()
+                        cal.set(Calendar.MILLISECOND, 0)
+                        cal.set(Calendar.SECOND, 0)
+                        cal.set(Calendar.MINUTE, simpleTimePicker.minute)
+                        cal.set(Calendar.HOUR_OF_DAY, simpleTimePicker.hour)
+
+                        drugLogFunction(schedule, cal.time)
+                        update()
+                    }
+
+                    timeDialog.dialogCancelBtn.setOnClickListener {
+                        timeAlertDialog.dismiss()
+                    }
+                }
+            }
+            true
+        }
+        popup.show()
+    }
+
+    private fun popoverMenuUpcoming(v: View, schedule: Schedules) {
+        val popup = PopupMenu(context, v.overflowMenu)
+        val inflater: MenuInflater = popup.menuInflater
+        inflater.inflate(R.menu.upcoming_schedule, popup.menu)
+        popup.setOnMenuItemClickListener { item ->
+            when(item.itemId) {
+                R.id.upcomingLogAtTime -> {
+                    val timeDialog = LayoutInflater.from(this.context).inflate(R.layout.time_prompt, null)
+                    val simpleTimePicker = timeDialog.findViewById<TimePicker>(R.id.simpleTimePicker)
+
+                    val title = SpannableString("Time Picker")
+                    title.setSpan(
+                        ForegroundColorSpan(this.context!!.resources.getColor(R.color.colorLightGrey)),
+                        0,
+                        title.length,
+                        Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+                    )
+                    val dialogBuilder = AlertDialog.Builder(this.context!!)
+                        .setView(timeDialog)
+                        .setTitle(title)
+
+                    timeDialog.findViewById<TextView>(R.id.timeTextPrompt).text = "Select log time"
+                    timeDialog.findViewById<Button>(R.id.dialogAddBtn).text = "Log"
+
+                    val timeAlertDialog = dialogBuilder.show()
+                    timeDialog.dialogAddBtn.setOnClickListener {
+                        timeAlertDialog.dismiss()
+                        val cal = Calendar.getInstance()
+                        cal.set(Calendar.MILLISECOND, 0)
+                        cal.set(Calendar.SECOND, 0)
+                        cal.set(Calendar.MINUTE, simpleTimePicker.minute)
+                        cal.set(Calendar.HOUR_OF_DAY, simpleTimePicker.hour)
+
+                        drugLogFunction(schedule, cal.time)
+                        update()
+                    }
+
+                    timeDialog.dialogCancelBtn.setOnClickListener {
+                        timeAlertDialog.dismiss()
+                    }
+                }
+            }
+            true
+        }
+        popup.show()
+    }
+
+    private fun popoverMenuCompleted(v: View, schedule: Schedules, log: Logs) {
+        val popup = PopupMenu(context, v.overflowMenu)
+        val inflater: MenuInflater = popup.menuInflater
+        inflater.inflate(R.menu.completed_schedule, popup.menu)
+        popup.setOnMenuItemClickListener { item ->
+            when(item.itemId) {
+                R.id.completedChangeLogTime -> {
+                    val timeDialog = LayoutInflater.from(this.context).inflate(R.layout.time_prompt, null)
+                    val simpleTimePicker = timeDialog.findViewById<TimePicker>(R.id.simpleTimePicker)
+
+                    val title = SpannableString("Time Picker")
+                    title.setSpan(
+                        ForegroundColorSpan(this.context!!.resources.getColor(R.color.colorLightGrey)),
+                        0,
+                        title.length,
+                        Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+                    )
+                    val dialogBuilder = AlertDialog.Builder(this.context!!)
+                        .setView(timeDialog)
+                        .setTitle(title)
+
+                    timeDialog.findViewById<TextView>(R.id.timeTextPrompt).text = "Select log time"
+                    timeDialog.findViewById<Button>(R.id.dialogAddBtn).text = "Log"
+
+                    val timeAlertDialog = dialogBuilder.show()
+                    timeDialog.dialogAddBtn.setOnClickListener {
+                        undoLog(log)
+
+                        timeAlertDialog.dismiss()
+                        val cal = Calendar.getInstance()
+                        cal.set(Calendar.MILLISECOND, 0)
+                        cal.set(Calendar.SECOND, 0)
+                        cal.set(Calendar.MINUTE, simpleTimePicker.minute)
+                        cal.set(Calendar.HOUR_OF_DAY, simpleTimePicker.hour)
+
+                        drugLogFunction(schedule, cal.time)
+                        update()
+                    }
+
+                    timeDialog.dialogCancelBtn.setOnClickListener {
+                        timeAlertDialog.dismiss()
+                    }
+                }
+                R.id.completedUndoLog -> {
+                    undoLog(log)
+                    update()
+                }
+            }
+            true
+        }
+        popup.show()
+    }
+    //endregion
+
+    fun setUpScheduleCards(schedules: RealmResults<out Schedules>) {
         for (databaseSchedule in schedules) {
             if (databaseSchedule.deleted || databaseSchedule.medication!!.first()!!.deleted) {
                 continue
@@ -115,6 +285,9 @@ class DashboardFragment : Fragment() {
     }
 
     private fun addDrugCard(schedule: Schedules, medication: Medications) {
+        // Send notification
+        NotificationUtils.startAlarm(this.context!!, schedule)
+
         var newCard = DrugCard(this.context!!)
 
         newCard.nameText.text = medication.name
@@ -131,6 +304,12 @@ class DashboardFragment : Fragment() {
             update()
         }
 
+        newCard.icon.setOnClickListener {
+            val intent = Intent(context, AddDrugActivity::class.java)
+            intent.putExtra("medication-uid", medication.uid)
+            startActivityForResult(intent, 1)
+        }
+
         // MARK: Select stack and colour
         val paddingTime = 10
         val currentDate = Calendar.getInstance()
@@ -144,6 +323,9 @@ class DashboardFragment : Fragment() {
             // Completed
             newCard.doneImage.setVisibility(LinearLayout.VISIBLE)
             newCard.drugCard.setCardBackgroundColor(this.resources.getColor(R.color.colorGrey))
+            newCard.overflowMenu.setOnClickListener {
+                popoverMenuCompleted(newCard, schedule, currentLog.first())
+            }
             completedStack.addView(newCard)
         } else if (currentDate.time >= schedule.occurrence!!) {
             // Current
@@ -152,14 +334,17 @@ class DashboardFragment : Fragment() {
                 newCard.lateText.setVisibility(LinearLayout.VISIBLE)
             }
             newCard.drugCard.setCardBackgroundColor(this.resources.getColor(R.color.colorWhite))
+            newCard.overflowMenu.setOnClickListener {
+                popoverMenuCurrent(newCard, schedule)
+            }
             currentStack.addView(newCard)
-
-            // Send notification
-            NotificationUtils.startAlarm(this.context!!, schedule)
         } else {
             // Upcoming
             newCard.countdownLabel.setVisibility(LinearLayout.VISIBLE)
             newCard.drugCard.setCardBackgroundColor(this.resources.getColor(R.color.colorWhite))
+            newCard.overflowMenu.setOnClickListener {
+                popoverMenuUpcoming(newCard, schedule)
+            }
             upcomingStack.addView(newCard)
         }
     }
@@ -168,12 +353,12 @@ class DashboardFragment : Fragment() {
         return realm.where(realmClass).findAll()
     }
 
-    private fun drugLogFunction(schedule: Schedules) {
+    private fun drugLogFunction(schedule: Schedules, time: Date = Date()) {
         val databaseSchedule =
             realm.where(Schedules::class.java).equalTo("uid", schedule.uid).findFirst()!!
         realm.executeTransaction {
             var newLog = it.createObject(Logs::class.java, UUID.randomUUID().toString())
-            newLog.occurrence = Date()
+            newLog.occurrence = time
             newLog.due = schedule.occurrence
             val n = databaseSchedule.repetitionCount!!
             val u = DateHelper.getUnitByIndex(databaseSchedule.repetitionUnit!!)
@@ -182,11 +367,28 @@ class DashboardFragment : Fragment() {
         }
     }
 
+    private fun undoLog(log: Logs) {
+        realm.executeTransaction {
+            val databaseLog = realm.where(Logs::class.java).equalTo("uid", log.uid).findFirst()!!
+            val schedule = databaseLog.schedule!!.first()!!
+            val n = schedule.repetitionCount!!
+            val u = DateHelper.getUnitByIndex(schedule.repetitionUnit!!)
+
+            schedule.occurrence = DateHelper.addUnitToDate(schedule.occurrence!!, -n, u)
+            databaseLog.deleteFromRealm()
+        }
+    }
+
     fun update() {
         currentStack.removeViews(1, currentStack.childCount - 1)
         upcomingStack.removeViews(1, upcomingStack.childCount - 1)
         completedStack.removeViews(1, completedStack.childCount - 1)
         setUpScheduleCards(readAllData(Schedules::class.java) as RealmResults<out Schedules>)
+    }
+
+    override fun onActivityResult(requestCode:Int, resultCode:Int, data:Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        update()
     }
 
     // region
@@ -291,4 +493,5 @@ class DashboardFragment : Fragment() {
             }
         }
     }
+    //endregion
 }

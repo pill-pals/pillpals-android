@@ -3,8 +3,12 @@ package com.pillpals.pillbuddies.ui
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
+import android.text.SpannableString
+import android.text.Spanned
+import android.text.style.ForegroundColorSpan
 import android.util.Log
 import android.view.LayoutInflater
+import android.view.MenuInflater
 import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AlertDialog
@@ -21,6 +25,7 @@ import kotlinx.android.synthetic.main.activity_add_drug.*
 import kotlinx.android.synthetic.main.delete_prompt.view.*
 import kotlinx.android.synthetic.main.delete_prompt.view.dialogCancelBtn
 import kotlinx.android.synthetic.main.dosage_time_box.view.*
+import kotlinx.android.synthetic.main.drug_card.view.*
 import kotlinx.android.synthetic.main.time_prompt.view.*
 import java.util.*
 import kotlin.collections.ArrayList
@@ -105,9 +110,16 @@ class EditScheduleActivity : AppCompatActivity() {
             val timeDialog = LayoutInflater.from(this).inflate(R.layout.time_prompt, null)
             simpleTimePicker = timeDialog!!.findViewById(R.id.simpleTimePicker)
 
+            val title = SpannableString("Time Picker")
+            title.setSpan(
+                ForegroundColorSpan(this.getResources().getColor(R.color.colorLightGrey)),
+                0,
+                title.length,
+                Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+            )
             val dialogBuilder = AlertDialog.Builder(this)
                 .setView(timeDialog)
-                .setTitle("Time Picker")
+                .setTitle(title)
 
             val timeAlertDialog = dialogBuilder.show()
             timeDialog.dialogAddBtn.setOnClickListener {
