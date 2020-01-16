@@ -35,6 +35,8 @@ import com.pillpals.pillbuddies.data.model.Medications
 import com.pillpals.pillbuddies.data.model.Schedules
 import com.pillpals.pillbuddies.helpers.DatabaseHelper
 import com.pillpals.pillbuddies.helpers.DatabaseHelper.Companion.getColorStringByID
+import com.pillpals.pillbuddies.helpers.DateHelper.Companion.getUnitByIndex
+import com.pillpals.pillbuddies.helpers.replace
 import io.realm.RealmResults
 import java.util.*
 import kotlin.collections.ArrayList
@@ -51,6 +53,7 @@ class StatisticsFragment : Fragment() {
     public lateinit var barChart: BarChart
     public lateinit var medications: RealmResults<out Medications>
     public var medicationSets = mutableListOf<IBarDataSet>()
+    var dateStringList = ArrayList<String>()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -76,6 +79,48 @@ class StatisticsFragment : Fragment() {
         return view
     }
 
+    private fun averageLogsAcrossSchedules(medication: Medications, timeStep: Int): List<TimeCount> {
+        val schedules = medication.schedules
+
+        var allLogs = schedules.fold(listOf<Logs>()) { acc, it -> acc.plus(it.logs) }
+        allLogs = allLogs.sortedBy { it.due }
+
+        val timeCount = allLogs.fold(mutableListOf<TimeCount>()) { acc, it ->
+            val logDate = Calendar.getInstance()
+            logDate.time = it.due!!
+            logDate.set(Calendar.MILLISECOND, 0)
+            logDate.set(Calendar.SECOND, 0)
+            logDate.set(Calendar.MINUTE, 0)
+            when (timeStep) {
+                Calendar.DATE -> null // Sums in hours
+                Calendar.WEEK_OF_YEAR -> logDate.set(Calendar.HOUR_OF_DAY, 0) // Sums in days
+                Calendar.MONTH -> { // Sums in weeks
+                    logDate.set(Calendar.HOUR_OF_DAY, 0)
+                    logDate.set(Calendar.DATE, 0)
+                }
+            }
+
+            val existingTimeCount = getTimeCount(logDate.time, acc)
+
+            if(existingTimeCount != null) {
+                val logsList = existingTimeCount.logs.plus(it)
+                val average = logsList.fold(0f) { sum, log ->
+                    val logOffset = (it.occurrence!!.time - it.due!!.time).toFloat() // Calculate y value of bar here
+                    sum + logOffset
+                } / logsList.count()
+                acc[acc.indexOf(existingTimeCount)] = TimeCount(logDate.time, existingTimeCount.count + 1, average, logsList)
+            }
+            else {
+                val logOffset = (it.occurrence!!.time - it.due!!.time).toFloat()
+                acc.add(TimeCount(logDate.time, 1, logOffset, listOf(it)))
+            }
+
+            acc
+        }
+
+        return timeCount
+    }
+
     private fun populateLegendStack() {
         medications.forEach {
             val legendItem = CheckBox(this.context!!)
@@ -94,19 +139,23 @@ class StatisticsFragment : Fragment() {
         medicationSets.clear()
         medications.forEach {
             if (filteredMedications[it.name] != false) {
-                val schedule = it.schedules.first()!!
-                val logs = schedule.logs!!
+                // Average logs on time across schedules
+                val timeCounts = averageLogsAcrossSchedules(it, Calendar.WEEK_OF_YEAR)
+                //val schedule = it.schedules.first()!!
+                //val logs = schedule.logs!!
+
+                Log.i("test", timeCounts.toString())
 
                 val entries = ArrayList<BarEntry>()
-                val dateStringList = ArrayList<String>()
+                dateStringList = ArrayList<String>()
 
-                for ((index, log) in logs.withIndex()) {
+                for ((index, timeCount) in timeCounts.withIndex()) {
                     val timeDifference =
-                        abs(log.occurrence!!.time - log.due!!.time) / 1000 / 60 // Minutes
+                        abs(timeCount.offset) / 1000 / 60 // Minutes
                     val dateString =
-                        SimpleDateFormat("dd-MM", Locale.getDefault()).format(log.due!!)
+                        SimpleDateFormat("dd-MM", Locale.getDefault()).format(timeCount.time)
                     dateStringList.add(dateString)
-                    val currentEntry = BarEntry(index.toFloat(), timeDifference.toFloat())
+                    val currentEntry = BarEntry(index.toFloat(), timeDifference)
                     entries.add(currentEntry)
                 }
 
@@ -122,7 +171,7 @@ class StatisticsFragment : Fragment() {
         determineMedicationSetData()
         barChart.setTouchEnabled(true)
         barChart.setPinchZoom(true)
-        //barChart.xAxis.valueFormatter = IndexAxisValueFormatter(dateStringList)
+        barChart.xAxis.valueFormatter = IndexAxisValueFormatter(dateStringList)
         barChart.setDrawMarkers(true)
         //barChart.marker = marker
         barChart.xAxis.position = XAxis.XAxisPosition.BOTTOM
@@ -187,6 +236,12 @@ class StatisticsFragment : Fragment() {
     private fun updateFilteredMedications(name: String, isChecked: Boolean) {
         filteredMedications[name] = isChecked
         renderBarChart()
-        Log.v("HEY", filteredMedications.toString())
+    }
+
+    private fun getTimeCount(time: Date, timeCountList: List<TimeCount>): TimeCount? {
+        return timeCountList.filter { it.time == time }.firstOrNull()
     }
 }
+
+data class AverageLogOffset(val offset: Float, val time: Date)
+data class TimeCount(val time: Date, val count: Int, val offset: Float, val logs: List<Logs>)

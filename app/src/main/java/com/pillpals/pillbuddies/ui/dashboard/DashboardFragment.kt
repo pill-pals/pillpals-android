@@ -490,6 +490,17 @@ class DashboardFragment : Fragment() {
                 log.occurrence = cal.time
                 schedule.logs.add(log)
             }
+
+            for (i in 5.downTo(1)) {
+                val log = it.createObject(Logs::class.java, UUID.randomUUID().toString())
+                val due = DateHelper.addUnitToDate(schedule.occurrence!!, -i * n, u)
+                log.due = due
+                val cal = Calendar.getInstance()
+                cal.time = due
+                cal.add(Calendar.MINUTE, (-10..10).random())
+                log.occurrence = cal.time
+                schedule.logs.add(log)
+            }
         }
     }
     //endregion
