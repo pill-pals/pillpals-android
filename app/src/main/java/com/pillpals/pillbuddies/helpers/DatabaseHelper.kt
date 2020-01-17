@@ -3,6 +3,7 @@ package com.pillpals.pillbuddies.helpers
 import android.content.Context
 import com.pillpals.pillbuddies.data.model.Colors
 import com.pillpals.pillbuddies.data.model.Icons
+import com.pillpals.pillbuddies.data.model.MoodIcons
 import com.pillpals.pillbuddies.data.model.Medications
 import com.pillpals.pillbuddies.data.model.Schedules
 import io.realm.Realm
@@ -44,6 +45,12 @@ class DatabaseHelper {
         }
         fun getRandomIcon(): String {
             return Realm.getDefaultInstance().where(Icons::class.java).findAll().random().icon
+        }
+        fun getMoodIconByID(id: Int): String {
+            return Realm.getDefaultInstance().where(MoodIcons::class.java).equalTo("id", id).findFirst()!!.icon
+        }
+        fun getMoodIconIDByString(icon: String): Int {
+            return Realm.getDefaultInstance().where(MoodIcons::class.java).equalTo("icon", icon).findFirst()!!.id
         }
         fun getDrawableIconById(context: Context, id: Int): Int {
             val icon = getIconByID(id)

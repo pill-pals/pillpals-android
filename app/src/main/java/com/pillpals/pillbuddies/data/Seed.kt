@@ -2,6 +2,7 @@ package com.pillpals.pillbuddies.data
 
 import com.pillpals.pillbuddies.data.model.Colors
 import com.pillpals.pillbuddies.data.model.Icons
+import com.pillpals.pillbuddies.data.model.MoodIcons
 import io.realm.Realm
 
 
@@ -9,6 +10,7 @@ class Seed : Realm.Transaction {
     override fun execute(realm: Realm) {
         seedColors(realm)
         seedIcons(realm)
+        seedMoodIcons(realm)
     }
 
     private fun seedColors(realm: Realm) {
@@ -116,6 +118,25 @@ class Seed : Realm.Transaction {
         icon = Icons(3)
         icon.icon = "ic_syringe"
         realm.insertOrUpdate(icon)
+    }
+
+    private fun seedMoodIcons(realm: Realm) {
+        var icon = MoodIcons(0)
+        icon.icon = "ic_big_frown"
+        realm.insertOrUpdate(icon)
+
+        icon = MoodIcons(1)
+        icon.icon = "ic_frown"
+        realm.insertOrUpdate(icon)
+
+        icon = MoodIcons(2)
+        icon.icon = "ic_smile"
+        realm.insertOrUpdate(icon)
+
+        icon = MoodIcons(3)
+        icon.icon = "ic_big_smile"
+        realm.insertOrUpdate(icon)
+
     }
 
     override fun hashCode(): Int {
