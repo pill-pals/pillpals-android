@@ -9,6 +9,7 @@ import io.realm.RealmObject
 import com.pillpals.pillbuddies.data.model.Medications
 import com.pillpals.pillbuddies.data.model.Schedules
 import com.pillpals.pillbuddies.data.model.Logs
+import com.pillpals.pillbuddies.data.model.MoodLogs
 import io.realm.RealmResults
 import com.pillpals.pillbuddies.helpers.DateHelper
 
@@ -69,7 +70,8 @@ class DashboardFragment : Fragment() {
 
         //region
         // Testing
-        //clearDatabase()
+        // *running clearDatabase will also clear the seed database
+        // clearDatabase()
         createTestData()
         //populateAllStacks(8)
         //endregion
@@ -425,6 +427,12 @@ class DashboardFragment : Fragment() {
                 logs = readAllData(Logs::class.java) as RealmResults<Logs>
             }
         }
+        var moodLogs = readAllData(MoodLogs::class.java) as RealmResults<MoodLogs>
+        if (moodLogs.count() == 0) {
+            createTestMoodLogData()
+            moodLogs = readAllData(MoodLogs::class.java) as RealmResults<MoodLogs>
+            Log.v("HELLO",moodLogs.toString())
+        }
     }
 
     private fun clearDatabase() {
@@ -500,6 +508,28 @@ class DashboardFragment : Fragment() {
                 cal.add(Calendar.MINUTE, (-10..10).random())
                 log.occurrence = cal.time
                 schedule.logs.add(log)
+            }
+        }
+    }
+
+    private fun createTestMoodLogData() {
+        realm.executeTransaction {
+            val moodLogs = Array(3){MoodLogs()}
+            val dates = listOf(0,1,2)
+            val ratings = listOf(1,2,3)
+
+            for (i in moodLogs.indices) {
+                var cal = Calendar.getInstance()
+                cal.time = DateHelper.addUnitToDate(Date(),dates[i],DateHelper.getIndexByUnit(Calendar.DATE))
+                cal.set(Calendar.MILLISECOND, 0)
+                cal.set(Calendar.SECOND, 0)
+                cal.set(Calendar.MINUTE, 0)
+                cal.set(Calendar.HOUR_OF_DAY, 0)
+
+
+                moodLogs[i] = it.createObject(MoodLogs::class.java, UUID.randomUUID().toString())
+                moodLogs[i].rating = ratings[i]
+                moodLogs[i].date = cal.time
             }
         }
     }
