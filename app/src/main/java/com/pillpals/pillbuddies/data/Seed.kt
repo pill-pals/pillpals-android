@@ -4,7 +4,7 @@ import com.pillpals.pillbuddies.data.model.Colors
 import com.pillpals.pillbuddies.data.model.Icons
 import com.pillpals.pillbuddies.data.model.MoodIcons
 import io.realm.Realm
-
+import android.util.Log
 
 class Seed : Realm.Transaction {
     override fun execute(realm: Realm) {

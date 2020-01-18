@@ -44,7 +44,10 @@ import androidx.core.content.ContextCompat.getSystemService
 import android.view.LayoutInflater
 import android.content.Context
 import android.content.Intent
+import androidx.cardview.widget.CardView
+import com.pillpals.pillbuddies.helpers.DatabaseHelper
 import com.pillpals.pillbuddies.ui.AddDrugActivity
+import io.realm.kotlin.createObject
 
 
 class DashboardFragment : Fragment() {
@@ -52,6 +55,9 @@ class DashboardFragment : Fragment() {
     public lateinit var currentStack: LinearLayout
     public lateinit var upcomingStack: LinearLayout
     public lateinit var completedStack: LinearLayout
+    public lateinit var moodIconList: LinearLayout
+    //public var selectedMoodImage: String? = null
+
     private lateinit var realm: Realm
 
     override fun onCreateView(
@@ -62,11 +68,13 @@ class DashboardFragment : Fragment() {
         super.onCreateView(inflater, container, savedInstanceState)
         val view = inflater!!.inflate(R.layout.fragment_dashboard, container, false)
 
+        //Realm.deleteRealm(Realm.getDefaultConfiguration())
         realm = Realm.getDefaultInstance()
 
         currentStack = view!!.findViewById(R.id.currentStack)
         upcomingStack = view!!.findViewById(R.id.upcomingStack)
         completedStack = view!!.findViewById(R.id.completedStack)
+        moodIconList = view!!.findViewById(R.id.moodIconList)
 
         //region
         // Testing
@@ -77,7 +85,7 @@ class DashboardFragment : Fragment() {
         //endregion
 
         setUpScheduleCards(readAllData(Schedules::class.java) as RealmResults<out Schedules>)
-
+        setUpMoodTracker()
 
         val handler = Handler()
         val timer = Timer()
@@ -94,6 +102,62 @@ class DashboardFragment : Fragment() {
         timer.schedule(doAsynchronousTask, 0, 60000)
 
         return view
+    }
+
+    //Mood tracker
+    private fun getCurrentMoodLog():MoodLogs? {
+        return realm.where(MoodLogs::class.java).equalTo("date", DateHelper.today()).findFirst()
+    }
+
+    private fun createOrUpdateCurrentMoodLog(rating: Int) {
+        var currentMoodLog = getCurrentMoodLog()
+
+        realm.executeTransaction {
+            if (currentMoodLog == null) {
+                var cal = Calendar.getInstance()
+                cal.time = Date()
+                cal.set(Calendar.MILLISECOND, 0)
+                cal.set(Calendar.SECOND, 0)
+                cal.set(Calendar.MINUTE, 0)
+                cal.set(Calendar.HOUR_OF_DAY, 0)
+
+                currentMoodLog = it.createObject(MoodLogs::class.java, UUID.randomUUID().toString())
+                currentMoodLog!!.date = cal.time
+            }
+
+            currentMoodLog!!.rating = rating
+        }
+    }
+
+    private fun setUpMoodTracker() {
+        for (i in 0 until moodIconList.getChildCount()) {
+            val borderCard = moodIconList.getChildAt(i) as CardView
+            val card = borderCard.getChildAt(0) as CardView
+            val image = card.getChildAt(0) as ImageView
+
+            card.setOnClickListener {
+                //selectedMoodImage = image.tag as String
+                //Log.v("HELLO", selectedMoodImage)
+                createOrUpdateCurrentMoodLog(DatabaseHelper.getMoodIconIDByString(image.tag as String))
+                updateMoodStyles()
+            }
+        }
+        updateMoodStyles()
+    }
+
+    private fun updateMoodStyles() {
+        for (i in 0 until moodIconList.getChildCount()) {
+            val borderCard = moodIconList.getChildAt(i) as CardView
+            val card = borderCard.getChildAt(0) as CardView
+            val image = card.getChildAt(0) as ImageView
+            val cardImageDrawable = image.tag
+            if (getCurrentMoodLog() != null && cardImageDrawable == DatabaseHelper.getMoodIconByID(getCurrentMoodLog()?.rating!!)) {
+                borderCard.setCardBackgroundColor(Color.parseColor("#FFFFFF"))
+            }
+            else {
+                borderCard.setCardBackgroundColor(Color.parseColor("#00FFFFFF"))
+            }
+        }
     }
 
     //Popover menus
@@ -430,8 +494,7 @@ class DashboardFragment : Fragment() {
         var moodLogs = readAllData(MoodLogs::class.java) as RealmResults<MoodLogs>
         if (moodLogs.count() == 0) {
             createTestMoodLogData()
-            moodLogs = readAllData(MoodLogs::class.java) as RealmResults<MoodLogs>
-            Log.v("HELLO",moodLogs.toString())
+            //moodLogs = readAllData(MoodLogs::class.java) as RealmResults<MoodLogs>
         }
     }
 
