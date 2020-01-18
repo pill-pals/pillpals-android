@@ -99,6 +99,18 @@
                 app:layout_constraintEnd_toStartOf="@+id/overflowMenu"
                 app:layout_constraintTop_toTopOf="parent" />
 
+            <TextView
+                android:id="@+id/logtimeLabel"
+                android:layout_width="132dp"
+                android:layout_height="32dp"
+                android:layout_marginTop="20dp"
+                android:layout_marginEnd="16dp"
+                android:gravity="end"
+                android:text="Countdown"
+                android:textAppearance="@style/TextAppearance.baseText"
+                app:layout_constraintEnd_toStartOf="@+id/overflowMenu"
+                app:layout_constraintTop_toTopOf="parent" />
+
             <Button
                 android:id="@+id/button"
                 android:layout_width="68dp"
@@ -116,16 +128,6 @@
                 android:layout_marginEnd="16dp"
                 app:layout_constraintEnd_toStartOf="@+id/overflowMenu"
                 app:layout_constraintTop_toTopOf="parent" />
-
-            <ImageView
-                android:id="@+id/doneImage"
-                android:layout_width="80dp"
-                android:layout_height="40dp"
-                android:layout_marginTop="12dp"
-                android:layout_marginEnd="16dp"
-                app:layout_constraintEnd_toStartOf="@+id/overflowMenu"
-                app:layout_constraintTop_toTopOf="parent"
-                app:srcCompat="@drawable/ic_done_outline_24dp" />
 
             <ImageButton
                 android:id="@+id/overflowMenu"

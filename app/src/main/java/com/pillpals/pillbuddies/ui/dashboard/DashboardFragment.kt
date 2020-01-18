@@ -9,9 +9,10 @@ import io.realm.RealmObject
 import com.pillpals.pillbuddies.data.model.Medications
 import com.pillpals.pillbuddies.data.model.Schedules
 import com.pillpals.pillbuddies.data.model.Logs
+import com.pillpals.pillbuddies.data.model.MoodLogs
 import io.realm.RealmResults
 import com.pillpals.pillbuddies.helpers.DateHelper
-
+import androidx.core.content.res.ResourcesCompat
 import android.util.Log
 import com.pillpals.pillbuddies.ui.DrugCard
 
@@ -43,7 +44,13 @@ import androidx.core.content.ContextCompat.getSystemService
 import android.view.LayoutInflater
 import android.content.Context
 import android.content.Intent
+import android.content.res.ColorStateList
+import android.graphics.BlendMode
+import android.graphics.PorterDuff
+import androidx.cardview.widget.CardView
+import com.pillpals.pillbuddies.helpers.DatabaseHelper
 import com.pillpals.pillbuddies.ui.AddDrugActivity
+import io.realm.kotlin.createObject
 
 
 class DashboardFragment : Fragment() {
@@ -51,6 +58,9 @@ class DashboardFragment : Fragment() {
     public lateinit var currentStack: LinearLayout
     public lateinit var upcomingStack: LinearLayout
     public lateinit var completedStack: LinearLayout
+    public lateinit var moodIconList: LinearLayout
+    //public var selectedMoodImage: String? = null
+
     private lateinit var realm: Realm
 
     override fun onCreateView(
@@ -61,21 +71,24 @@ class DashboardFragment : Fragment() {
         super.onCreateView(inflater, container, savedInstanceState)
         val view = inflater!!.inflate(R.layout.fragment_dashboard, container, false)
 
+        //Realm.deleteRealm(Realm.getDefaultConfiguration())
         realm = Realm.getDefaultInstance()
 
         currentStack = view!!.findViewById(R.id.currentStack)
         upcomingStack = view!!.findViewById(R.id.upcomingStack)
         completedStack = view!!.findViewById(R.id.completedStack)
+        moodIconList = view!!.findViewById(R.id.moodIconList)
 
         //region
         // Testing
-        //clearDatabase()
+        // *running clearDatabase will also clear the seed database
+        // clearDatabase()
         createTestData()
         //populateAllStacks(8)
         //endregion
 
         setUpScheduleCards(readAllData(Schedules::class.java) as RealmResults<out Schedules>)
-
+        setUpMoodTracker()
 
         val handler = Handler()
         val timer = Timer()
@@ -92,6 +105,62 @@ class DashboardFragment : Fragment() {
         timer.schedule(doAsynchronousTask, 0, 60000)
 
         return view
+    }
+
+    //Mood tracker
+    private fun getCurrentMoodLog():MoodLogs? {
+        return realm.where(MoodLogs::class.java).equalTo("date", DateHelper.today()).findFirst()
+    }
+
+    private fun createOrUpdateCurrentMoodLog(rating: Int) {
+        var currentMoodLog = getCurrentMoodLog()
+
+        realm.executeTransaction {
+            if (currentMoodLog == null) {
+                var cal = Calendar.getInstance()
+                cal.time = Date()
+                cal.set(Calendar.MILLISECOND, 0)
+                cal.set(Calendar.SECOND, 0)
+                cal.set(Calendar.MINUTE, 0)
+                cal.set(Calendar.HOUR_OF_DAY, 0)
+
+                currentMoodLog = it.createObject(MoodLogs::class.java, UUID.randomUUID().toString())
+                currentMoodLog!!.date = cal.time
+            }
+
+            currentMoodLog!!.rating = rating
+        }
+    }
+
+    private fun setUpMoodTracker() {
+        for (i in 0 until moodIconList.getChildCount()) {
+            val card = moodIconList.getChildAt(i) as CardView
+            val image = card.getChildAt(0) as ImageView
+
+            card.setOnClickListener {
+                //selectedMoodImage = image.tag as String
+                //Log.v("HELLO", selectedMoodImage)
+                createOrUpdateCurrentMoodLog(DatabaseHelper.getMoodIconIDByString(image.tag as String))
+                updateMoodStyles()
+            }
+        }
+        updateMoodStyles()
+    }
+
+    private fun updateMoodStyles() {
+        for (i in 0 until moodIconList.getChildCount()) {
+            val card = moodIconList.getChildAt(i) as CardView
+            val image = card.getChildAt(0) as ImageView
+            val cardImageDrawable = image.tag
+            if (getCurrentMoodLog() != null && cardImageDrawable == DatabaseHelper.getMoodIconByID(getCurrentMoodLog()?.rating!!)) {
+                card.setCardBackgroundColor(Color.parseColor("#FFFFFF"))
+                image.imageTintList = ColorStateList.valueOf(ResourcesCompat.getColor(getResources(), R.color.colorPrimaryDark, null))
+            }
+            else {
+                card.setCardBackgroundColor(Color.parseColor("#00FFFFFF"))
+                image.imageTintList = ColorStateList.valueOf(ResourcesCompat.getColor(getResources(), R.color.colorGrey, null))
+            }
+        }
     }
 
     //Popover menus
@@ -296,6 +365,7 @@ class DashboardFragment : Fragment() {
         val seconds = diff / 1000
         newCard.countdownLabel.text = DateHelper.secondsToCountdown(seconds)
 
+
         newCard.button.setOnClickListener {
             drugLogFunction(schedule)
             update()
@@ -318,7 +388,8 @@ class DashboardFragment : Fragment() {
         val currentLog = schedule.logs.filter { it.due == schedule.occurrence }
         if (currentLog.count() > 0) {
             // Completed
-            newCard.doneImage.setVisibility(LinearLayout.VISIBLE)
+            newCard.logtimeLabel.text = DateHelper.dateToString(currentLog.first().occurrence!!)
+            newCard.logtimeLabel.setVisibility(LinearLayout.VISIBLE)
             newCard.drugCard.setCardBackgroundColor(this.resources.getColor(R.color.colorGrey))
             newCard.overflowMenu.setOnClickListener {
                 popoverMenuCompleted(newCard, schedule, currentLog.first())
@@ -425,6 +496,11 @@ class DashboardFragment : Fragment() {
                 logs = readAllData(Logs::class.java) as RealmResults<Logs>
             }
         }
+        var moodLogs = readAllData(MoodLogs::class.java) as RealmResults<MoodLogs>
+        if (moodLogs.count() == 0) {
+            createTestMoodLogData()
+            //moodLogs = readAllData(MoodLogs::class.java) as RealmResults<MoodLogs>
+        }
     }
 
     private fun clearDatabase() {
@@ -500,6 +576,28 @@ class DashboardFragment : Fragment() {
                 cal.add(Calendar.MINUTE, (-10..10).random())
                 log.occurrence = cal.time
                 schedule.logs.add(log)
+            }
+        }
+    }
+
+    private fun createTestMoodLogData() {
+        realm.executeTransaction {
+            val moodLogs = Array(3){MoodLogs()}
+            val dates = listOf(0,1,2)
+            val ratings = listOf(1,2,3)
+
+            for (i in moodLogs.indices) {
+                var cal = Calendar.getInstance()
+                cal.time = DateHelper.addUnitToDate(Date(),dates[i],DateHelper.getIndexByUnit(Calendar.DATE))
+                cal.set(Calendar.MILLISECOND, 0)
+                cal.set(Calendar.SECOND, 0)
+                cal.set(Calendar.MINUTE, 0)
+                cal.set(Calendar.HOUR_OF_DAY, 0)
+
+
+                moodLogs[i] = it.createObject(MoodLogs::class.java, UUID.randomUUID().toString())
+                moodLogs[i].rating = ratings[i]
+                moodLogs[i].date = cal.time
             }
         }
     }
