@@ -13,9 +13,9 @@
 
     <fragment
         android:id="@+id/navigation_dashboard"
-        android:name="com.pillpals.pillbuddies.ui.medications.medication_info.MedicationInfoFragment"
+        android:name="com.pillpals.pillbuddies.ui.dashboard.DashboardFragment"
         android:label="Dashboard"
-        tools:layout="@layout/fragment_medication_info" />
+        tools:layout="@layout/fragment_dashboard" />
 
     <fragment
         android:id="@+id/navigation_statistics"
