@@ -12,7 +12,7 @@ import com.pillpals.pillbuddies.data.model.Logs
 import com.pillpals.pillbuddies.data.model.MoodLogs
 import io.realm.RealmResults
 import com.pillpals.pillbuddies.helpers.DateHelper
-
+import androidx.core.content.res.ResourcesCompat
 import android.util.Log
 import com.pillpals.pillbuddies.ui.DrugCard
 
@@ -44,6 +44,9 @@ import androidx.core.content.ContextCompat.getSystemService
 import android.view.LayoutInflater
 import android.content.Context
 import android.content.Intent
+import android.content.res.ColorStateList
+import android.graphics.BlendMode
+import android.graphics.PorterDuff
 import androidx.cardview.widget.CardView
 import com.pillpals.pillbuddies.helpers.DatabaseHelper
 import com.pillpals.pillbuddies.ui.AddDrugActivity
@@ -131,8 +134,7 @@ class DashboardFragment : Fragment() {
 
     private fun setUpMoodTracker() {
         for (i in 0 until moodIconList.getChildCount()) {
-            val borderCard = moodIconList.getChildAt(i) as CardView
-            val card = borderCard.getChildAt(0) as CardView
+            val card = moodIconList.getChildAt(i) as CardView
             val image = card.getChildAt(0) as ImageView
 
             card.setOnClickListener {
@@ -147,15 +149,16 @@ class DashboardFragment : Fragment() {
 
     private fun updateMoodStyles() {
         for (i in 0 until moodIconList.getChildCount()) {
-            val borderCard = moodIconList.getChildAt(i) as CardView
-            val card = borderCard.getChildAt(0) as CardView
+            val card = moodIconList.getChildAt(i) as CardView
             val image = card.getChildAt(0) as ImageView
             val cardImageDrawable = image.tag
             if (getCurrentMoodLog() != null && cardImageDrawable == DatabaseHelper.getMoodIconByID(getCurrentMoodLog()?.rating!!)) {
-                borderCard.setCardBackgroundColor(Color.parseColor("#FFFFFF"))
+                card.setCardBackgroundColor(Color.parseColor("#FFFFFF"))
+                image.imageTintList = ColorStateList.valueOf(ResourcesCompat.getColor(getResources(), R.color.colorPrimaryDark, null))
             }
             else {
-                borderCard.setCardBackgroundColor(Color.parseColor("#00FFFFFF"))
+                card.setCardBackgroundColor(Color.parseColor("#00FFFFFF"))
+                image.imageTintList = ColorStateList.valueOf(ResourcesCompat.getColor(getResources(), R.color.colorGrey, null))
             }
         }
     }
