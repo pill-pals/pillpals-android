@@ -8,7 +8,7 @@
         <item name="colorAccent">@color/colorAccent</item>
         <item name="android:colorBackground">@color/colorLightGrey</item>
         <item name="textAppearanceButton">@style/TextAppearance.Button</item>
-        <item name="android:textColor">@color/colorPrimary</item>
+        <item name="android:textColor">@color/colorBlack</item>
     </style>
 
     <style name="TextAppearance.Button" parent="TextAppearance.MaterialComponents.Button">

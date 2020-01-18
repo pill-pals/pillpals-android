@@ -24,8 +24,8 @@ class DrugCard : LinearLayout {
     public lateinit var lateText: TextView
     public lateinit var button: MaterialButton
     public lateinit var countdownLabel: TextView
+    public lateinit var logtimeLabel: TextView
     public lateinit var icon: ImageView
-    public lateinit var doneImage: ImageView
     public lateinit var iconBackground: CardView
     public lateinit var overflowMenu: ImageButton
 
@@ -54,15 +54,15 @@ class DrugCard : LinearLayout {
         nameText  = findViewById(R.id.nameText)
         button  = findViewById(R.id.button)
         countdownLabel = findViewById(R.id.countdownLabel)
+        logtimeLabel = findViewById(R.id.logtimeLabel)
         icon = findViewById(R.id.icon)
-        doneImage = findViewById(R.id.doneImage)
         iconBackground = findViewById(R.id.iconBackground)
         overflowMenu = findViewById(R.id.overflowMenu)
 
         //Initialize elements
         button.visibility = GONE
-        doneImage.visibility = GONE
         countdownLabel.visibility = GONE
+        logtimeLabel.visibility = GONE
         lateText.visibility = GONE
     }
 }

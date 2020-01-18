@@ -14,6 +14,7 @@ import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.content.res.ResourcesCompat
 import com.pillpals.pillbuddies.R
 import com.pillpals.pillbuddies.data.model.Schedules
 import com.pillpals.pillbuddies.helpers.DatabaseHelper.Companion.getMedicationByUid
@@ -112,7 +113,7 @@ class EditScheduleActivity : AppCompatActivity() {
 
             val title = SpannableString("Time Picker")
             title.setSpan(
-                ForegroundColorSpan(this.getResources().getColor(R.color.colorLightGrey)),
+                ForegroundColorSpan(ResourcesCompat.getColor(getResources(), R.color.colorLightGrey, null)),
                 0,
                 title.length,
                 Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
