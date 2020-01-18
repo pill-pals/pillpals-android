@@ -365,6 +365,7 @@ class DashboardFragment : Fragment() {
         val seconds = diff / 1000
         newCard.countdownLabel.text = DateHelper.secondsToCountdown(seconds)
 
+
         newCard.button.setOnClickListener {
             drugLogFunction(schedule)
             update()
@@ -387,7 +388,8 @@ class DashboardFragment : Fragment() {
         val currentLog = schedule.logs.filter { it.due == schedule.occurrence }
         if (currentLog.count() > 0) {
             // Completed
-            newCard.doneImage.setVisibility(LinearLayout.VISIBLE)
+            newCard.logtimeLabel.text = DateHelper.dateToString(currentLog.first().occurrence!!)
+            newCard.logtimeLabel.setVisibility(LinearLayout.VISIBLE)
             newCard.drugCard.setCardBackgroundColor(this.resources.getColor(R.color.colorGrey))
             newCard.overflowMenu.setOnClickListener {
                 popoverMenuCompleted(newCard, schedule, currentLog.first())
