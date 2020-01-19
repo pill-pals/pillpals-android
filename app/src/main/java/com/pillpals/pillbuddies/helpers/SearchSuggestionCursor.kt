@@ -16,7 +16,7 @@ class SearchSuggestionCursor(
     private val mContext: Context,
     cursor: Cursor,
     private val searchView: SearchView
-) : CursorAdapter(mContext, cursor, true) {
+) : CursorAdapter(mContext, cursor, false) {
     private val mLayoutInflater: LayoutInflater
 
     init {
