@@ -33,7 +33,7 @@ import kotlin.collections.ArrayList
 
 class EditScheduleActivity : AppCompatActivity() {
 
-    public lateinit var addTimeButton : ImageButton
+    public lateinit var addTimeButton : Button
     public lateinit var bottomOptions: BottomOptions
     public lateinit var timeBoxList : LinearLayout
     public lateinit var simpleTimePicker : TimePicker
@@ -80,6 +80,7 @@ class EditScheduleActivity : AppCompatActivity() {
         intervalOptions = findViewById(R.id.intervalOptions)
         intervalNumBox = findViewById(R.id.intervalNumBox)
         intervalScaleList = findViewById(R.id.intervalScaleList)
+        intervalScaleList.setSelection(1)
 
         bottomOptions.leftButton.text = "Save"
         bottomOptions.rightButton.text = "Cancel"
@@ -263,7 +264,7 @@ class EditScheduleActivity : AppCompatActivity() {
                             "Hours" -> DateHelper.getIndexByUnit(Calendar.HOUR_OF_DAY)
                             "Days" -> DateHelper.getIndexByUnit(Calendar.DATE)
                             "Weeks" -> DateHelper.getIndexByUnit(Calendar.WEEK_OF_YEAR)
-                            else -> DateHelper.getIndexByUnit(Calendar.HOUR_OF_DAY)
+                            else -> DateHelper.getIndexByUnit(Calendar.DATE)
                         }
 
                         schedules.add(schedule)
