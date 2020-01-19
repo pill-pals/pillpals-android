@@ -64,6 +64,9 @@ class SearchFragment : Fragment() {
     public var runnable: Runnable? = null
     public var suggestions: List<String> = listOf()
     public var outerContext: SearchFragment = this
+    public var updateSuggestionsFlag: Boolean = false
+    public var clearQueriesFlag: Boolean = false
+    public var showResultsFlag: Boolean = false
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         super.onCreateView(inflater, container, savedInstanceState)
@@ -74,6 +77,19 @@ class SearchFragment : Fragment() {
         searchResults = view.findViewById(R.id.searchResults)
         outerContext = this
         handler = Handler(Looper.getMainLooper())
+
+        val dispatcher = Dispatcher()
+        dispatcher.maxRequests = 1
+
+        val netInterceptor = Interceptor { chain ->
+            chain.proceed(chain.request())
+        }
+
+        val client = OkHttpClient
+            .Builder()
+            .addNetworkInterceptor(netInterceptor)
+            .dispatcher(dispatcher)
+            .build()
 
         searchView.setOnQueryTextListener(object: android.widget.SearchView.OnQueryTextListener {
             override fun onQueryTextChange(query: String): Boolean {
@@ -86,19 +102,6 @@ class SearchFragment : Fragment() {
                             val url = "http://mapi-us.iterar.co/api/autocomplete?query=${query}"
 
                             val request = Request.Builder().url(url).build()
-                            val dispatcher = Dispatcher()
-                            dispatcher.maxRequests = 1
-
-                            val netInterceptor = Interceptor { chain ->
-                                chain.proceed(chain.request())
-                            }
-
-
-                            val client = OkHttpClient
-                                .Builder()
-                                .addNetworkInterceptor(netInterceptor)
-                                .dispatcher(dispatcher)
-                                .build()
 
                             client.newCall(request).enqueue(object : Callback {
                                 override fun onFailure(call: Call, e: IOException) {
@@ -114,20 +117,53 @@ class SearchFragment : Fragment() {
                                         val autocomplete = gson.fromJson(jsonString, Autocomplete::class.java)
 
                                         suggestions = autocomplete.suggestions
+                                        updateSuggestionsFlag = true
                                     }
                                 }
                             })
                         }
+                        else {
+                            clearQueriesFlag = true
+                        }
                     }
                 }
 
-                handler.postDelayed(runnable!!, 400)
+                handler.postDelayed(runnable!!, 200)
 
                 return false
             }
 
             override fun onQueryTextSubmit(query: String): Boolean {
                 rootSearchView.requestFocus()
+
+                if(query.isNotEmpty()) {
+                    val url = "http://mapi-us.iterar.co/api/autocomplete?query=${query}"
+
+                    val request = Request.Builder().url(url).build()
+
+                    client.newCall(request).enqueue(object : Callback {
+                        override fun onFailure(call: Call, e: IOException) {
+                            e.printStackTrace()
+                        }
+
+                        override fun onResponse(call: Call, response: Response) {
+                            response.use {
+                                if (!response.isSuccessful) throw IOException("Unexpected code $response")
+
+                                val jsonString = response.body!!.string()
+                                val gson = Gson()
+                                val autocomplete = gson.fromJson(jsonString, Autocomplete::class.java)
+
+                                suggestions = autocomplete.suggestions
+                                showResultsFlag = true
+                            }
+                        }
+                    })
+                }
+                else {
+                    clearQueriesFlag = true
+                }
+
                 return false
             }
         })
@@ -139,15 +175,21 @@ class SearchFragment : Fragment() {
         val timer = Timer()
         val doAsynchronousTask = object : TimerTask() {
             override fun run() {
-                handler.post(Runnable {
+                handler.post {
                     try {
-                        updateSuggestions()
-                    } catch (e: Exception) {
-                    }
-                })
+                        when(true) {
+                            updateSuggestionsFlag -> updateSuggestions()
+                            clearQueriesFlag -> clearQueries()
+                            showResultsFlag -> showResults()
+                        }
+                        updateSuggestionsFlag = false
+                        clearQueriesFlag = false
+                        showResultsFlag = false
+                    } catch (e: Exception) { }
+                }
             }
         }
-        timer.schedule(doAsynchronousTask, 0, 400)
+        timer.schedule(doAsynchronousTask, 0, 200)
 
         searchView.setOnSuggestionListener(object: android.widget.SearchView.OnSuggestionListener {
             override fun onSuggestionSelect(position: Int): Boolean {
@@ -157,16 +199,20 @@ class SearchFragment : Fragment() {
             override fun onSuggestionClick(position: Int): Boolean {
                 val cursor = searchView.suggestionsAdapter.getItem(position) as Cursor
                 val selection = cursor.getString(cursor.getColumnIndex("suggestion"))
-                searchView.setQuery(selection, false)
+                searchView.setQuery(selection, true)
 
                 return true
             }
         })
+
+        val cursor = MatrixCursor(arrayOf("_id", "suggestion"))
+        searchView.suggestionsAdapter = SearchSuggestionCursor(this.context!!, cursor, searchView)
+
         return view
     }
 
     private fun updateSuggestions() {
-        searchResults.removeAllViews()
+        //searchResults.removeAllViews()
         val cursor = MatrixCursor(arrayOf("_id", "suggestion"))
         suggestions.forEachIndexed {index, suggestion ->
             // Create dropdown suggestions
@@ -174,12 +220,21 @@ class SearchFragment : Fragment() {
                 .add("_id", index + 1)
                 .add("suggestion", suggestion)
 
-            addDrugCard(suggestion)
+            //addDrugCard(suggestion)
         }
 
-        searchView.suggestionsAdapter = SearchSuggestionCursor(outerContext.context!!, cursor, searchView)
+        searchView.suggestionsAdapter.changeCursor(cursor)
+    }
 
+    private fun clearQueries() {
+        searchResults.removeAllViews()
+    }
 
+    private fun showResults() {
+        searchResults.removeAllViews()
+        suggestions.forEach {suggestion ->
+            addDrugCard(suggestion)
+        }
     }
 
     private fun addDrugCard(name: String) {

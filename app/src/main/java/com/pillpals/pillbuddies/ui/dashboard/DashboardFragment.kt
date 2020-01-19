@@ -347,7 +347,7 @@ class DashboardFragment : Fragment() {
                     )
                     addDrugCard(newSchedule, databaseSchedule.medication!!.first()!!)
                 }
-                //testSchedule = realm.copyFromRealm(testSchedule)
+
                 testSchedule.occurrence = DateHelper.addUnitToDate(testSchedule.occurrence!!, n, u)
             }
         }
