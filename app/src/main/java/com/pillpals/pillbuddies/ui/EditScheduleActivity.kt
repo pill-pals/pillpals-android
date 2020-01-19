@@ -124,21 +124,46 @@ class EditScheduleActivity : AppCompatActivity() {
 
             val timeAlertDialog = dialogBuilder.show()
             timeDialog.dialogAddBtn.setOnClickListener {
-                timeAlertDialog.dismiss()
                 val cal = Calendar.getInstance()
+                var repeat = false
                 cal.set(Calendar.MILLISECOND, 0)
                 cal.set(Calendar.SECOND, 0)
                 cal.set(Calendar.MINUTE, simpleTimePicker.minute)
                 cal.set(Calendar.HOUR_OF_DAY, simpleTimePicker.hour)
 
-                val timeData = dateToString(cal.time)
-                list.add(DosageTimeBox(this))
-                calList.add(cal)
-                list.last().timeBoxText.text = timeData
-                timeBoxList.removeAllViews()
-                list.forEach {
-                    //Log.i("test", it.timeBoxText.text.toString())
-                    timeBoxList.addView(it)
+                calList.forEach{
+                    if(cal.time == it.time){
+                        Toast.makeText(applicationContext, "Please submit a unique time", Toast.LENGTH_SHORT).show()
+                        repeat = true
+                    }
+                }
+
+                if(repeat == false) {
+                    timeAlertDialog.dismiss()
+                    val timeData = dateToString(cal.time)
+                    list.add(DosageTimeBox(this))
+                    calList.add(cal)
+                    list.last().timeBoxText.text = timeData
+
+                    val listData = list.last()
+                    val calData = cal
+                    list.last().button.setOnClickListener {
+                        //Log.i("test", it.parent.parent.toString())
+                        list.remove(listData)
+                        calList.remove(calData)
+
+                        timeBoxList.removeAllViews()
+                        list.forEach {
+                            //Log.i("test", it.timeBoxText.text.toString())
+                            timeBoxList.addView(it)
+                        }
+                    }
+
+                    timeBoxList.removeAllViews()
+                    list.forEach {
+                        //Log.i("test", it.timeBoxText.text.toString())
+                        timeBoxList.addView(it)
+                    }
                 }
             }
 
