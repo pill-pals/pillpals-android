@@ -16,6 +16,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.view.isEmpty
+import com.google.android.flexbox.FlexboxLayout
 import com.pillpals.pillbuddies.R
 import com.pillpals.pillbuddies.data.model.Schedules
 import com.pillpals.pillbuddies.helpers.DatabaseHelper
@@ -39,7 +40,7 @@ class EditScheduleActivity : AppCompatActivity() {
 
     public lateinit var addTimeButton : Button
     public lateinit var bottomOptions: BottomOptions
-    public lateinit var timeBoxList : LinearLayout
+    public lateinit var timeBoxList : FlexboxLayout
     public lateinit var simpleTimePicker : TimePicker
     public lateinit var mondayButton : ToggleButton
     public lateinit var tuesdayButton : ToggleButton
