@@ -15,7 +15,8 @@
         android:layout_height="wrap_content"
         android:text="You have unsaved schedules for this medication.  Are you sure you want to continue?"
         android:layout_gravity="center"
-        android:textAppearance="?android:attr/textAppearanceMedium" />
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:textColor="@color/colorLightGrey" />
 
     <TextView
         android:id="@+id/deleteSchedules"
@@ -23,7 +24,8 @@
         android:layout_height="wrap_content"
         android:text=""
         android:layout_gravity="center"
-        android:textAppearance="?android:attr/textAppearanceMedium" />
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:textColor="@color/colorLightGrey" />
 
     <LinearLayout
         android:layout_width="match_parent"

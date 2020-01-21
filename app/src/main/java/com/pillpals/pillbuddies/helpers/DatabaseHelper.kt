@@ -37,6 +37,11 @@ class DatabaseHelper {
                 }
             }
         }
+        fun obliterateSchedule(schedule: Schedules) {
+            Realm.getDefaultInstance().executeTransaction {
+                schedule.deleteFromRealm()
+            }
+        }
         fun getIconByID(id: Int): String {
             return Realm.getDefaultInstance().where(Icons::class.java).equalTo("id", id).findFirst()!!.icon
         }

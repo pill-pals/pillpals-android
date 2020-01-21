@@ -197,9 +197,16 @@ class EditScheduleActivity : AppCompatActivity() {
                     missingIntervalText.visibility = View.VISIBLE
                 }
 
+                val title = SpannableString("Error Saving Schedule")
+                title.setSpan(
+                    ForegroundColorSpan(ResourcesCompat.getColor(getResources(), R.color.colorLightGrey, null)),
+                    0,
+                    title.length,
+                    Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+                )
                 val dialogBuilder = AlertDialog.Builder(this)
                     .setView(errorDialog)
-                    .setTitle("Error Saving Schedule")
+                    .setTitle(title)
 
                 val errorAlertDialog = dialogBuilder.show()
                 errorDialog.dialogCancelBtn.setOnClickListener {

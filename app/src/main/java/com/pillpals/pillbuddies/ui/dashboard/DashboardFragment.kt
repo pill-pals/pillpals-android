@@ -49,6 +49,7 @@ import android.graphics.BlendMode
 import android.graphics.PorterDuff
 import androidx.cardview.widget.CardView
 import com.pillpals.pillbuddies.helpers.DatabaseHelper
+import com.pillpals.pillbuddies.helpers.DatabaseHelper.Companion.obliterateSchedule
 import com.pillpals.pillbuddies.ui.AddDrugActivity
 import io.realm.kotlin.createObject
 
@@ -315,7 +316,11 @@ class DashboardFragment : Fragment() {
 
     fun setUpScheduleCards(schedules: RealmResults<out Schedules>) {
         for (databaseSchedule in schedules) {
-            if (databaseSchedule.deleted || databaseSchedule.medication!!.first()!!.deleted) {
+            if (databaseSchedule.medication.isNullOrEmpty()) {
+                obliterateSchedule(databaseSchedule)
+                continue
+            }
+            else if (databaseSchedule.deleted || databaseSchedule.medication!!.first()!!.deleted) {
                 continue
             }
 

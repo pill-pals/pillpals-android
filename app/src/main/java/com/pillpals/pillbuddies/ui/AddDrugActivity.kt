@@ -18,6 +18,7 @@ import android.widget.Toast
 import java.util.Calendar
 
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.res.ResourcesCompat
 import com.pillpals.pillbuddies.R
 import com.pillpals.pillbuddies.data.model.Medications
 import com.pillpals.pillbuddies.helpers.DatabaseHelper.Companion.getMedicationByUid
@@ -102,9 +103,16 @@ class AddDrugActivity : AppCompatActivity() {
                     if(scheduleRecordsSetToDelete.count() > 0) {
                         val deleteDialog = LayoutInflater.from(this).inflate(R.layout.delete_schedules_prompt, null)
 
+                        val title = SpannableString("Delete Schedules")
+                        title.setSpan(
+                            ForegroundColorSpan(ResourcesCompat.getColor(getResources(), R.color.colorLightGrey, null)),
+                            0,
+                            title.length,
+                            Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+                        )
                         val dialogBuilder = AlertDialog.Builder(this)
                             .setView(deleteDialog)
-                            .setTitle("Delete Schedules")
+                            .setTitle(title)
 
                         val deleteSchedules = deleteDialog!!.findViewById<TextView>(R.id.deleteSchedules)
                         val scheduleTexts = scheduleRecordsSetToDelete.map {
@@ -158,9 +166,16 @@ class AddDrugActivity : AppCompatActivity() {
                     if(scheduleRecordsSetToDelete.count() > 0) {
                         val deleteDialog = LayoutInflater.from(this).inflate(R.layout.delete_schedules_prompt, null)
 
+                        val title = SpannableString("Delete Schedules")
+                        title.setSpan(
+                            ForegroundColorSpan(ResourcesCompat.getColor(getResources(), R.color.colorLightGrey, null)),
+                            0,
+                            title.length,
+                            Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+                        )
                         val dialogBuilder = AlertDialog.Builder(this)
                             .setView(deleteDialog)
-                            .setTitle("Delete Schedules")
+                            .setTitle(title)
 
                         val deleteSchedules = deleteDialog!!.findViewById<TextView>(R.id.deleteSchedules)
                         val scheduleTexts = scheduleRecordsSetToDelete.map {
@@ -204,9 +219,16 @@ class AddDrugActivity : AppCompatActivity() {
             if(::scheduleIdList.isInitialized){
                 val deleteDialog = LayoutInflater.from(this).inflate(R.layout.unsaved_schedules_prompt, null)
 
+                val title = SpannableString("Discard Changes")
+                title.setSpan(
+                    ForegroundColorSpan(ResourcesCompat.getColor(getResources(), R.color.colorLightGrey, null)),
+                    0,
+                    title.length,
+                    Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+                )
                 val dialogBuilder = AlertDialog.Builder(this)
                     .setView(deleteDialog)
-                    .setTitle("Discard Changes")
+                    .setTitle(title)
 
                 val deleteAlertDialog = dialogBuilder.show()
                 deleteDialog.dialogConfirmBtn.setOnClickListener {
@@ -456,10 +478,7 @@ class AddDrugActivity : AppCompatActivity() {
         super.onActivityResult(requestCode, resultCode, data)
         if(requestCode == 1) { // Schedules
             if(data != null) {
-                if(data.hasExtra("medication-uid")) {
-                    scheduleStack.removeAllViews()
-                    calculateScheduleRecords((getMedicationByUid(data.getStringExtra("medication-uid")!!)!!).schedules)
-                } else if(data.hasExtra("schedule-id-list")){
+                if(data.hasExtra("schedule-id-list")){
                     scheduleIdList = data.getStringArrayListExtra("schedule-id-list")
                     scheduleIdList.forEach {
                         toBeAdded.add(getScheduleByUid(it)!!)
