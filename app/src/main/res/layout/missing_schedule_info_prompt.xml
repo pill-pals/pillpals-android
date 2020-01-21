@@ -17,15 +17,17 @@
         android:layout_marginBottom="16dp"
         android:text="To save the schedule, you must do the following:"
         android:textAppearance="?android:attr/textAppearanceMedium"
-        android:textSize="24sp" />
+        android:textSize="24sp"
+        android:textColor="@color/colorLightGrey" />
 
     <TextView
         android:id="@+id/missingTimeText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center|center_horizontal|left"
-        android:text=" - Select time(s) the medicaiton is taken at."
-        android:textAppearance="?android:attr/textAppearanceMedium" />
+        android:text=" - Select time(s) the medication is taken at."
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:textColor="@color/colorLightGrey" />
 
     <TextView
         android:id="@+id/missingWeekdaysText"
@@ -33,7 +35,8 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center|center_horizontal|left"
         android:text=" - Select which days of the week the medication is taken on."
-        android:textAppearance="?android:attr/textAppearanceMedium" />
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:textColor="@color/colorLightGrey" />
 
     <TextView
         android:id="@+id/missingIntervalText"
@@ -41,7 +44,8 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center|center_horizontal|left"
         android:text=" - Select the time interval to repeat the reminder."
-        android:textAppearance="?android:attr/textAppearanceMedium" />
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:textColor="@color/colorLightGrey" />
 
     <LinearLayout
         android:layout_width="match_parent"
