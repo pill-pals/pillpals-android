@@ -28,6 +28,7 @@ class DrugCard : LinearLayout {
     public lateinit var icon: ImageView
     public lateinit var iconBackground: CardView
     public lateinit var overflowMenu: ImageButton
+    public var drugCode: Int = 0
 
     constructor(context: Context) : super(context) {
         init()
