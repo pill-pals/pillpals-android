@@ -16,10 +16,12 @@ import android.view.animation.LinearInterpolator
 import android.view.animation.RotateAnimation
 import android.widget.*
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.view.marginEnd
 import com.google.gson.Gson
 import com.pillpals.pillbuddies.data.model.Medications
 import com.pillpals.pillbuddies.helpers.DatabaseHelper
 import com.pillpals.pillbuddies.helpers.SearchSuggestionCursor
+import com.pillpals.pillbuddies.helpers.margin
 import com.pillpals.pillbuddies.ui.DrugCard
 import io.realm.RealmResults
 import kotlinx.android.synthetic.main.drug_card.view.*
@@ -40,7 +42,7 @@ class SearchFragment : Fragment() {
     public var clearQueriesFlag: Boolean = false
     public var showResultsFlag: Boolean = false
     public var refreshCardsFlag: Boolean = false
-    public var drugCards: MutableList<DrugCard> = mutableListOf()
+    public var drugCards: MutableList<DrugCard?> = mutableListOf()
     public lateinit var loadingAnimation: RotateAnimation
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -222,7 +224,8 @@ class SearchFragment : Fragment() {
 
         suggestions.forEachIndexed {index, suggestion ->
             drugCards.add(addDrugCard(suggestion))
-            val url = "https://health-products.canada.ca/api/drug/drugproduct/?brandname=${suggestion}"
+            val re = Regex("[^A-Za-z ]")
+            val url = "https://health-products.canada.ca/api/drug/drugproduct/?brandname=${re.replace(suggestion, "")}"
 
             val request = Request.Builder().url(url).build()
 
@@ -241,82 +244,97 @@ class SearchFragment : Fragment() {
 
                         // First for now
                         val firstDrugProduct = drugProducts.firstOrNull()
-                        if (firstDrugProduct != null) {
-                            // gather info and set to card
-                            var newCard = DrugCard(outerContext.context!!)
-                            newCard.nameText.text = suggestion
-                            newCard.button.layoutParams.width = ViewGroup.LayoutParams.WRAP_CONTENT
-                            newCard.overflowMenu.visibility = View.INVISIBLE
 
-                            newCard.drugCode = firstDrugProduct.drug_code
+                        if (firstDrugProduct == null) {
+                            drugCards[index] = null
+                            refreshCardsFlag = true
+                            return
+                        }
 
-                            val url = "https://health-products.canada.ca/api/drug/activeingredient/?id=${firstDrugProduct.drug_code}"
 
-                            val request = Request.Builder().url(url).build()
+                        // gather info and set to card
+                        var newCard = DrugCard(outerContext.context!!)
+                        newCard.nameText.text = suggestion
+                        newCard.button.layoutParams.width = ViewGroup.LayoutParams.WRAP_CONTENT
+                        newCard.overflowMenu.visibility = View.INVISIBLE
+                        newCard.button.visibility = View.VISIBLE
+                        newCard.button.text = "View"
+                        newCard.button.margin(right = 0F)
 
-                            client.newCall(request).enqueue(object : Callback {
-                                override fun onFailure(call: Call, e: IOException) {
-                                    e.printStackTrace()
-                                }
+                        newCard.drugCode = firstDrugProduct.drug_code
+                        // Add button action here, using drug code ^
+                        newCard.button.setOnClickListener {
+                            Log.i("Drug Code", firstDrugProduct.drug_code.toString())
+                        }
 
-                                override fun onResponse(call: Call, response: Response) {
-                                    response.use {
-                                        if (!response.isSuccessful) throw IOException("Unexpected code $response")
 
-                                        val jsonString = response.body!!.string()
-                                        val gson = Gson()
-                                        val activeIngredients = gson.fromJson(jsonString, Array<ActiveIngredient>::class.java).toList()
+                        val url = "https://health-products.canada.ca/api/drug/activeingredient/?id=${firstDrugProduct.drug_code}"
 
-                                        val ingredientNameList = activeIngredients.fold(listOf<String>()) { acc, it ->
-                                            acc.plus(it.ingredient_name)
+                        val request = Request.Builder().url(url).build()
+
+                        client.newCall(request).enqueue(object : Callback {
+                            override fun onFailure(call: Call, e: IOException) {
+                                e.printStackTrace()
+                            }
+
+                            override fun onResponse(call: Call, response: Response) {
+                                response.use {
+                                    if (!response.isSuccessful) throw IOException("Unexpected code $response")
+
+                                    val jsonString = response.body!!.string()
+                                    val gson = Gson()
+                                    val activeIngredients = gson.fromJson(jsonString, Array<ActiveIngredient>::class.java).toList()
+
+                                    val ingredientNameList = activeIngredients.fold(listOf<String>()) { acc, it ->
+                                        acc.plus(it.ingredient_name)
+                                    }
+
+                                    newCard.timeText.text = ingredientNameList.joinToString()
+
+                                    val url = "https://health-products.canada.ca/api/drug/route/?id=${firstDrugProduct.drug_code}"
+
+                                    val request = Request.Builder().url(url).build()
+
+                                    client.newCall(request).enqueue(object : Callback {
+                                        override fun onFailure(call: Call, e: IOException) {
+                                            e.printStackTrace()
                                         }
 
-                                        newCard.timeText.text = ingredientNameList.joinToString()
+                                        override fun onResponse(call: Call, response: Response) {
+                                            response.use {
+                                                if (!response.isSuccessful) throw IOException("Unexpected code $response")
 
-                                        val url = "https://health-products.canada.ca/api/drug/route/?id=${firstDrugProduct.drug_code}"
+                                                val jsonString = response.body!!.string()
+                                                val gson = Gson()
+                                                val administrationRoutes = gson.fromJson(jsonString, Array<AdministrationRoute>::class.java).toList()
 
-                                        val request = Request.Builder().url(url).build()
+                                                val firstRoute = administrationRoutes.firstOrNull()
+                                                if(firstRoute != null) {
+                                                    newCard.icon.setImageResource(administrationRouteToIcon(firstRoute.route_of_administration_name))
+                                                    var colorString =
+                                                        DatabaseHelper.getRandomColorString()
+                                                    while(colorString == "#000000") { // Let's not let black be selected randomly
+                                                        colorString = DatabaseHelper.getRandomColorString()
+                                                    }
+                                                    newCard.iconBackground.setCardBackgroundColor(Color.parseColor(colorString))
 
-                                        client.newCall(request).enqueue(object : Callback {
-                                            override fun onFailure(call: Call, e: IOException) {
-                                                e.printStackTrace()
-                                            }
-
-                                            override fun onResponse(call: Call, response: Response) {
-                                                response.use {
-                                                    if (!response.isSuccessful) throw IOException("Unexpected code $response")
-
-                                                    val jsonString = response.body!!.string()
-                                                    val gson = Gson()
-                                                    val administrationRoutes = gson.fromJson(jsonString, Array<AdministrationRoute>::class.java).toList()
-
-                                                    val firstRoute = administrationRoutes.firstOrNull()
-                                                    if(firstRoute != null) {
-                                                        newCard.icon.setImageResource(administrationRouteToIcon(firstRoute.route_of_administration_name))
-                                                        var colorString =
-                                                            DatabaseHelper.getRandomColorString()
-                                                        while(colorString == "#000000") { // Let's not let black be selected randomly
-                                                            colorString = DatabaseHelper.getRandomColorString()
-                                                        }
-                                                        newCard.backgroundTintList = ColorStateList.valueOf(Color.parseColor(colorString))
-
-                                                        val administrationRoutesList = administrationRoutes.fold(listOf<String>()) { acc, it ->
-                                                            acc.plus(it.route_of_administration_name)
-                                                        }
-
-                                                        newCard.lateText.text = administrationRoutesList.joinToString()
+                                                    val administrationRoutesList = administrationRoutes.fold(listOf<String>()) { acc, it ->
+                                                        acc.plus(it.route_of_administration_name)
                                                     }
 
-                                                    drugCards[index] = newCard
-
-                                                    refreshCardsFlag = true
+                                                    newCard.lateText.text = administrationRoutesList.joinToString()
                                                 }
+
+                                                drugCards[index] = newCard
+
+                                                refreshCardsFlag = true
                                             }
-                                        })
-                                    }
+                                        }
+                                    })
                                 }
-                            })
-                        }
+                            }
+                        })
+
                     }
                 }
             })
@@ -344,6 +362,10 @@ class SearchFragment : Fragment() {
     private fun refreshCards() {
         searchResults.removeAllViews()
         drugCards.forEach {
+            if(it == null) return@forEach
+            if(it.drugCode == 0) {
+                it.icon.startAnimation(loadingAnimation)
+            }
             searchResults.addView(it)
         }
     }
@@ -353,6 +375,7 @@ class SearchFragment : Fragment() {
             route.startsWith("Intra") -> R.drawable.ic_syringe
             route.startsWith("Oral") -> R.drawable.ic_pill_v5
             route.startsWith("Rectal") -> R.drawable.ic_tablet
+            route.startsWith("Inhalation") -> R.drawable.ic_inhaler
             else -> R.drawable.ic_dropper
         }
     }

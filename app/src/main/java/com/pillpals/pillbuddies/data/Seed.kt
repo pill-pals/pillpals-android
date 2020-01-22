@@ -118,6 +118,10 @@ class Seed : Realm.Transaction {
         icon = Icons(3)
         icon.icon = "ic_syringe"
         realm.insertOrUpdate(icon)
+
+        icon = Icons(4)
+        icon.icon = "ic_inhaler"
+        realm.insertOrUpdate(icon)
     }
 
     private fun seedMoodIcons(realm: Realm) {
