@@ -79,13 +79,15 @@
                     app:layout_constraintStart_toEndOf="@+id/timeText" />
             </androidx.constraintlayout.widget.ConstraintLayout>
 
-            <TextView
+            <me.grantland.widget.AutofitTextView
                 android:id="@+id/nameText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
                 android:layout_marginTop="8dp"
                 android:text="Test Medication"
+                android:singleLine="true"
+                android:maxWidth="160dp"
                 android:textAppearance="@style/TextAppearance.baseText"
                 app:layout_constraintStart_toEndOf="@+id/iconBackground"
                 app:layout_constraintTop_toTopOf="parent" />

@@ -36,14 +36,16 @@ class SearchFragment : Fragment() {
     public lateinit var searchResults: LinearLayout
     public var handler: Handler = Handler(Looper.getMainLooper())
     public var runnable: Runnable? = null
-    public var suggestions: List<String> = listOf()
+    public var suggestions: MutableList<String> = mutableListOf()
     public var outerContext: SearchFragment = this
     public var updateSuggestionsFlag: Boolean = false
     public var clearQueriesFlag: Boolean = false
     public var showResultsFlag: Boolean = false
     public var refreshCardsFlag: Boolean = false
     public var drugCards: MutableList<DrugCard?> = mutableListOf()
+    public var upcomingDrugCards: MutableList<DrugCard?> = mutableListOf()
     public lateinit var loadingAnimation: RotateAnimation
+    public var lastQuery: String? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         super.onCreateView(inflater, container, savedInstanceState)
@@ -117,6 +119,7 @@ class SearchFragment : Fragment() {
 
             override fun onQueryTextSubmit(query: String): Boolean {
                 rootSearchView.requestFocus()
+                lastQuery = null
 
                 if(query.isNotEmpty()) {
                     val url = "http://mapi-us.iterar.co/api/autocomplete?query=${query}"
@@ -137,6 +140,7 @@ class SearchFragment : Fragment() {
                                 val autocomplete = gson.fromJson(jsonString, Autocomplete::class.java)
 
                                 suggestions = autocomplete.suggestions
+                                lastQuery = query
                                 showResultsFlag = true
                             }
                         }
@@ -211,9 +215,17 @@ class SearchFragment : Fragment() {
         searchResults.removeAllViews()
     }
 
+    private fun multipleDrugsExistsWithName(drug: DrugProduct): Boolean {
+        return upcomingDrugCards.filter {
+            it?.nameText?.text.toString() == drug.brand_name
+        }.count() > 1
+    }
+
     private fun showResults() {
         searchResults.removeAllViews()
         drugCards = mutableListOf()
+        upcomingDrugCards = mutableListOf()
+
         val dispatcher = Dispatcher()
         dispatcher.maxRequests = suggestions.count() * 3
 
@@ -222,7 +234,13 @@ class SearchFragment : Fragment() {
             .dispatcher(dispatcher)
             .build()
 
-        suggestions.forEachIndexed {index, suggestion ->
+        val drugsToSearch = suggestions
+
+        if(lastQuery != null && !suggestions.contains(lastQuery!!)) {
+            drugsToSearch.add(0, lastQuery!!)
+        }
+
+        drugsToSearch.forEachIndexed {index, suggestion ->
             drugCards.add(addDrugCard(suggestion))
             val re = Regex("[^A-Za-z ]")
             val url = "https://health-products.canada.ca/api/drug/drugproduct/?brandname=${re.replace(suggestion, "")}"
@@ -232,6 +250,8 @@ class SearchFragment : Fragment() {
             client.newCall(request).enqueue(object : Callback {
                 override fun onFailure(call: Call, e: IOException) {
                     e.printStackTrace()
+                    drugCards[index] = null
+                    refreshCardsFlag = true
                 }
 
                 override fun onResponse(call: Call, response: Response) {
@@ -251,10 +271,9 @@ class SearchFragment : Fragment() {
                             return
                         }
 
-
                         // gather info and set to card
                         var newCard = DrugCard(outerContext.context!!)
-                        newCard.nameText.text = suggestion
+                        newCard.nameText.text = firstDrugProduct.brand_name
                         newCard.button.layoutParams.width = ViewGroup.LayoutParams.WRAP_CONTENT
                         newCard.overflowMenu.visibility = View.INVISIBLE
                         newCard.button.visibility = View.VISIBLE
@@ -267,6 +286,13 @@ class SearchFragment : Fragment() {
                             Log.i("Drug Code", firstDrugProduct.drug_code.toString())
                         }
 
+                        upcomingDrugCards.add(newCard)
+
+                        if(multipleDrugsExistsWithName(firstDrugProduct)) {
+                            drugCards[index] = null
+                            refreshCardsFlag = true
+                            return
+                        }
 
                         val url = "https://health-products.canada.ca/api/drug/activeingredient/?id=${firstDrugProduct.drug_code}"
 
@@ -275,6 +301,8 @@ class SearchFragment : Fragment() {
                         client.newCall(request).enqueue(object : Callback {
                             override fun onFailure(call: Call, e: IOException) {
                                 e.printStackTrace()
+                                drugCards[index] = null
+                                refreshCardsFlag = true
                             }
 
                             override fun onResponse(call: Call, response: Response) {
@@ -298,6 +326,8 @@ class SearchFragment : Fragment() {
                                     client.newCall(request).enqueue(object : Callback {
                                         override fun onFailure(call: Call, e: IOException) {
                                             e.printStackTrace()
+                                            drugCards[index] = null
+                                            refreshCardsFlag = true
                                         }
 
                                         override fun onResponse(call: Call, response: Response) {
@@ -381,7 +411,7 @@ class SearchFragment : Fragment() {
     }
 }
 
-data class Autocomplete(val query: String, val suggestions: List<String>)
+data class Autocomplete(val query: String, val suggestions: MutableList<String>)
 data class DrugProduct(
     val drug_code: Int,
     val class_name: String,
