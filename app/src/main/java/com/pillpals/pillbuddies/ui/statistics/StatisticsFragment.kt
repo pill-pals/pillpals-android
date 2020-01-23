@@ -14,34 +14,28 @@ import com.github.mikephil.charting.charts.*
 import com.github.mikephil.charting.data.*
 import com.github.mikephil.charting.data.BarData
 import com.github.mikephil.charting.interfaces.datasets.IBarDataSet
-import android.graphics.Color.DKGRAY
-import androidx.core.content.ContextCompat
-import android.graphics.drawable.Drawable
-import com.github.mikephil.charting.utils.Utils.getSDKInt
-import android.graphics.DashPathEffect
 import android.icu.text.SimpleDateFormat
 import android.widget.CheckBox
 import android.widget.LinearLayout
-import android.widget.ToggleButton
+import androidx.core.content.res.ResourcesCompat
 import androidx.core.graphics.ColorUtils
+import androidx.core.view.children
 import com.github.mikephil.charting.components.MarkerView
 import com.github.mikephil.charting.data.BarDataSet
-import com.github.mikephil.charting.utils.Utils
 import com.github.mikephil.charting.components.XAxis
-import com.github.mikephil.charting.components.YAxis
 import com.github.mikephil.charting.formatter.IndexAxisValueFormatter
 import com.pillpals.pillbuddies.data.model.Logs
 import com.pillpals.pillbuddies.data.model.Medications
-import com.pillpals.pillbuddies.data.model.Schedules
+import com.pillpals.pillbuddies.helpers.DateHelper
 import com.pillpals.pillbuddies.helpers.DatabaseHelper
 import com.pillpals.pillbuddies.helpers.DatabaseHelper.Companion.getColorStringByID
-import com.pillpals.pillbuddies.helpers.DateHelper.Companion.getUnitByIndex
-import com.pillpals.pillbuddies.helpers.replace
 import io.realm.RealmResults
 import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
 import kotlin.math.abs
+import android.widget.TextView
+import java.util.Calendar
 
 class StatisticsFragment : Fragment() {
 
@@ -49,11 +43,16 @@ class StatisticsFragment : Fragment() {
     private lateinit var realm: Realm
     private var repeatingColorHash = HashMap<String, Int>()
     public lateinit var legendStack: LinearLayout
+    public lateinit var timeSpanFilterView: LinearLayout
+    public lateinit var viewModeFilterView: LinearLayout
     public var filteredMedications = HashMap<String, Boolean>()
     public lateinit var barChart: BarChart
     public lateinit var medications: RealmResults<out Medications>
     public var medicationSets = mutableListOf<IBarDataSet>()
     var dateStringList = ArrayList<String>()
+    public lateinit var timeSpanFilter: Filter
+    public lateinit var viewModeFilter: Filter
+    public lateinit var graphHeader: TextView
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -69,6 +68,15 @@ class StatisticsFragment : Fragment() {
         realm = Realm.getDefaultInstance()
 
         legendStack = view!!.findViewById(R.id.legendStack)
+        timeSpanFilterView = view!!.findViewById(R.id.timeSpanFilter)
+        viewModeFilterView = view!!.findViewById(R.id.viewModeFilter)
+        graphHeader = view!!.findViewById(R.id.graphHeader)
+
+        timeSpanFilter = Filter(timeSpanFilterView,"Day")
+        viewModeFilter = Filter(viewModeFilterView,"Timeline")
+
+        setupFilter(timeSpanFilter)
+        setupFilter(viewModeFilter)
 
         medications = DatabaseHelper.readAllData(Medications::class.java) as RealmResults<out Medications>
 
@@ -79,7 +87,7 @@ class StatisticsFragment : Fragment() {
         return view
     }
 
-    private fun averageLogsAcrossSchedules(medication: Medications, timeStep: Int): List<TimeCount> {
+    private fun averageLogsAcrossSchedules(medication: Medications): List<TimeCount> {
         val schedules = medication.schedules
 
         var allLogs = schedules.fold(listOf<Logs>()) { acc, it -> acc.plus(it.logs) }
@@ -91,10 +99,14 @@ class StatisticsFragment : Fragment() {
             logDate.set(Calendar.MILLISECOND, 0)
             logDate.set(Calendar.SECOND, 0)
             logDate.set(Calendar.MINUTE, 0)
-            when (timeStep) {
-                Calendar.DATE -> null // Sums in hours
-                Calendar.WEEK_OF_YEAR -> logDate.set(Calendar.HOUR_OF_DAY, 0) // Sums in days
-                Calendar.MONTH -> { // Sums in weeks
+            when (timeSpanFilter.selectedValue) {
+                "Day" -> null // Sums in hours
+                "Week" -> logDate.set(Calendar.HOUR_OF_DAY, 0) // Sums in days
+                "Month" -> { // Sums in weeks
+                    logDate.set(Calendar.HOUR_OF_DAY, 0)
+                    logDate.set(Calendar.DATE, 0)
+                }
+                "Year" -> { // Sums in weeks
                     logDate.set(Calendar.HOUR_OF_DAY, 0)
                     logDate.set(Calendar.DATE, 0)
                 }
@@ -140,7 +152,7 @@ class StatisticsFragment : Fragment() {
         medications.forEach {
             if (filteredMedications[it.name] != false) {
                 // Average logs on time across schedules
-                val timeCounts = averageLogsAcrossSchedules(it, Calendar.WEEK_OF_YEAR)
+                val timeCounts = averageLogsAcrossSchedules(it)
                 //val schedule = it.schedules.first()!!
                 //val logs = schedule.logs!!
 
@@ -168,6 +180,18 @@ class StatisticsFragment : Fragment() {
     }
 
     private fun renderBarChart() {
+        val date = Date()
+        val cal = Calendar.getInstance()
+        cal.time = date
+
+        graphHeader.text = when (timeSpanFilter.selectedValue) {
+            "Day" -> cal.get(Calendar.DAY_OF_YEAR).toString()
+            "Week" -> cal.get(Calendar.WEEK_OF_YEAR).toString()
+            "Month" -> cal.get(Calendar.MONTH).toString()
+            "Year" -> cal.get(Calendar.YEAR).toString()
+            else -> cal.get(Calendar.DAY_OF_YEAR).toString()
+        }
+
         determineMedicationSetData()
         barChart.setTouchEnabled(true)
         barChart.setPinchZoom(true)
@@ -241,7 +265,29 @@ class StatisticsFragment : Fragment() {
     private fun getTimeCount(time: Date, timeCountList: List<TimeCount>): TimeCount? {
         return timeCountList.filter { it.time == time }.firstOrNull()
     }
+
+    private fun styleFilter(filter: Filter) {
+        filter.view.children.forEach() {
+            if(it.tag == filter.selectedValue) {
+                it.backgroundTintList = ColorStateList.valueOf(ResourcesCompat.getColor(getResources(), R.color.colorGrey, null))
+            } else {
+                it.backgroundTintList = ColorStateList.valueOf(ResourcesCompat.getColor(getResources(), R.color.colorWhite, null))
+            }
+        }
+    }
+
+    private fun setupFilter(filter: Filter) {
+        filter.view.children.forEach {
+            it.setOnClickListener(){
+                filter.selectedValue = it.tag.toString()
+                styleFilter(filter)
+                renderBarChart()
+            }
+        }
+        styleFilter(filter)
+    }
 }
 
 data class AverageLogOffset(val offset: Float, val time: Date)
 data class TimeCount(val time: Date, val count: Int, val offset: Float, val logs: List<Logs>)
+data class Filter(var view: LinearLayout, var selectedValue: String)
