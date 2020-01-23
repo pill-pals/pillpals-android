@@ -459,6 +459,21 @@ class DashboardFragment : Fragment() {
         upcomingStack.removeViews(1, upcomingStack.childCount - 1)
         completedStack.removeViews(1, completedStack.childCount - 1)
         setUpScheduleCards(readAllData(Schedules::class.java) as RealmResults<out Schedules>)
+        hideEmptyStacks()
+    }
+
+    private fun hideEmptyStacks() {
+        hideStackIfEmpty(currentStack)
+        hideStackIfEmpty(upcomingStack)
+        hideStackIfEmpty(completedStack)
+    }
+
+    private fun hideStackIfEmpty(stack: LinearLayout) {
+        if (stack.childCount == 1) {
+            stack.visibility = View.GONE
+        } else {
+            stack.visibility = View.VISIBLE
+        }
     }
 
     override fun onActivityResult(requestCode:Int, resultCode:Int, data:Intent?) {
