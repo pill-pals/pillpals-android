@@ -16,6 +16,7 @@ import com.github.mikephil.charting.data.BarData
 import com.github.mikephil.charting.interfaces.datasets.IBarDataSet
 import android.icu.text.SimpleDateFormat
 import android.widget.CheckBox
+import android.widget.ImageButton
 import android.widget.LinearLayout
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.graphics.ColorUtils
@@ -46,6 +47,8 @@ class StatisticsFragment : Fragment() {
     public lateinit var legendStack: LinearLayout
     public lateinit var timeSpanFilterView: LinearLayout
     public lateinit var viewModeFilterView: LinearLayout
+    public lateinit var leftTimeButton: ImageButton
+    public lateinit var rightTimeButton: ImageButton
     public var filteredMedications = HashMap<String, Boolean>()
     public lateinit var barChart: BarChart
     public lateinit var medications: RealmResults<out Medications>
@@ -54,6 +57,7 @@ class StatisticsFragment : Fragment() {
     public lateinit var timeSpanFilter: Filter
     public lateinit var viewModeFilter: Filter
     public lateinit var graphHeader: TextView
+    public var currentDate = DateHelper.today()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -72,6 +76,11 @@ class StatisticsFragment : Fragment() {
         timeSpanFilterView = view!!.findViewById(R.id.timeSpanFilter)
         viewModeFilterView = view!!.findViewById(R.id.viewModeFilter)
         graphHeader = view!!.findViewById(R.id.graphHeader)
+        leftTimeButton = view!!.findViewById(R.id.leftTimeButton)
+        rightTimeButton = view!!.findViewById(R.id.rightTimeButton)
+
+        leftTimeButton.setOnClickListener({timeButtonClick(-1)})
+        rightTimeButton.setOnClickListener({timeButtonClick(1)})
 
         timeSpanFilter = Filter(timeSpanFilterView,"Day")
         viewModeFilter = Filter(viewModeFilterView,"Timeline")
@@ -194,7 +203,7 @@ class StatisticsFragment : Fragment() {
         //get the range and step unit.
         //range will later be changeable from the buttons
         var cal = Calendar.getInstance()
-        cal.time = Date()
+        cal.time = currentDate
 
         var rangedTimeCounts = mutableListOf<DataPoint>()
 
@@ -205,7 +214,6 @@ class StatisticsFragment : Fragment() {
                 calIterator.set(Calendar.SECOND, 0)
                 calIterator.set(Calendar.MINUTE, 0)
                 calIterator.set(Calendar.DAY_OF_YEAR, cal.get(Calendar.DAY_OF_YEAR))
-                calIterator.set(Calendar.WEEK_OF_YEAR, cal.get(Calendar.WEEK_OF_YEAR))
                 calIterator.set(Calendar.MONTH, cal.get(Calendar.MONTH))
                 calIterator.set(Calendar.YEAR, cal.get(Calendar.YEAR))
 
@@ -299,16 +307,15 @@ class StatisticsFragment : Fragment() {
     }
 
     private fun renderBarChart() {
+        //set the header of the chart
         val cal = Calendar.getInstance()
-        cal.time = Date()
+        cal.time = currentDate
         val firstDayOfWeekCal = Calendar.getInstance()
         firstDayOfWeekCal.time = cal.time
         firstDayOfWeekCal.set(Calendar.DAY_OF_WEEK,firstDayOfWeekCal.firstDayOfWeek)
         val lastDayOfWeekCal = Calendar.getInstance()
         lastDayOfWeekCal.time = firstDayOfWeekCal.time
         lastDayOfWeekCal.time = DateHelper.addUnitToDate(lastDayOfWeekCal.time,6,Calendar.DATE)
-
-
         graphHeader.text = when (timeSpanFilter.selectedValue) {
             "Day" -> cal.getDisplayName(Calendar.MONTH,Calendar.SHORT,Locale.US) + " " + cal.get(Calendar.DAY_OF_MONTH).toString() + ", " + cal.get(Calendar.YEAR).toString()
             "Week" -> firstDayOfWeekCal.getDisplayName(Calendar.MONTH,Calendar.SHORT,Locale.US) + " " + firstDayOfWeekCal.get(Calendar.DAY_OF_MONTH).toString() + " - " + lastDayOfWeekCal.getDisplayName(Calendar.MONTH,Calendar.SHORT,Locale.US) + " " + lastDayOfWeekCal.get(Calendar.DAY_OF_MONTH).toString()
@@ -406,6 +413,7 @@ class StatisticsFragment : Fragment() {
             it.setOnClickListener(){
                 filter.selectedValue = it.tag.toString()
                 styleFilter(filter)
+                resetCurrentDate()
                 renderBarChart()
             }
         }
@@ -422,6 +430,22 @@ class StatisticsFragment : Fragment() {
             }
         }
         return equalFlag
+    }
+
+    private fun timeButtonClick(direction: Int){
+        currentDate = DateHelper.addUnitToDate(currentDate,direction,when(timeSpanFilter.selectedValue){
+            "Day"->Calendar.DATE
+            "Week"->Calendar.WEEK_OF_YEAR
+            "Month"->Calendar.MONTH
+            "Year"->Calendar.YEAR
+            else->Calendar.DATE
+        })
+
+        renderBarChart()
+    }
+
+    private fun resetCurrentDate(){
+        currentDate = Date()
     }
 }
 
