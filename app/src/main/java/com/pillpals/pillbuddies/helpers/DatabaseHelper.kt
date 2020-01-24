@@ -2,6 +2,7 @@ package com.pillpals.pillbuddies.helpers
 
 import android.content.Context
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import com.pillpals.pillbuddies.data.model.Colors
 import com.pillpals.pillbuddies.data.model.Icons
 import com.pillpals.pillbuddies.data.model.MoodIcons
@@ -68,6 +69,9 @@ class DatabaseHelper {
             val base = ByteArrayOutputStream()
             icon.compress(Bitmap.CompressFormat.PNG, 100, base)
             return base.toByteArray()
+        }
+        fun convertByteArrayToBitmap(byteArray: ByteArray?): Bitmap{
+            return BitmapFactory.decodeByteArray(byteArray, 0, byteArray!!.size)
         }
     }
 }

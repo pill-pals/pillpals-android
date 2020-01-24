@@ -10,7 +10,14 @@ import android.widget.LinearLayout
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.flexbox.FlexboxLayout
 import com.pillpals.pillbuddies.R
+import com.pillpals.pillbuddies.data.model.Photos
+import com.pillpals.pillbuddies.helpers.DatabaseHelper.Companion.convertBitmapToByteArray
+import com.pillpals.pillbuddies.helpers.DatabaseHelper.Companion.convertByteArrayToBitmap
 import io.realm.Realm
+import io.realm.RealmObject
+import io.realm.RealmResults
+import java.util.*
+import kotlin.collections.ArrayList
 
 class DrugGallery: AppCompatActivity() {
 
@@ -31,6 +38,9 @@ class DrugGallery: AppCompatActivity() {
         bottomOptions.leftButton.text = "Select"
         bottomOptions.rightButton.text = "Cancel"
 
+        photoList.removeAllViews()
+        populateGallery(readAllData(Photos::class.java) as RealmResults<out Photos>)
+
         snapButton.setOnClickListener {
             dispatchTakePictureIntent()
         }
@@ -48,11 +58,28 @@ class DrugGallery: AppCompatActivity() {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == 1 && resultCode == RESULT_OK) {
             val imageBitmap = data!!.extras!!.get("data") as Bitmap
+            Realm.getDefaultInstance().executeTransaction{
+                var newPhoto = it.createObject(Photos::class.java, UUID.randomUUID().toString())
+                newPhoto.icon = convertBitmapToByteArray(imageBitmap)
+            }
+
+            photoList.removeAllViews()
+            populateGallery(readAllData(Photos::class.java) as RealmResults<out Photos>)
+        }
+    }
+
+    private fun populateGallery(photos: RealmResults<out Photos>){
+        for(photo in photos){
+            val newBmp = convertByteArrayToBitmap(photo.icon)
             val imageView = ImageView(this)
 
             imageView.layoutParams = LinearLayout.LayoutParams(100, 100)
-            imageView.setImageBitmap(imageBitmap)
+            imageView.setImageBitmap(newBmp)
             photoList.addView(imageView)
         }
+    }
+
+    private fun readAllData(realmClass: Class<out RealmObject>): RealmResults<out RealmObject> {
+        return Realm.getDefaultInstance().where(realmClass).findAll()
     }
 }
