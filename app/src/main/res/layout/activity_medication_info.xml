@@ -5,7 +5,7 @@
     android:id="@+id/frameLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.medications.medication_info.MedicationInfoFragment" >
+    tools:context=".ui.medications.medication_info.MedicationInfoActivity" >
 
     <androidx.cardview.widget.CardView
         android:id="@+id/iconBackground"
