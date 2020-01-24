@@ -1,6 +1,6 @@
 package com.pillpals.pillbuddies.ui.dashboard
 
-import android.graphics.Color
+import android.app.NotificationManager
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import com.pillpals.pillbuddies.R
@@ -45,9 +45,11 @@ import android.view.LayoutInflater
 import android.content.Context
 import android.content.Intent
 import android.content.res.ColorStateList
-import android.graphics.BlendMode
-import android.graphics.PorterDuff
+import android.graphics.*
+import android.graphics.drawable.BitmapDrawable
 import androidx.cardview.widget.CardView
+import androidx.core.app.NotificationManagerCompat
+import androidx.core.content.ContextCompat
 import com.pillpals.pillbuddies.helpers.DatabaseHelper
 import com.pillpals.pillbuddies.helpers.DatabaseHelper.Companion.obliterateSchedule
 import com.pillpals.pillbuddies.ui.AddDrugActivity
@@ -431,6 +433,7 @@ class DashboardFragment : Fragment() {
     private fun drugLogFunction(schedule: Schedules, time: Date = Date()) {
         val databaseSchedule =
             realm.where(Schedules::class.java).equalTo("uid", schedule.uid).findFirst()!!
+
         realm.executeTransaction {
             var newLog = it.createObject(Logs::class.java, UUID.randomUUID().toString())
             newLog.occurrence = time
@@ -440,6 +443,10 @@ class DashboardFragment : Fragment() {
             databaseSchedule.occurrence = DateHelper.addUnitToDate(schedule.occurrence!!, n, u)
             databaseSchedule.logs.add(newLog)
         }
+
+        val notificationManager = NotificationManagerCompat.from(context!!)
+
+        notificationManager.cancel(databaseSchedule.uid.hashCode())
     }
 
     private fun undoLog(log: Logs) {
