@@ -703,6 +703,17 @@
                         </androidx.cardview.widget.CardView>
                     </LinearLayout>
 
+                    <Button
+                        android:id="@+id/photoButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="12dp"
+                        android:layout_marginEnd="0dp"
+                        android:layout_gravity="center_horizontal"
+                        android:text="Add photo from gallery"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
                 </LinearLayout>
 
             </androidx.constraintlayout.widget.ConstraintLayout>
