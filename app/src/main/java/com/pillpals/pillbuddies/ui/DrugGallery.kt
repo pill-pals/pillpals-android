@@ -1,5 +1,6 @@
 package com.pillpals.pillbuddies.ui
 
+import android.app.Activity
 import android.content.Intent
 import android.graphics.Bitmap
 import android.os.Bundle
@@ -29,20 +30,31 @@ class DrugGallery: AppCompatActivity() {
         super.onCreate(savedInstanceState)
         Realm.init(this)
         setContentView(R.layout.activity_drug_gallery)
-        val list: MutableList<ImageView> = ArrayList()
+        //val list: MutableList<ImageView> = ArrayList()
 
         bottomOptions = findViewById(R.id.bottomOptions)
         photoList = findViewById(R.id.photoList)
         snapButton = findViewById(R.id.snapButton)
 
         bottomOptions.leftButton.text = "Select"
-        bottomOptions.rightButton.text = "Cancel"
+        bottomOptions.rightButton.text = "Back"
 
         photoList.removeAllViews()
         populateGallery(readAllData(Photos::class.java) as RealmResults<out Photos>)
 
         snapButton.setOnClickListener {
             dispatchTakePictureIntent()
+        }
+
+        /*bottomOptions.leftButton.setOnClickListener{
+            val resultIntent = Intent(this, EditMedicationIcon::class.java)
+            resultIntent.putExtra("image-string", imageDrawable)
+            setResult(Activity.RESULT_OK, resultIntent)
+            finish()
+        }*/
+
+        bottomOptions.rightButton.setOnClickListener{
+            finish()
         }
     }
 
@@ -73,7 +85,7 @@ class DrugGallery: AppCompatActivity() {
             val newBmp = convertByteArrayToBitmap(photo.icon)
             val imageView = ImageView(this)
 
-            imageView.layoutParams = LinearLayout.LayoutParams(100, 100)
+            imageView.layoutParams = LinearLayout.LayoutParams(200, 200)
             imageView.setImageBitmap(newBmp)
             photoList.addView(imageView)
         }
