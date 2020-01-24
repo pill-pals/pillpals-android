@@ -100,15 +100,12 @@ class StatisticsFragment : Fragment() {
             logDate.set(Calendar.SECOND, 0)
             logDate.set(Calendar.MINUTE, 0)
             when (timeSpanFilter.selectedValue) {
-                "Day" -> null // Sums in hours
-                "Week" -> logDate.set(Calendar.HOUR_OF_DAY, 0) // Sums in days
-                "Month" -> { // Sums in weeks
+                "Day" -> null // Avg in hours
+                "Week" -> logDate.set(Calendar.HOUR_OF_DAY, 0) // Avg in days
+                "Month" -> logDate.set(Calendar.HOUR_OF_DAY, 0) // Avg in days
+                "Year" -> { // Avg in Months
                     logDate.set(Calendar.HOUR_OF_DAY, 0)
-                    logDate.set(Calendar.DATE, 0)
-                }
-                "Year" -> { // Sums in weeks
-                    logDate.set(Calendar.HOUR_OF_DAY, 0)
-                    logDate.set(Calendar.DATE, 0)
+                    logDate.set(Calendar.DAY_OF_MONTH, 0)
                 }
             }
 
@@ -153,19 +150,22 @@ class StatisticsFragment : Fragment() {
             if (filteredMedications[it.name] != false) {
                 // Average logs on time across schedules
                 val timeCounts = averageLogsAcrossSchedules(it)
+                //Log.i("test", timeCounts.toString())
+                // Get timeCounts for data in time range only
+                val dataPoints = getTimeCountsInRange(timeCounts)
+                Log.i("test", dataPoints.toString())
+
                 //val schedule = it.schedules.first()!!
                 //val logs = schedule.logs!!
-
-                Log.i("test", timeCounts.toString())
 
                 val entries = ArrayList<BarEntry>()
                 dateStringList = ArrayList<String>()
 
-                for ((index, timeCount) in timeCounts.withIndex()) {
+                for ((index, dataPoints) in dataPoints.withIndex()) {
                     val timeDifference =
-                        abs(timeCount.offset) / 1000 / 60 // Minutes
+                        abs(dataPoints.value) / 1000 / 60 // Minutes
                     val dateString =
-                        SimpleDateFormat("dd-MM", Locale.getDefault()).format(timeCount.time)
+                        SimpleDateFormat("dd-MM", Locale.getDefault()).format(dataPoints.time)
                     dateStringList.add(dateString)
                     val currentEntry = BarEntry(index.toFloat(), timeDifference)
                     entries.add(currentEntry)
@@ -179,10 +179,122 @@ class StatisticsFragment : Fragment() {
         }
     }
 
+    private fun getTimeCountsInRange(timeCounts: List<TimeCount>):MutableList<DataPoint> {
+        //get the range and step unit.
+        //range will later be changeable from the buttons
+        var cal = Calendar.getInstance()
+        cal.time = Date()
+
+        var rangedTimeCounts = mutableListOf<DataPoint>()
+
+        when (timeSpanFilter.selectedValue) {
+            "Day" -> {
+                val calIterator = Calendar.getInstance()
+                calIterator.set(Calendar.MILLISECOND, 0)
+                calIterator.set(Calendar.SECOND, 0)
+                calIterator.set(Calendar.MINUTE, 0)
+                calIterator.set(Calendar.DAY_OF_YEAR, cal.get(Calendar.DAY_OF_YEAR))
+                calIterator.set(Calendar.WEEK_OF_YEAR, cal.get(Calendar.WEEK_OF_YEAR))
+                calIterator.set(Calendar.MONTH, cal.get(Calendar.MONTH))
+                calIterator.set(Calendar.YEAR, cal.get(Calendar.YEAR))
+
+                for (i in 1..24) {
+                    calIterator.set(Calendar.HOUR_OF_DAY, i)
+
+                    var existingTimeCount = timeCounts.filter {equalTimeUnit(it,calIterator,listOf(Calendar.HOUR_OF_DAY,Calendar.DAY_OF_YEAR,Calendar.YEAR))}.firstOrNull()
+
+                    if(existingTimeCount != null) {
+                        rangedTimeCounts.add(DataPoint(calIterator.time,existingTimeCount.offset))
+                    }
+                    else {
+                        rangedTimeCounts.add(DataPoint(calIterator.time,0f))
+                    }
+                }
+            }
+            "Week" -> {
+                val calIterator = Calendar.getInstance()
+                calIterator.set(Calendar.MILLISECOND, 0)
+                calIterator.set(Calendar.SECOND, 0)
+                calIterator.set(Calendar.MINUTE, 0)
+                calIterator.set(Calendar.HOUR, 0)
+                calIterator.set(Calendar.WEEK_OF_YEAR, cal.get(Calendar.WEEK_OF_YEAR))
+                calIterator.set(Calendar.MONTH, cal.get(Calendar.MONTH))
+                calIterator.set(Calendar.YEAR, cal.get(Calendar.YEAR))
+
+                for (i in 1..7) {
+                    calIterator.set(Calendar.DAY_OF_WEEK, i)
+
+                    var existingTimeCount = timeCounts.filter {equalTimeUnit(it,calIterator,listOf(Calendar.DAY_OF_WEEK,Calendar.DAY_OF_YEAR,Calendar.YEAR))}.firstOrNull()
+
+                    if(existingTimeCount != null) {
+                        rangedTimeCounts.add(DataPoint(calIterator.time,existingTimeCount.offset))
+                    }
+                    else {
+                        rangedTimeCounts.add(DataPoint(calIterator.time,0f))
+                    }
+                }
+            }
+            "Month" -> {
+                val calIterator = Calendar.getInstance()
+                calIterator.set(Calendar.MILLISECOND, 0)
+                calIterator.set(Calendar.SECOND, 0)
+                calIterator.set(Calendar.MINUTE, 0)
+                calIterator.set(Calendar.HOUR, 0)
+                calIterator.set(Calendar.WEEK_OF_YEAR, cal.get(Calendar.WEEK_OF_YEAR))
+                calIterator.set(Calendar.MONTH, cal.get(Calendar.MONTH))
+                calIterator.set(Calendar.DAY_OF_MONTH, 1)
+                calIterator.set(Calendar.YEAR, cal.get(Calendar.YEAR))
+
+                for (i in 1..cal.getActualMaximum(Calendar.DAY_OF_MONTH)) {
+                    Log.i("test",cal.get(Calendar.MONTH).toString())
+                    Log.i("test",cal.getActualMaximum(Calendar.DAY_OF_MONTH).toString())
+                    Log.i("test",cal.get(Calendar.DAY_OF_MONTH).toString())
+
+                    var existingTimeCount = timeCounts.filter {equalTimeUnit(it,calIterator,listOf(Calendar.DAY_OF_MONTH,Calendar.DAY_OF_YEAR,Calendar.YEAR))}.firstOrNull()
+
+                    if(existingTimeCount != null) {
+                        rangedTimeCounts.add(DataPoint(calIterator.time,existingTimeCount.offset))
+                    }
+                    else {
+                        rangedTimeCounts.add(DataPoint(calIterator.time,0f))
+                    }
+                    calIterator.time = DateHelper.addUnitToDate(calIterator.time,1,Calendar.DATE)
+                }
+            }
+            "Year" -> {
+                val calIterator = Calendar.getInstance()
+                calIterator.set(Calendar.MILLISECOND, 0)
+                calIterator.set(Calendar.SECOND, 0)
+                calIterator.set(Calendar.MINUTE, 0)
+                calIterator.set(Calendar.HOUR, 0)
+                calIterator.set(Calendar.DAY_OF_MONTH, 0)
+                calIterator.set(Calendar.MONTH, 0)
+                calIterator.set(Calendar.WEEK_OF_YEAR, 0)
+                calIterator.set(Calendar.YEAR, cal.get(Calendar.YEAR))
+
+                for (i in 0..11) {
+
+                    var existingTimeCount = timeCounts.filter {equalTimeUnit(it,calIterator,listOf(Calendar.MONTH,Calendar.YEAR))}.firstOrNull()
+
+                    if(existingTimeCount != null) {
+                        rangedTimeCounts.add(DataPoint(calIterator.time,existingTimeCount.offset))
+                    }
+                    else {
+                        rangedTimeCounts.add(DataPoint(calIterator.time,0f))
+                    }
+
+                    calIterator.time = DateHelper.addUnitToDate(calIterator.time,1,Calendar.MONTH)
+                }
+            }
+        }
+
+
+        return rangedTimeCounts
+    }
+
     private fun renderBarChart() {
-        val date = Date()
         val cal = Calendar.getInstance()
-        cal.time = date
+        cal.time = Date()
 
         graphHeader.text = when (timeSpanFilter.selectedValue) {
             "Day" -> cal.get(Calendar.DAY_OF_YEAR).toString()
@@ -286,8 +398,21 @@ class StatisticsFragment : Fragment() {
         }
         styleFilter(filter)
     }
+
+    private fun equalTimeUnit(timeCount: TimeCount, cal: Calendar, unitList: List<Int>):Boolean {
+        val calData = Calendar.getInstance()
+        calData.time = timeCount.time
+        var equalFlag = true
+        unitList.forEach{
+            if (calData.get(it) != cal.get(it)) {
+                equalFlag = false
+            }
+        }
+        return equalFlag
+    }
 }
 
 data class AverageLogOffset(val offset: Float, val time: Date)
 data class TimeCount(val time: Date, val count: Int, val offset: Float, val logs: List<Logs>)
+data class DataPoint(val time: Date, val value: Float)
 data class Filter(var view: LinearLayout, var selectedValue: String)
