@@ -2,6 +2,8 @@ package com.pillpals.pillbuddies.ui
 
 import android.app.Activity
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.graphics.Bitmap
 import android.os.Bundle
 import android.widget.LinearLayout
 import androidx.appcompat.app.AppCompatActivity
@@ -9,9 +11,12 @@ import com.pillpals.pillbuddies.R
 import com.pillpals.pillbuddies.data.model.Medications
 import com.pillpals.pillbuddies.helpers.DatabaseHelper
 import android.graphics.Color
+import android.provider.MediaStore
 import android.util.Log
 import android.view.View
+import android.widget.Button
 import android.widget.ImageView
+import android.widget.Toast
 import io.realm.Realm
 import androidx.cardview.widget.CardView
 import com.google.android.material.card.MaterialCardView
@@ -29,6 +34,7 @@ class EditMedicationIcon : AppCompatActivity() {
     public lateinit var heavyColorList : LinearLayout
     public lateinit var shadesColorList : LinearLayout
     public lateinit var firstIconList: LinearLayout
+    public lateinit var photoButton: Button
     var colorString = "#FFFFFF"
     var imageDrawable = "ic_pill_v5"
 
@@ -54,6 +60,7 @@ class EditMedicationIcon : AppCompatActivity() {
         shadesColorList = findViewById(R.id.shadesColorList)
 
         firstIconList = findViewById(R.id.firstIconList)
+        photoButton = findViewById(R.id.photoButton)
 
         addBorderToCards()
         for (i in 0 until lightColorList.getChildCount()) {
@@ -101,6 +108,15 @@ class EditMedicationIcon : AppCompatActivity() {
             card.setOnClickListener {
                 imageDrawable = image.tag as String
                 addBorderToCards()
+            }
+        }
+
+        photoButton.setOnClickListener {
+            if(this.getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA_ANY)){
+                val addIntent = Intent(this, DrugGallery::class.java)
+                startActivityForResult(addIntent, 1)
+            }else{
+                Toast.makeText(applicationContext, "Your device does not have a camera", Toast.LENGTH_SHORT).show()
             }
         }
 
@@ -176,4 +192,20 @@ class EditMedicationIcon : AppCompatActivity() {
             }
         }
     }
+
+    /*private fun dispatchTakePictureIntent() {
+        Intent(MediaStore.ACTION_IMAGE_CAPTURE).also { takePictureIntent ->
+            takePictureIntent.resolveActivity(packageManager)?.also {
+                startActivityForResult(takePictureIntent, 1)
+            }
+        }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == 1 && resultCode == RESULT_OK) {
+            val imageBitmap = data!!.extras!!.get("data") as Bitmap
+            //imageView.setImageBitmap(imageBitmap)
+        }
+    }*/
 }
