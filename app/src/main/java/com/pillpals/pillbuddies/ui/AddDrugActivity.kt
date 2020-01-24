@@ -40,8 +40,8 @@ import com.pillpals.pillbuddies.helpers.DatabaseHelper.Companion.getColorIDByStr
 import com.pillpals.pillbuddies.helpers.DatabaseHelper.Companion.getColorStringByID
 import com.pillpals.pillbuddies.helpers.DatabaseHelper.Companion.getIconByID
 import com.pillpals.pillbuddies.helpers.DatabaseHelper.Companion.getIconIDByString
-import com.pillpals.pillbuddies.helpers.DatabaseHelper.Companion.getRandomColorString
 import com.pillpals.pillbuddies.helpers.DatabaseHelper.Companion.getRandomIcon
+import com.pillpals.pillbuddies.helpers.DatabaseHelper.Companion.getRandomUniqueColorString
 import com.pillpals.pillbuddies.helpers.DatabaseHelper.Companion.getScheduleByUid
 import io.realm.RealmObject.deleteFromRealm
 
@@ -153,10 +153,7 @@ class AddDrugActivity : AppCompatActivity() {
                 }
             }
         } else {
-            colorString = getRandomColorString()
-            while(colorString == "#000000") { // Let's not let black be selected randomly
-                colorString = getRandomColorString()
-            }
+            colorString = getRandomUniqueColorString()  // Can't be black, otherwise tries to get an unused colour if possible
             imageDrawable = getRandomIcon()
             iconButton.backgroundTintList = ColorStateList.valueOf(Color.parseColor(colorString))
             iconButton.icon = resources.getDrawable(DatabaseHelper.getDrawableIconById(this, getIconIDByString(imageDrawable)), theme)

@@ -341,11 +341,9 @@ class SearchFragment : Fragment() {
                                                 val firstRoute = administrationRoutes.firstOrNull()
                                                 if(firstRoute != null) {
                                                     newCard.icon.setImageResource(administrationRouteToIcon(firstRoute.route_of_administration_name))
-                                                    var colorString =
-                                                        DatabaseHelper.getRandomColorString()
-                                                    while(colorString == "#000000") { // Let's not let black be selected randomly
-                                                        colorString = DatabaseHelper.getRandomColorString()
-                                                    }
+
+                                                    // Can't be black, otherwise tries to get an unused colour if possible
+                                                    var colorString = DatabaseHelper.getRandomUniqueColorString()
                                                     newCard.iconBackground.setCardBackgroundColor(Color.parseColor(colorString))
 
                                                     val administrationRoutesList = administrationRoutes.fold(listOf<String>()) { acc, it ->
