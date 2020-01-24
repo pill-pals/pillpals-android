@@ -16,6 +16,7 @@ import com.github.mikephil.charting.data.BarData
 import com.github.mikephil.charting.interfaces.datasets.IBarDataSet
 import android.icu.text.SimpleDateFormat
 import android.widget.CheckBox
+import android.widget.ImageButton
 import android.widget.LinearLayout
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.graphics.ColorUtils
@@ -35,24 +36,27 @@ import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
 import kotlin.math.abs
 import android.widget.TextView
+import java.time.format.TextStyle
 import java.util.Calendar
 
 class StatisticsFragment : Fragment() {
-
 
     private lateinit var realm: Realm
     private var repeatingColorHash = HashMap<String, Int>()
     public lateinit var legendStack: LinearLayout
     public lateinit var timeSpanFilterView: LinearLayout
     public lateinit var viewModeFilterView: LinearLayout
+    public lateinit var leftTimeButton: ImageButton
+    public lateinit var rightTimeButton: ImageButton
     public var filteredMedications = HashMap<String, Boolean>()
     public lateinit var barChart: BarChart
-    public lateinit var medications: RealmResults<out Medications>
+    public lateinit var medications: List<Medications>
     public var medicationSets = mutableListOf<IBarDataSet>()
-    var dateStringList = ArrayList<String>()
+    var axisStringList = ArrayList<String>()
     public lateinit var timeSpanFilter: Filter
     public lateinit var viewModeFilter: Filter
     public lateinit var graphHeader: TextView
+    public var currentDate = DateHelper.today()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -60,17 +64,22 @@ class StatisticsFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         super.onCreateView(inflater, container, savedInstanceState)
-        val view = inflater!!.inflate(R.layout.fragment_statistics, container, false)
+        val view = inflater.inflate(R.layout.fragment_statistics, container, false)
         val marker = MarkerView(this.context, R.layout.custom_marker_view)
 
         barChart = view.findViewById(R.id.chart) as BarChart
 
         realm = Realm.getDefaultInstance()
 
-        legendStack = view!!.findViewById(R.id.legendStack)
-        timeSpanFilterView = view!!.findViewById(R.id.timeSpanFilter)
-        viewModeFilterView = view!!.findViewById(R.id.viewModeFilter)
-        graphHeader = view!!.findViewById(R.id.graphHeader)
+        legendStack = view.findViewById(R.id.legendStack)
+        timeSpanFilterView = view.findViewById(R.id.timeSpanFilter)
+        viewModeFilterView = view.findViewById(R.id.viewModeFilter)
+        graphHeader = view.findViewById(R.id.graphHeader)
+        leftTimeButton = view.findViewById(R.id.leftTimeButton)
+        rightTimeButton = view.findViewById(R.id.rightTimeButton)
+
+        leftTimeButton.setOnClickListener{timeButtonClick(-1)}
+        rightTimeButton.setOnClickListener{timeButtonClick(1)}
 
         timeSpanFilter = Filter(timeSpanFilterView,"Day")
         viewModeFilter = Filter(viewModeFilterView,"Timeline")
@@ -78,7 +87,8 @@ class StatisticsFragment : Fragment() {
         setupFilter(timeSpanFilter)
         setupFilter(viewModeFilter)
 
-        medications = DatabaseHelper.readAllData(Medications::class.java) as RealmResults<out Medications>
+        val allMedications = DatabaseHelper.readAllData(Medications::class.java) as RealmResults<out Medications>
+        medications = allMedications.filter{!it.deleted}
 
         determineRepeatingColors()
         populateLegendStack()
@@ -93,25 +103,21 @@ class StatisticsFragment : Fragment() {
         var allLogs = schedules.fold(listOf<Logs>()) { acc, it -> acc.plus(it.logs) }
         allLogs = allLogs.sortedBy { it.due }
 
-        val timeCount = allLogs.fold(mutableListOf<TimeCount>()) { acc, it ->
+        return allLogs.fold(mutableListOf<TimeCount>()) { acc, it ->
             val logDate = Calendar.getInstance()
             logDate.time = it.due!!
             logDate.set(Calendar.MILLISECOND, 0)
             logDate.set(Calendar.SECOND, 0)
             logDate.set(Calendar.MINUTE, 0)
             when (timeSpanFilter.selectedValue) {
-                "Day" -> null // Sums in hours
-                "Week" -> logDate.set(Calendar.HOUR_OF_DAY, 0) // Sums in days
-                "Month" -> { // Sums in weeks
+                "Day" -> null // Avg in hours
+                "Week" -> logDate.set(Calendar.HOUR_OF_DAY, 0) // Avg in days
+                "Month" -> logDate.set(Calendar.HOUR_OF_DAY, 0) // Avg in days
+                "Year" -> { // Avg in Months
                     logDate.set(Calendar.HOUR_OF_DAY, 0)
-                    logDate.set(Calendar.DATE, 0)
-                }
-                "Year" -> { // Sums in weeks
-                    logDate.set(Calendar.HOUR_OF_DAY, 0)
-                    logDate.set(Calendar.DATE, 0)
+                    logDate.set(Calendar.DAY_OF_MONTH, 1)
                 }
             }
-
             val existingTimeCount = getTimeCount(logDate.time, acc)
 
             if(existingTimeCount != null) {
@@ -129,8 +135,6 @@ class StatisticsFragment : Fragment() {
 
             acc
         }
-
-        return timeCount
     }
 
     private fun populateLegendStack() {
@@ -153,20 +157,21 @@ class StatisticsFragment : Fragment() {
             if (filteredMedications[it.name] != false) {
                 // Average logs on time across schedules
                 val timeCounts = averageLogsAcrossSchedules(it)
+                //Log.i("test", timeCounts.toString())
+                // Get timeCounts for data in time range only
+                val dataPoints = getTimeCountsInRange(timeCounts)
+                Log.i("test", dataPoints.toString())
+
                 //val schedule = it.schedules.first()!!
                 //val logs = schedule.logs!!
 
-                Log.i("test", timeCounts.toString())
-
                 val entries = ArrayList<BarEntry>()
-                dateStringList = ArrayList<String>()
+                axisStringList = ArrayList<String>()
 
-                for ((index, timeCount) in timeCounts.withIndex()) {
-                    val timeDifference =
-                        abs(timeCount.offset) / 1000 / 60 // Minutes
-                    val dateString =
-                        SimpleDateFormat("dd-MM", Locale.getDefault()).format(timeCount.time)
-                    dateStringList.add(dateString)
+                for ((index, dataPoints) in dataPoints.withIndex()) {
+                    val timeDifference = abs(dataPoints.value) / 1000 / 60 // Minutes
+                    val dateString = getAxisString(dataPoints)
+                    axisStringList.add(dateString)
                     val currentEntry = BarEntry(index.toFloat(), timeDifference)
                     entries.add(currentEntry)
                 }
@@ -179,23 +184,148 @@ class StatisticsFragment : Fragment() {
         }
     }
 
-    private fun renderBarChart() {
-        val date = Date()
-        val cal = Calendar.getInstance()
-        cal.time = date
+    private fun getAxisString(dataPoints: DataPoint):String {
+        var cal = Calendar.getInstance()
+        cal.time = dataPoints.time
 
+        return when (timeSpanFilter.selectedValue) {
+            "Day" -> cal.get(Calendar.HOUR_OF_DAY).toString()
+            "Week" -> cal.getDisplayName(Calendar.DAY_OF_WEEK,Calendar.SHORT,Locale.US)
+            "Month" -> cal.get(Calendar.DAY_OF_MONTH).toString()
+            "Year" -> cal.getDisplayName(Calendar.MONTH,Calendar.SHORT,Locale.US)
+            else -> ""
+        }
+    }
+
+    private fun getTimeCountsInRange(timeCounts: List<TimeCount>):MutableList<DataPoint> {
+        //get the range and step unit.
+        //range will later be changeable from the buttons
+        var cal = Calendar.getInstance()
+        cal.time = currentDate
+
+        var rangedTimeCounts = mutableListOf<DataPoint>()
+
+        when (timeSpanFilter.selectedValue) {
+            "Day" -> {
+                val calIterator = Calendar.getInstance()
+                calIterator.set(Calendar.MILLISECOND, 0)
+                calIterator.set(Calendar.SECOND, 0)
+                calIterator.set(Calendar.MINUTE, 0)
+                calIterator.set(Calendar.DAY_OF_YEAR, cal.get(Calendar.DAY_OF_YEAR))
+                calIterator.set(Calendar.MONTH, cal.get(Calendar.MONTH))
+                calIterator.set(Calendar.YEAR, cal.get(Calendar.YEAR))
+
+                for (i in 1..24) {
+                    calIterator.set(Calendar.HOUR_OF_DAY, i)
+
+                    var existingTimeCount = timeCounts.filter {equalTimeUnit(it,calIterator,listOf(Calendar.HOUR_OF_DAY,Calendar.DAY_OF_YEAR,Calendar.YEAR))}.firstOrNull()
+
+                    if(existingTimeCount != null) {
+                        rangedTimeCounts.add(DataPoint(calIterator.time,existingTimeCount.offset))
+                    }
+                    else {
+                        rangedTimeCounts.add(DataPoint(calIterator.time,0f))
+                    }
+                }
+            }
+            "Week" -> {
+                val calIterator = Calendar.getInstance()
+                calIterator.set(Calendar.MILLISECOND, 0)
+                calIterator.set(Calendar.SECOND, 0)
+                calIterator.set(Calendar.MINUTE, 0)
+                calIterator.set(Calendar.HOUR, 0)
+                calIterator.set(Calendar.WEEK_OF_YEAR, cal.get(Calendar.WEEK_OF_YEAR))
+                calIterator.set(Calendar.MONTH, cal.get(Calendar.MONTH))
+                calIterator.set(Calendar.YEAR, cal.get(Calendar.YEAR))
+
+                for (i in 1..7) {
+                    calIterator.set(Calendar.DAY_OF_WEEK, i)
+
+                    var existingTimeCount = timeCounts.filter {equalTimeUnit(it,calIterator,listOf(Calendar.DAY_OF_WEEK,Calendar.DAY_OF_YEAR,Calendar.YEAR))}.firstOrNull()
+
+                    if(existingTimeCount != null) {
+                        rangedTimeCounts.add(DataPoint(calIterator.time,existingTimeCount.offset))
+                    }
+                    else {
+                        rangedTimeCounts.add(DataPoint(calIterator.time,0f))
+                    }
+                }
+            }
+            "Month" -> {
+                val calIterator = Calendar.getInstance()
+                calIterator.set(Calendar.MILLISECOND, 0)
+                calIterator.set(Calendar.SECOND, 0)
+                calIterator.set(Calendar.MINUTE, 0)
+                calIterator.set(Calendar.HOUR, 0)
+                calIterator.set(Calendar.WEEK_OF_YEAR, cal.get(Calendar.WEEK_OF_YEAR))
+                calIterator.set(Calendar.MONTH, cal.get(Calendar.MONTH))
+                calIterator.set(Calendar.DAY_OF_MONTH, 1)
+                calIterator.set(Calendar.YEAR, cal.get(Calendar.YEAR))
+
+                for (i in 1..cal.getActualMaximum(Calendar.DAY_OF_MONTH)) {
+
+                    var existingTimeCount = timeCounts.filter {equalTimeUnit(it,calIterator,listOf(Calendar.DAY_OF_MONTH,Calendar.DAY_OF_YEAR,Calendar.YEAR))}.firstOrNull()
+
+                    if(existingTimeCount != null) {
+                        rangedTimeCounts.add(DataPoint(calIterator.time,existingTimeCount.offset))
+                    }
+                    else {
+                        rangedTimeCounts.add(DataPoint(calIterator.time,0f))
+                    }
+                    calIterator.time = DateHelper.addUnitToDate(calIterator.time,1,Calendar.DATE)
+                }
+            }
+            "Year" -> {
+                val calIterator = Calendar.getInstance()
+                calIterator.set(Calendar.MILLISECOND, 0)
+                calIterator.set(Calendar.SECOND, 0)
+                calIterator.set(Calendar.MINUTE, 0)
+                calIterator.set(Calendar.HOUR_OF_DAY, 1)
+                calIterator.set(Calendar.DAY_OF_YEAR, 1)
+                calIterator.set(Calendar.WEEK_OF_YEAR, 1)
+                calIterator.set(Calendar.YEAR, cal.get(Calendar.YEAR))
+
+                for (i in 0..11) {
+                    calIterator.set(Calendar.MONTH, i)
+
+                    var existingTimeCount = timeCounts.filter {equalTimeUnit(it,calIterator,listOf(Calendar.MONTH,Calendar.YEAR))}.firstOrNull()
+
+                    if(existingTimeCount != null) {
+                        rangedTimeCounts.add(DataPoint(calIterator.time,existingTimeCount.offset))
+                    }
+                    else {
+                        rangedTimeCounts.add(DataPoint(calIterator.time,0f))
+                    }
+                }
+            }
+        }
+
+
+        return rangedTimeCounts
+    }
+
+    private fun renderBarChart() {
+        //set the header of the chart
+        val cal = Calendar.getInstance()
+        cal.time = currentDate
+        val firstDayOfWeekCal = Calendar.getInstance()
+        firstDayOfWeekCal.time = cal.time
+        firstDayOfWeekCal.set(Calendar.DAY_OF_WEEK,firstDayOfWeekCal.firstDayOfWeek)
+        val lastDayOfWeekCal = Calendar.getInstance()
+        lastDayOfWeekCal.time = firstDayOfWeekCal.time
+        lastDayOfWeekCal.time = DateHelper.addUnitToDate(lastDayOfWeekCal.time,6,Calendar.DATE)
         graphHeader.text = when (timeSpanFilter.selectedValue) {
-            "Day" -> cal.get(Calendar.DAY_OF_YEAR).toString()
-            "Week" -> cal.get(Calendar.WEEK_OF_YEAR).toString()
-            "Month" -> cal.get(Calendar.MONTH).toString()
+            "Day" -> cal.getDisplayName(Calendar.MONTH,Calendar.SHORT,Locale.US) + " " + cal.get(Calendar.DAY_OF_MONTH).toString() + ", " + cal.get(Calendar.YEAR).toString()
+            "Week" -> firstDayOfWeekCal.getDisplayName(Calendar.MONTH,Calendar.SHORT,Locale.US) + " " + firstDayOfWeekCal.get(Calendar.DAY_OF_MONTH).toString() + " - " + lastDayOfWeekCal.getDisplayName(Calendar.MONTH,Calendar.SHORT,Locale.US) + " " + lastDayOfWeekCal.get(Calendar.DAY_OF_MONTH).toString()
+            "Month" -> cal.getDisplayName(Calendar.MONTH,Calendar.LONG,Locale.US) + " " + cal.get(Calendar.YEAR).toString()
             "Year" -> cal.get(Calendar.YEAR).toString()
-            else -> cal.get(Calendar.DAY_OF_YEAR).toString()
+            else -> ""
         }
 
         determineMedicationSetData()
         barChart.setTouchEnabled(true)
         barChart.setPinchZoom(true)
-        barChart.xAxis.valueFormatter = IndexAxisValueFormatter(dateStringList)
+        barChart.xAxis.valueFormatter = IndexAxisValueFormatter(axisStringList)
         barChart.setDrawMarkers(true)
         //barChart.marker = marker
         barChart.xAxis.position = XAxis.XAxisPosition.BOTTOM
@@ -281,13 +411,43 @@ class StatisticsFragment : Fragment() {
             it.setOnClickListener(){
                 filter.selectedValue = it.tag.toString()
                 styleFilter(filter)
+                resetCurrentDate()
                 renderBarChart()
             }
         }
         styleFilter(filter)
     }
+
+    private fun equalTimeUnit(timeCount: TimeCount, cal: Calendar, unitList: List<Int>):Boolean {
+        val calData = Calendar.getInstance()
+        calData.time = timeCount.time
+        var equalFlag = true
+        unitList.forEach{
+            if (calData.get(it) != cal.get(it)) {
+                equalFlag = false
+            }
+        }
+        return equalFlag
+    }
+
+    private fun timeButtonClick(direction: Int){
+        currentDate = DateHelper.addUnitToDate(currentDate,direction,when(timeSpanFilter.selectedValue){
+            "Day"->Calendar.DATE
+            "Week"->Calendar.WEEK_OF_YEAR
+            "Month"->Calendar.MONTH
+            "Year"->Calendar.YEAR
+            else->Calendar.DATE
+        })
+
+        renderBarChart()
+    }
+
+    private fun resetCurrentDate(){
+        currentDate = Date()
+    }
 }
 
 data class AverageLogOffset(val offset: Float, val time: Date)
 data class TimeCount(val time: Date, val count: Int, val offset: Float, val logs: List<Logs>)
+data class DataPoint(val time: Date, val value: Float)
 data class Filter(var view: LinearLayout, var selectedValue: String)

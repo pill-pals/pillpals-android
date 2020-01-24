@@ -59,12 +59,12 @@
                         android:id="@+id/imageView"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:background="@color/colorLightGrey"
+                        android:layout_marginStart="76dp"
+                        android:background="#4DF2F2F2"
                         android:translationZ="100dp"
                         app:layout_constraintEnd_toEndOf="@+id/iconButton"
                         app:layout_constraintTop_toTopOf="@id/iconButton"
-                        app:srcCompat="@drawable/ic_edit_black_24dp"
-                        android:layout_marginStart="76dp"/>
+                        app:srcCompat="@drawable/ic_edit_black_24dp" />
 
                 </RelativeLayout>
 
