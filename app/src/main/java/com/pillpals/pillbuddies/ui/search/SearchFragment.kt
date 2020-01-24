@@ -1,5 +1,6 @@
 package com.pillpals.pillbuddies.ui.search
 
+import android.content.Intent
 import android.content.res.ColorStateList
 import android.database.Cursor
 import android.database.MatrixCursor
@@ -23,6 +24,8 @@ import com.pillpals.pillbuddies.helpers.DatabaseHelper
 import com.pillpals.pillbuddies.helpers.SearchSuggestionCursor
 import com.pillpals.pillbuddies.helpers.margin
 import com.pillpals.pillbuddies.ui.DrugCard
+import com.pillpals.pillbuddies.ui.EditMedicationIcon
+import com.pillpals.pillbuddies.ui.medications.medication_info.MedicationInfoActivity
 import io.realm.RealmResults
 import kotlinx.android.synthetic.main.drug_card.view.*
 import okhttp3.*
@@ -283,7 +286,9 @@ class SearchFragment : Fragment() {
                         newCard.drugCode = firstDrugProduct.drug_code
                         // Add button action here, using drug code ^
                         newCard.button.setOnClickListener {
-                            Log.i("Drug Code", firstDrugProduct.drug_code.toString())
+                            val infoIntent = Intent(outerContext.context, MedicationInfoActivity::class.java)
+                            infoIntent.putExtra("drug-code", firstDrugProduct.drug_code)
+                            startActivityForResult(infoIntent, 1)
                         }
 
                         upcomingDrugCards.add(newCard)
