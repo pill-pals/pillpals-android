@@ -19,12 +19,19 @@ import com.google.android.material.tabs.TabLayout
 import com.pillpals.pillbuddies.R
 import com.pillpals.pillbuddies.ui.AddDrugActivity
 import io.realm.Realm
+import androidx.core.app.ComponentActivity.ExtraData
+import androidx.core.content.ContextCompat.getSystemService
+import android.icu.lang.UCharacter.GraphemeClusterBreak.T
+import android.view.MenuItem
+import androidx.core.app.NavUtils
+
 
 class MedicationInfoActivity : AppCompatActivity() {
 
     public lateinit var tabLayout: TabLayout
     public lateinit var tabViewPager: ViewPager
     public lateinit var addButton: Button
+    public var drugCode: Int = 0
 
     private var tabFragments: List<MedicationInfoTextFragment> = mutableListOf(
         MedicationInfoTextFragment(),
@@ -50,10 +57,13 @@ class MedicationInfoActivity : AppCompatActivity() {
         Realm.init(this)
         setContentView(R.layout.activity_medication_info)
 
+        supportActionBar!!.setDisplayHomeAsUpEnabled(true)
+
         addButton = findViewById(R.id.addButton)
         tabLayout = findViewById(R.id.tabLayout)
         tabViewPager = findViewById(R.id.tabViewPager)
         tabLayout.setupWithViewPager(tabViewPager)
+        drugCode = intent.getIntExtra("drug-code", 0)
 
         tabPagerAdapter = TabPagerAdapter(supportFragmentManager)
         tabViewPager.adapter = tabPagerAdapter
@@ -110,5 +120,13 @@ class MedicationInfoActivity : AppCompatActivity() {
         override fun getPageTitle(position: Int) : String {
             return tabTitles[position]
         }
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when (item.itemId) {
+            android.R.id.home -> finish()
+            else -> return super.onOptionsItemSelected(item)
+        }
+        return true
     }
 }

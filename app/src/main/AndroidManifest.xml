@@ -46,11 +46,19 @@
             </intent-filter>
         </receiver>
 
-        <activity android:name=".ui.AddDrugActivity"></activity>
+        <activity android:name=".ui.AddDrugActivity">
 
-        <activity android:name=".ui.EditMedicationIcon"></activity>
+        </activity>
 
-        <activity android:name=".ui.medications.medication_info.MedicationInfoActivity"></activity>
+        <activity android:name=".ui.EditMedicationIcon">
+
+        </activity>
+
+        <activity android:name=".ui.medications.medication_info.MedicationInfoActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".ui.MainActivity" />
+        </activity>
     </application>
 
 </manifest>
