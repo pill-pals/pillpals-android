@@ -49,6 +49,8 @@
         <activity android:name=".ui.AddDrugActivity"></activity>
 
         <activity android:name=".ui.EditMedicationIcon"></activity>
+
+        <activity android:name=".ui.medications.medication_info.MedicationInfoActivity"></activity>
     </application>
 
 </manifest>
