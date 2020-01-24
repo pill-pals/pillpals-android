@@ -10,6 +10,7 @@ import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.LinearLayout.LayoutParams
 import android.widget.TextView
+import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentStatePagerAdapter
 import androidx.viewpager.widget.ViewPager
@@ -19,13 +20,11 @@ import com.pillpals.pillbuddies.R
 import com.pillpals.pillbuddies.ui.AddDrugActivity
 import io.realm.Realm
 
-class MedicationInfoFragment : Fragment() {
+class MedicationInfoActivity : AppCompatActivity() {
 
     public lateinit var tabLayout: TabLayout
     public lateinit var tabViewPager: ViewPager
     public lateinit var addButton: Button
-
-    private lateinit var realm: Realm
 
     private var tabFragments: List<MedicationInfoTextFragment> = mutableListOf(
         MedicationInfoTextFragment(),
@@ -46,29 +45,26 @@ class MedicationInfoFragment : Fragment() {
     private var headerSize = 20f
     private var bodySize = 16f
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        super.onCreateView(inflater, container, savedInstanceState)
-        val view = inflater!!.inflate(R.layout.fragment_medication_info, container,false)
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        Realm.init(this)
+        setContentView(R.layout.activity_medication_info)
 
-        realm = Realm.getDefaultInstance()
-
-        addButton = view!!.findViewById(R.id.addButton)
-        tabLayout = view!!.findViewById(R.id.tabLayout)
-        tabViewPager = view!!.findViewById(R.id.tabViewPager)
+        addButton = findViewById(R.id.addButton)
+        tabLayout = findViewById(R.id.tabLayout)
+        tabViewPager = findViewById(R.id.tabViewPager)
         tabLayout.setupWithViewPager(tabViewPager)
 
-        tabPagerAdapter = TabPagerAdapter(activity!!.supportFragmentManager)
+        tabPagerAdapter = TabPagerAdapter(supportFragmentManager)
         tabViewPager.adapter = tabPagerAdapter
         tabViewPager.offscreenPageLimit = 3
 
         textParams.topMargin = textTopMargin
 
         addButton.setOnClickListener {
-            val intent = Intent(context, AddDrugActivity::class.java)
+            val intent = Intent(this, AddDrugActivity::class.java)
             startActivityForResult(intent, 1)
         }
-
-        return view
     }
 
     //Assumes that the headers and bodyText lists are ordered and have indices that correspond with each other 1:1
@@ -94,7 +90,7 @@ class MedicationInfoFragment : Fragment() {
     }
 
     private fun appendText(layout: ViewGroup, text: String, fontSize: Float) {
-        var newView = TextView(context)
+        var newView = TextView(this)
         newView.text = text
         newView.textSize = fontSize
         newView.layoutParams = textParams
