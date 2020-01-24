@@ -11,6 +11,8 @@ import com.pillpals.pillbuddies.data.model.Schedules
 import io.realm.Realm
 import io.realm.RealmObject
 import io.realm.RealmResults
+import kotlin.random.Random
+import kotlin.random.nextInt
 import java.io.ByteArrayOutputStream
 
 class DatabaseHelper {
@@ -32,6 +34,20 @@ class DatabaseHelper {
         }
         fun getRandomColorString(): String {
             return Realm.getDefaultInstance().where(Colors::class.java).findAll().random().color
+        }
+        // Gets a random color that hasn't been used before if possible, otherwise gives a random one that has been used
+        // Never gives black (#000000)
+        fun getRandomUniqueColorString(): String {
+            var possibleColors = (0 until Realm.getDefaultInstance().where(Colors::class.java).count().toInt()).toMutableList()
+            possibleColors.remove(2) // Removes black from the list of possible colours
+            for (medication in readAllData(Medications::class.java) as RealmResults<Medications>) {
+                possibleColors.remove(medication.color_id)
+            }
+            if (possibleColors.size > 0) {
+                return getColorStringByID(possibleColors[Random.nextInt(possibleColors.size)])
+            } else {
+                return getRandomColorString()
+            }
         }
         fun deleteSchedules(schedules: List<Schedules>) {
             for (schedule in schedules) {
