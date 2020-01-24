@@ -41,7 +41,6 @@ import java.util.Calendar
 
 class StatisticsFragment : Fragment() {
 
-
     private lateinit var realm: Realm
     private var repeatingColorHash = HashMap<String, Int>()
     public lateinit var legendStack: LinearLayout
@@ -51,7 +50,7 @@ class StatisticsFragment : Fragment() {
     public lateinit var rightTimeButton: ImageButton
     public var filteredMedications = HashMap<String, Boolean>()
     public lateinit var barChart: BarChart
-    public lateinit var medications: RealmResults<out Medications>
+    public lateinit var medications: List<Medications>
     public var medicationSets = mutableListOf<IBarDataSet>()
     var axisStringList = ArrayList<String>()
     public lateinit var timeSpanFilter: Filter
@@ -65,22 +64,22 @@ class StatisticsFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         super.onCreateView(inflater, container, savedInstanceState)
-        val view = inflater!!.inflate(R.layout.fragment_statistics, container, false)
+        val view = inflater.inflate(R.layout.fragment_statistics, container, false)
         val marker = MarkerView(this.context, R.layout.custom_marker_view)
 
         barChart = view.findViewById(R.id.chart) as BarChart
 
         realm = Realm.getDefaultInstance()
 
-        legendStack = view!!.findViewById(R.id.legendStack)
-        timeSpanFilterView = view!!.findViewById(R.id.timeSpanFilter)
-        viewModeFilterView = view!!.findViewById(R.id.viewModeFilter)
-        graphHeader = view!!.findViewById(R.id.graphHeader)
-        leftTimeButton = view!!.findViewById(R.id.leftTimeButton)
-        rightTimeButton = view!!.findViewById(R.id.rightTimeButton)
+        legendStack = view.findViewById(R.id.legendStack)
+        timeSpanFilterView = view.findViewById(R.id.timeSpanFilter)
+        viewModeFilterView = view.findViewById(R.id.viewModeFilter)
+        graphHeader = view.findViewById(R.id.graphHeader)
+        leftTimeButton = view.findViewById(R.id.leftTimeButton)
+        rightTimeButton = view.findViewById(R.id.rightTimeButton)
 
-        leftTimeButton.setOnClickListener({timeButtonClick(-1)})
-        rightTimeButton.setOnClickListener({timeButtonClick(1)})
+        leftTimeButton.setOnClickListener{timeButtonClick(-1)}
+        rightTimeButton.setOnClickListener{timeButtonClick(1)}
 
         timeSpanFilter = Filter(timeSpanFilterView,"Day")
         viewModeFilter = Filter(viewModeFilterView,"Timeline")
@@ -88,7 +87,8 @@ class StatisticsFragment : Fragment() {
         setupFilter(timeSpanFilter)
         setupFilter(viewModeFilter)
 
-        medications = DatabaseHelper.readAllData(Medications::class.java) as RealmResults<out Medications>
+        val allMedications = DatabaseHelper.readAllData(Medications::class.java) as RealmResults<out Medications>
+        medications = allMedications.filter{!it.deleted}
 
         determineRepeatingColors()
         populateLegendStack()
@@ -103,7 +103,7 @@ class StatisticsFragment : Fragment() {
         var allLogs = schedules.fold(listOf<Logs>()) { acc, it -> acc.plus(it.logs) }
         allLogs = allLogs.sortedBy { it.due }
 
-        val timeCount = allLogs.fold(mutableListOf<TimeCount>()) { acc, it ->
+        return allLogs.fold(mutableListOf<TimeCount>()) { acc, it ->
             val logDate = Calendar.getInstance()
             logDate.time = it.due!!
             logDate.set(Calendar.MILLISECOND, 0)
@@ -135,8 +135,6 @@ class StatisticsFragment : Fragment() {
 
             acc
         }
-
-        return timeCount
     }
 
     private fun populateLegendStack() {
