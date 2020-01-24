@@ -1,6 +1,7 @@
 package com.pillpals.pillbuddies.helpers
 
 import android.content.Context
+import android.graphics.Bitmap
 import com.pillpals.pillbuddies.data.model.Colors
 import com.pillpals.pillbuddies.data.model.Icons
 import com.pillpals.pillbuddies.data.model.MoodIcons
@@ -9,6 +10,7 @@ import com.pillpals.pillbuddies.data.model.Schedules
 import io.realm.Realm
 import io.realm.RealmObject
 import io.realm.RealmResults
+import java.io.ByteArrayOutputStream
 
 class DatabaseHelper {
     companion object{
@@ -61,6 +63,11 @@ class DatabaseHelper {
             val icon = getIconByID(id)
             return context.getResources()
                 .getIdentifier("drawable/$icon", null, context.packageName)
+        }
+        fun convertBitmapToByteArray(icon: Bitmap): ByteArray{
+            val base = ByteArrayOutputStream()
+            icon.compress(Bitmap.CompressFormat.PNG, 100, base)
+            return base.toByteArray()
         }
     }
 }
