@@ -163,7 +163,7 @@ class StatisticsFragment : Fragment() {
 
                 for ((index, dataPoints) in dataPoints.withIndex()) {
                     val timeDifference = abs(dataPoints.value) / 1000 / 60 // Minutes
-                    val dateString = getAxisString(index, dataPoints)
+                    val dateString = getAxisString(dataPoints)
                     axisStringList.add(dateString)
                     val currentEntry = BarEntry(index.toFloat(), timeDifference)
                     entries.add(currentEntry)
@@ -177,7 +177,7 @@ class StatisticsFragment : Fragment() {
         }
     }
 
-    private fun getAxisString(index: Int, dataPoints: DataPoint):String {
+    private fun getAxisString(dataPoints: DataPoint):String {
         var cal = Calendar.getInstance()
         cal.time = dataPoints.time
 
@@ -282,18 +282,14 @@ class StatisticsFragment : Fragment() {
                 for (i in 0..11) {
                     calIterator.set(Calendar.MONTH, i)
 
-                    //Log.i("test",calIterator.time.toString())
                     var existingTimeCount = timeCounts.filter {equalTimeUnit(it,calIterator,listOf(Calendar.MONTH,Calendar.YEAR))}.firstOrNull()
 
                     if(existingTimeCount != null) {
-                        //Log.i("text","logfound")
                         rangedTimeCounts.add(DataPoint(calIterator.time,existingTimeCount.offset))
                     }
                     else {
                         rangedTimeCounts.add(DataPoint(calIterator.time,0f))
                     }
-
-                    //calIterator.time = DateHelper.addUnitToDate(calIterator.time,1,Calendar.MONTH)
                 }
             }
         }
@@ -305,13 +301,20 @@ class StatisticsFragment : Fragment() {
     private fun renderBarChart() {
         val cal = Calendar.getInstance()
         cal.time = Date()
+        val firstDayOfWeekCal = Calendar.getInstance()
+        firstDayOfWeekCal.time = cal.time
+        firstDayOfWeekCal.set(Calendar.DAY_OF_WEEK,firstDayOfWeekCal.firstDayOfWeek)
+        val lastDayOfWeekCal = Calendar.getInstance()
+        lastDayOfWeekCal.time = firstDayOfWeekCal.time
+        lastDayOfWeekCal.time = DateHelper.addUnitToDate(lastDayOfWeekCal.time,6,Calendar.DATE)
+
 
         graphHeader.text = when (timeSpanFilter.selectedValue) {
-            "Day" -> cal.get(Calendar.DAY_OF_YEAR).toString()
-            "Week" -> cal.get(Calendar.WEEK_OF_YEAR).toString()
-            "Month" -> cal.get(Calendar.MONTH).toString()
+            "Day" -> cal.getDisplayName(Calendar.MONTH,Calendar.SHORT,Locale.US) + " " + cal.get(Calendar.DAY_OF_MONTH).toString() + ", " + cal.get(Calendar.YEAR).toString()
+            "Week" -> firstDayOfWeekCal.getDisplayName(Calendar.MONTH,Calendar.SHORT,Locale.US) + " " + firstDayOfWeekCal.get(Calendar.DAY_OF_MONTH).toString() + " - " + lastDayOfWeekCal.getDisplayName(Calendar.MONTH,Calendar.SHORT,Locale.US) + " " + lastDayOfWeekCal.get(Calendar.DAY_OF_MONTH).toString()
+            "Month" -> cal.getDisplayName(Calendar.MONTH,Calendar.LONG,Locale.US) + " " + cal.get(Calendar.YEAR).toString()
             "Year" -> cal.get(Calendar.YEAR).toString()
-            else -> cal.get(Calendar.DAY_OF_YEAR).toString()
+            else -> ""
         }
 
         determineMedicationSetData()
