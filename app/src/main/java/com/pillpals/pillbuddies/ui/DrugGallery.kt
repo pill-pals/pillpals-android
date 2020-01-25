@@ -9,6 +9,7 @@ import android.widget.Button
 import android.widget.ImageView
 import android.widget.LinearLayout
 import androidx.appcompat.app.AppCompatActivity
+import androidx.cardview.widget.CardView
 import com.google.android.flexbox.FlexboxLayout
 import com.pillpals.pillbuddies.R
 import com.pillpals.pillbuddies.data.model.Photos
@@ -83,11 +84,13 @@ class DrugGallery: AppCompatActivity() {
     private fun populateGallery(photos: RealmResults<out Photos>){
         for(photo in photos){
             val newBmp = convertByteArrayToBitmap(photo.icon)
-            val imageView = ImageView(this)
+            val galleryIcon = GalleryIconCard(this)
 
-            imageView.layoutParams = LinearLayout.LayoutParams(200, 200)
-            imageView.setImageBitmap(newBmp)
-            photoList.addView(imageView)
+            galleryIcon.image.setImageBitmap(newBmp)
+            galleryIcon.setOnClickListener {
+                //galleryIcon.active = true
+            }
+            photoList.addView(galleryIcon)
         }
     }
 
