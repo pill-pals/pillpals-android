@@ -4,6 +4,7 @@ import android.app.PendingIntent
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.res.Resources
 import android.graphics.*
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
@@ -22,6 +23,8 @@ import android.opengl.ETC1.getWidth
 import android.graphics.drawable.BitmapDrawable
 import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
+import com.pillpals.pillbuddies.helpers.DatabaseHelper.Companion.convertByteArrayToBitmap
+import com.pillpals.pillbuddies.helpers.DatabaseHelper.Companion.getByteArrayById
 import com.pillpals.pillbuddies.helpers.DatabaseHelper.Companion.getColorStringByID
 import com.pillpals.pillbuddies.helpers.DatabaseHelper.Companion.getDrawableIconById
 
@@ -44,7 +47,11 @@ public class AlarmReceiver: BroadcastReceiver() {
 
         val pendingIntent = PendingIntent.getActivity(context, schedule.uid!!.hashCode(), mainIntent, PendingIntent.FLAG_UPDATE_CURRENT)
 
-        val drawable = ContextCompat.getDrawable(context, getDrawableIconById(context, medication.icon_id))!!
+        val drawable = if(medication.photo_icon){
+            BitmapDrawable(context.resources, Bitmap.createScaledBitmap(convertByteArrayToBitmap(getByteArrayById(medication.photo_uid)), 64, 64, false))
+        }else{
+            ContextCompat.getDrawable(context, getDrawableIconById(context, medication.icon_id))!!
+        }
 
         val iconBitmap = Bitmap.createBitmap((drawable.intrinsicWidth * 1.1).toInt(), (drawable.intrinsicHeight * 1.1).toInt(), Bitmap.Config.ARGB_8888)
 
