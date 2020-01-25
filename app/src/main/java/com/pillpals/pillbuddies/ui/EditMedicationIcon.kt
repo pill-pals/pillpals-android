@@ -11,6 +11,7 @@ import com.pillpals.pillbuddies.R
 import com.pillpals.pillbuddies.data.model.Medications
 import com.pillpals.pillbuddies.helpers.DatabaseHelper
 import android.graphics.Color
+import android.graphics.drawable.BitmapDrawable
 import android.provider.MediaStore
 import android.util.Log
 import android.view.View
@@ -43,12 +44,13 @@ class EditMedicationIcon : AppCompatActivity() {
     public lateinit var photoList: FlexboxLayout
     var colorString = "#FFFFFF"
     var imageDrawable = "ic_pill_v5"
+    var selectedPhoto = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Realm.init(this)
         setContentView(R.layout.activity_edit_medication_icon)
-        val list: MutableList<String> = ArrayList()
+        //val list: MutableList<String> = ArrayList()
 
 
         if(intent.hasExtra("color-string")) {
@@ -138,6 +140,7 @@ class EditMedicationIcon : AppCompatActivity() {
             val resultIntent = Intent(this, EditScheduleActivity::class.java)
             resultIntent.putExtra("color-string", colorString)
             resultIntent.putExtra("image-string", imageDrawable)
+            resultIntent.putExtra("photo-boolean", selectedPhoto)
             setResult(Activity.RESULT_OK, resultIntent)
             finish()
         }
@@ -200,6 +203,7 @@ class EditMedicationIcon : AppCompatActivity() {
             val cardImageDrawable = image.tag
             if (cardImageDrawable == imageDrawable) {
                 borderCard.setCardBackgroundColor(Color.parseColor("#FFFFFF"))
+                selectedPhoto = false
             }
             else {
                 borderCard.setCardBackgroundColor(Color.parseColor("#00FFFFFF"))
@@ -217,6 +221,7 @@ class EditMedicationIcon : AppCompatActivity() {
             val cardImageDrawable = image.tag
             if (cardImageDrawable == imageDrawable) {
                 borderCard.setCardBackgroundColor(Color.parseColor("#FFFFFF"))
+                selectedPhoto = true
             }
             else {
                 borderCard.setCardBackgroundColor(Color.parseColor("#00FFFFFF"))
@@ -249,10 +254,10 @@ class EditMedicationIcon : AppCompatActivity() {
 
     private fun populateGallery(photos: RealmResults<out Photos>){
         for(photo in photos){
-            val newBmp = DatabaseHelper.convertByteArrayToBitmap(photo.icon)
+            val newBmp = Bitmap.createScaledBitmap(DatabaseHelper.convertByteArrayToBitmap(photo.icon), 64,64,false)
             val galleryIcon = GalleryIconCard(this)
 
-            galleryIcon.image.setImageBitmap(newBmp)
+            galleryIcon.image.setBackground(BitmapDrawable(resources, newBmp))
             galleryIcon.image.tag = photo.uid
             galleryIcon.setOnClickListener {
                 imageDrawable = galleryIcon.image.tag as String

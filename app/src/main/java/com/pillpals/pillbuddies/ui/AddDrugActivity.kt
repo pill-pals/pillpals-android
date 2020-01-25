@@ -2,7 +2,10 @@ package com.pillpals.pillbuddies.ui
 
 import android.content.Intent
 import android.content.res.ColorStateList
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.graphics.Color
+import android.graphics.drawable.BitmapDrawable
 import android.os.Bundle
 import android.text.SpannableString
 import android.text.Spanned
@@ -36,6 +39,8 @@ import com.pillpals.pillbuddies.data.model.Schedules
 import com.pillpals.pillbuddies.helpers.DateHelper
 import com.google.android.material.button.MaterialButton
 import com.pillpals.pillbuddies.helpers.DatabaseHelper
+import com.pillpals.pillbuddies.helpers.DatabaseHelper.Companion.convertByteArrayToBitmap
+import com.pillpals.pillbuddies.helpers.DatabaseHelper.Companion.getByteArrayById
 import com.pillpals.pillbuddies.helpers.DatabaseHelper.Companion.getColorIDByString
 import com.pillpals.pillbuddies.helpers.DatabaseHelper.Companion.getColorStringByID
 import com.pillpals.pillbuddies.helpers.DatabaseHelper.Companion.getIconByID
@@ -61,6 +66,7 @@ class AddDrugActivity : AppCompatActivity() {
     public val toBeAdded: MutableList<Schedules> = ArrayList()
     public lateinit var colorString: String
     public lateinit var imageDrawable: String
+    public var photoBoolean = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -86,6 +92,7 @@ class AddDrugActivity : AppCompatActivity() {
             editText.setText(medication.name)
             editText2.setText(medication.dosage)
             editText3.setText(medication.notes)
+            photoBoolean = medication.photo_icon
             colorString = getColorStringByID(medication.color_id)
             imageDrawable = getIconByID(medication.icon_id)
             iconButton.backgroundTintList = ColorStateList.valueOf(Color.parseColor(
@@ -486,13 +493,27 @@ class AddDrugActivity : AppCompatActivity() {
         }
         else if (requestCode == 2) { // Icon
             if(data != null) {
-                if(data.hasExtra("color-string")) {
-                    colorString = data.getStringExtra("color-string")!!
-                    iconButton.backgroundTintList = ColorStateList.valueOf(Color.parseColor(colorString))
-                }
-                if(data.hasExtra("image-string")) {
-                    imageDrawable = data.getStringExtra("image-string")!!
-                    iconButton.icon = resources.getDrawable(DatabaseHelper.getDrawableIconById(this, getIconIDByString(imageDrawable)), theme)
+                if(data.getBooleanExtra("photo-boolean", false) == false){
+                    photoBoolean = false
+                    if(data.hasExtra("color-string")) {
+                        colorString = data.getStringExtra("color-string")!!
+                        iconButton.backgroundTintList = ColorStateList.valueOf(Color.parseColor(colorString))
+                    }
+                    if(data.hasExtra("image-string")) {
+                        imageDrawable = data.getStringExtra("image-string")!!
+                        iconButton.icon = resources.getDrawable(DatabaseHelper.getDrawableIconById(this, getIconIDByString(imageDrawable)), theme)
+                    }
+                }else {
+                    photoBoolean = true
+                    if(data.hasExtra("color-string")) {
+                        colorString = data.getStringExtra("color-string")!!
+                        iconButton.backgroundTintList = ColorStateList.valueOf(Color.parseColor(colorString))
+                    }
+                    if(data.hasExtra("image-string")) {
+                        imageDrawable = data.getStringExtra("image-string")!!
+                        //Log.i("test", imageDrawable)
+                        iconButton.icon = BitmapDrawable(resources, Bitmap.createScaledBitmap(convertByteArrayToBitmap(getByteArrayById(imageDrawable)), 64, 64, false))
+                    }
                 }
             }
         }
