@@ -3,11 +3,7 @@ package com.pillpals.pillbuddies.helpers
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import com.pillpals.pillbuddies.data.model.Colors
-import com.pillpals.pillbuddies.data.model.Icons
-import com.pillpals.pillbuddies.data.model.MoodIcons
-import com.pillpals.pillbuddies.data.model.Medications
-import com.pillpals.pillbuddies.data.model.Schedules
+import com.pillpals.pillbuddies.data.model.*
 import io.realm.Realm
 import io.realm.RealmObject
 import io.realm.RealmResults
@@ -88,6 +84,9 @@ class DatabaseHelper {
         }
         fun convertByteArrayToBitmap(byteArray: ByteArray?): Bitmap{
             return BitmapFactory.decodeByteArray(byteArray, 0, byteArray!!.size)
+        }
+        fun getByteArrayById(id: String): ByteArray?{
+            return Realm.getDefaultInstance().where(Photos::class.java).equalTo("uid", id).findFirst()!!.icon
         }
     }
 }

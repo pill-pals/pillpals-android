@@ -16,7 +16,9 @@ import io.realm.Realm
 import kotlinx.android.synthetic.main.prompts.view.*
 import java.util.*
 import android.content.Intent
+import android.graphics.Bitmap
 import android.graphics.Color
+import android.graphics.drawable.BitmapDrawable
 import android.text.SpannableString
 import android.text.Spanned
 import android.text.style.ForegroundColorSpan
@@ -26,7 +28,10 @@ import android.view.MenuInflater
 import android.widget.PopupMenu
 import android.widget.TextView
 import com.pillpals.pillbuddies.helpers.DatabaseHelper
+import com.pillpals.pillbuddies.helpers.DatabaseHelper.Companion.convertByteArrayToBitmap
+import com.pillpals.pillbuddies.helpers.DatabaseHelper.Companion.getByteArrayById
 import com.pillpals.pillbuddies.helpers.DatabaseHelper.Companion.getColorStringByID
+import com.pillpals.pillbuddies.helpers.DatabaseHelper.Companion.getDrawableIconById
 import kotlinx.android.synthetic.main.delete_prompt.view.*
 import kotlinx.android.synthetic.main.drug_card.view.*
 import kotlinx.android.synthetic.main.prompts.view.dialogCancelBtn
@@ -115,12 +120,11 @@ class MedicationsFragment : Fragment() {
         newCard.nameText.text = medication.name
         newCard.altText.text = medication.dosage
         newCard.iconBackground.setCardBackgroundColor(Color.parseColor(getColorStringByID(medication.color_id)))
-        newCard.icon.setImageResource(
-            DatabaseHelper.getDrawableIconById(
-                this.context!!,
-                medication.icon_id
-            )
-        )
+        if(medication.photo_icon){
+            newCard.icon.setImageDrawable(BitmapDrawable(resources, Bitmap.createScaledBitmap(convertByteArrayToBitmap(getByteArrayById(medication.photo_uid)), 64, 64, false)))
+        }else {
+            newCard.icon.setImageResource(getDrawableIconById(this.context!!, medication.icon_id))
+        }
 
         newCard.button.setOnClickListener {
             val intent = Intent(context, AddDrugActivity::class.java)

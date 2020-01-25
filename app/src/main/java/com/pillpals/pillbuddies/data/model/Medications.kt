@@ -12,5 +12,7 @@ open class Medications(
     var notes: String = "",
     var color_id: Int = 0,
     var icon_id: Int = 0,
+    var photo_icon: Boolean = false,
+    var photo_uid: String = "",
     var deleted: Boolean = false
 ) : RealmObject(){}

@@ -52,10 +52,6 @@
         <activity android:name=".ui.EditMedicationIcon"></activity>
         <activity android:name=".ui.DrugGallery"></activity>
 
-        <activity android:name=".ui.EditMedicationIcon">
-
-        </activity>
-
         <activity android:name=".ui.medications.medication_info.MedicationInfoActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
