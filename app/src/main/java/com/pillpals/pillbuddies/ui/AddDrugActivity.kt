@@ -94,13 +94,20 @@ class AddDrugActivity : AppCompatActivity() {
             editText3.setText(medication.notes)
             photoBoolean = medication.photo_icon
             colorString = getColorStringByID(medication.color_id)
-            imageDrawable = getIconByID(medication.icon_id)
             iconButton.backgroundTintList = ColorStateList.valueOf(Color.parseColor(
                 getColorStringByID(
                     medication.color_id
                 )
             ))
-            iconButton.icon = resources.getDrawable(DatabaseHelper.getDrawableIconById(this, medication.icon_id), theme)
+            if(photoBoolean){
+                imageDrawable = medication.photo_uid
+                iconButton.icon = BitmapDrawable(resources, Bitmap.createScaledBitmap(convertByteArrayToBitmap(getByteArrayById(imageDrawable)), 64, 64, false))
+                iconButton.iconTint = null
+            }else{
+                imageDrawable = getIconByID(medication.icon_id)
+                iconButton.icon = resources.getDrawable(DatabaseHelper.getDrawableIconById(this, medication.icon_id), theme)
+                iconButton.iconTint = ColorStateList.valueOf(Color.parseColor("#0F0F0F"))
+            }
 
             calculateScheduleRecords(medication.schedules)
 
@@ -385,8 +392,13 @@ class AddDrugActivity : AppCompatActivity() {
             medication.name = drugName
             medication.dosage = drugDose
             medication.notes = drugNote
+            medication.photo_icon = photoBoolean
             medication.color_id = getColorIDByString(colorString)
-            medication.icon_id = getIconIDByString(imageDrawable)
+            if(photoBoolean){
+                medication.photo_uid = imageDrawable
+            }else {
+                medication.icon_id = getIconIDByString(imageDrawable)
+            }
 
             if(::scheduleIdList.isInitialized){
                 toBeAdded.forEach {
@@ -402,8 +414,13 @@ class AddDrugActivity : AppCompatActivity() {
             medication.name = drugName
             medication.dosage = drugDose
             medication.notes = drugNote
+            medication.photo_icon = photoBoolean
             medication.color_id = getColorIDByString(colorString)
-            medication.icon_id = getIconIDByString(imageDrawable)
+            if(photoBoolean){
+                medication.photo_uid = imageDrawable
+            }else {
+                medication.icon_id = getIconIDByString(imageDrawable)
+            }
 
             if(::scheduleIdList.isInitialized){
                 toBeAdded.forEach {
@@ -502,6 +519,7 @@ class AddDrugActivity : AppCompatActivity() {
                     if(data.hasExtra("image-string")) {
                         imageDrawable = data.getStringExtra("image-string")!!
                         iconButton.icon = resources.getDrawable(DatabaseHelper.getDrawableIconById(this, getIconIDByString(imageDrawable)), theme)
+                        iconButton.iconTint = ColorStateList.valueOf(Color.parseColor("#0F0F0F"))
                     }
                 }else {
                     photoBoolean = true
@@ -513,6 +531,7 @@ class AddDrugActivity : AppCompatActivity() {
                         imageDrawable = data.getStringExtra("image-string")!!
                         //Log.i("test", imageDrawable)
                         iconButton.icon = BitmapDrawable(resources, Bitmap.createScaledBitmap(convertByteArrayToBitmap(getByteArrayById(imageDrawable)), 64, 64, false))
+                        iconButton.iconTint = null
                     }
                 }
             }
