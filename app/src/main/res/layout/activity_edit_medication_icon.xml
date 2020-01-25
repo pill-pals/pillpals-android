@@ -703,6 +703,26 @@
                         </androidx.cardview.widget.CardView>
                     </LinearLayout>
 
+                    <com.google.android.flexbox.FlexboxLayout
+                        android:id="@+id/photoList"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="16dp"
+                        android:layout_marginTop="8dp"
+                        android:layout_marginEnd="16dp"
+                        android:gravity="center_horizontal"
+                        android:orientation="horizontal"
+                        app:flexWrap="wrap"
+                        app:alignItems="stretch"
+                        app:alignContent="stretch"
+                        app:justifyContent="space_evenly"
+                        app:showDivider="beginning|middle"
+                        app:dividerDrawable="@drawable/divider"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/firstSectionText">
+                    </com.google.android.flexbox.FlexboxLayout>
+
                     <Button
                         android:id="@+id/photoButton"
                         android:layout_width="wrap_content"
@@ -710,7 +730,7 @@
                         android:layout_marginTop="12dp"
                         android:layout_marginEnd="0dp"
                         android:layout_gravity="center_horizontal"
-                        android:text="Add photo from gallery"
+                        android:text="Take photo"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintTop_toTopOf="parent" />
 
