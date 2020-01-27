@@ -10,6 +10,7 @@ import io.realm.RealmResults
 open class Schedules(
     @PrimaryKey var uid: String? = null,
     var occurrence: Date? = null,
+    var startDate: Date? = null,
     var repetitionCount: Int? = null,
     var repetitionUnit: Int? = null,
     var logs: RealmList<Logs> = RealmList(),

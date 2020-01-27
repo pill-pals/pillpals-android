@@ -328,9 +328,9 @@ class DashboardFragment : Fragment() {
                 continue
             }
 
-            var testSchedule = realm.copyFromRealm(databaseSchedule)
+            val testSchedule = realm.copyFromRealm(databaseSchedule)
 
-            var loggedToday =
+            val loggedToday =
                 testSchedule.logs.filter { it.occurrence!! > DateHelper.today() && it.occurrence!! < DateHelper.tomorrow() }
                     .count()
 
@@ -350,6 +350,7 @@ class DashboardFragment : Fragment() {
                     val newSchedule = Schedules(
                         testSchedule.uid,
                         testSchedule.occurrence,
+                        testSchedule.startDate,
                         testSchedule.repetitionCount,
                         testSchedule.repetitionUnit,
                         testSchedule.logs
@@ -578,6 +579,7 @@ class DashboardFragment : Fragment() {
                 schedules[i].occurrence = cal.time
                 schedules[i].repetitionCount = counts[i]
                 schedules[i].repetitionUnit = units[i]
+                schedules[i].startDate = cal.time
 
                 medication.schedules.add(schedules[i])
             }

@@ -36,6 +36,7 @@ import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
 import kotlin.math.abs
 import android.widget.TextView
+import com.pillpals.pillbuddies.data.model.Schedules
 import java.time.format.TextStyle
 import java.util.Calendar
 
@@ -95,6 +96,31 @@ class StatisticsFragment : Fragment() {
         renderBarChart()
 
         return view
+    }
+
+    private fun missingLogsForSchedule(schedule: Schedules, endDate: Date = DateHelper.today()): List<MissingLog> {
+        val counterSchedule = realm.copyFromRealm(schedule)
+
+        val n = schedule.repetitionCount!!
+        val u = DateHelper.getUnitByIndex(schedule.repetitionUnit!!)
+
+        var missingLogs = listOf<MissingLog>()
+        counterSchedule.occurrence = schedule.startDate
+
+        while (counterSchedule.occurrence!! < endDate) {
+            val missing = schedule.logs.filter { it.due!! == counterSchedule.occurrence }.none()
+
+            if(missing) {
+                // There's no log at counterSchedule.occurrence.
+                // Could create some new log, or add missing logs to a data class that's checked in averageLogsAcrossSchedules
+                // MissingLog is an example of a somewhat useful data class, just a placeholder though
+                missingLogs = missingLogs.plus(MissingLog(schedule, counterSchedule.occurrence!!))
+            }
+
+            counterSchedule.occurrence = DateHelper.addUnitToDate(counterSchedule.occurrence!!, n, u)
+        }
+
+        return missingLogs
     }
 
     private fun averageLogsAcrossSchedules(medication: Medications): List<TimeCount> {
@@ -160,7 +186,6 @@ class StatisticsFragment : Fragment() {
                 //Log.i("test", timeCounts.toString())
                 // Get timeCounts for data in time range only
                 val dataPoints = getTimeCountsInRange(timeCounts)
-                Log.i("test", dataPoints.toString())
 
                 //val schedule = it.schedules.first()!!
                 //val logs = schedule.logs!!
@@ -451,3 +476,5 @@ data class AverageLogOffset(val offset: Float, val time: Date)
 data class TimeCount(val time: Date, val count: Int, val offset: Float, val logs: List<Logs>)
 data class DataPoint(val time: Date, val value: Float)
 data class Filter(var view: LinearLayout, var selectedValue: String)
+
+data class MissingLog(var schedule: Schedules, var occurrence: Date)
