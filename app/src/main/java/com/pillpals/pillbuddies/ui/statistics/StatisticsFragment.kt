@@ -98,23 +98,27 @@ class StatisticsFragment : Fragment() {
         return view
     }
 
-    private fun missingLogsForSchedule(schedule: Schedules, endDate: Date = DateHelper.today()): List<MissingLog> {
+    private fun getMissingLogsForSchedule(schedule: Schedules, endDate: Date = DateHelper.today()): List<MissingLogs> {
         val counterSchedule = realm.copyFromRealm(schedule)
 
         val n = schedule.repetitionCount!!
         val u = DateHelper.getUnitByIndex(schedule.repetitionUnit!!)
 
-        var missingLogs = listOf<MissingLog>()
+        var missingLogs = listOf<MissingLogs>()
         counterSchedule.occurrence = schedule.startDate
+
+        Log.i("test","Start Date: " + schedule.startDate)
+        Log.i("test", "End Date: " + endDate)
 
         while (counterSchedule.occurrence!! < endDate) {
             val missing = schedule.logs.filter { it.due!! == counterSchedule.occurrence }.none()
-
+            Log.i("test","Occurrence: " + counterSchedule.occurrence)
             if(missing) {
                 // There's no log at counterSchedule.occurrence.
                 // Could create some new log, or add missing logs to a data class that's checked in averageLogsAcrossSchedules
                 // MissingLog is an example of a somewhat useful data class, just a placeholder though
-                missingLogs = missingLogs.plus(MissingLog(schedule, counterSchedule.occurrence!!))
+                Log.i("test","Missing Log: " + counterSchedule.occurrence)
+                missingLogs = missingLogs.plus(MissingLogs(schedule, counterSchedule.occurrence!!))
             }
 
             counterSchedule.occurrence = DateHelper.addUnitToDate(counterSchedule.occurrence!!, n, u)
@@ -127,9 +131,31 @@ class StatisticsFragment : Fragment() {
         val schedules = medication.schedules
 
         var allLogs = schedules.fold(listOf<Logs>()) { acc, it -> acc.plus(it.logs) }
-        allLogs = allLogs.sortedBy { it.due }
 
-        return allLogs.fold(mutableListOf<TimeCount>()) { acc, it ->
+        var allMissingLogs = schedules.fold(listOf<MissingLogs>()) { acc, it ->
+            var missingLogs = if (it.deleted) {
+                getMissingLogsForSchedule(it,it.deletedDate!!)
+            } else
+            {
+                getMissingLogsForSchedule(it)
+            }
+
+            acc.plus(missingLogs)
+        }
+
+        var dataLogs = listOf<DataLogs>()
+        for (log in allLogs) {
+            dataLogs = dataLogs.plus(DataLogs(log.occurrence!!,log.due!!))
+        }
+
+        //currently gives an offset of 1 whole day for a missed medication
+        for (missingLog in allMissingLogs) {
+            dataLogs = dataLogs.plus(DataLogs(DateHelper.addUnitToDate(missingLog.due,1,Calendar.DATE),missingLog.due))
+        }
+
+        dataLogs = dataLogs.sortedBy { it.due }
+
+        return dataLogs.fold(mutableListOf<TimeCount>()) { acc, it ->
             val logDate = Calendar.getInstance()
             logDate.time = it.due!!
             logDate.set(Calendar.MILLISECOND, 0)
@@ -190,10 +216,12 @@ class StatisticsFragment : Fragment() {
                 //val schedule = it.schedules.first()!!
                 //val logs = schedule.logs!!
 
+                val bucketedDataPoints = bucketDataPoints(dataPoints)
+
                 val entries = ArrayList<BarEntry>()
                 axisStringList = ArrayList<String>()
 
-                for ((index, dataPoints) in dataPoints.withIndex()) {
+                for ((index, dataPoints) in bucketedDataPoints.withIndex()) {
                     val timeDifference = abs(dataPoints.value) / 1000 / 60 // Minutes
                     val dateString = getAxisString(dataPoints)
                     axisStringList.add(dateString)
@@ -207,6 +235,26 @@ class StatisticsFragment : Fragment() {
                 medicationSets.add(set)
             }
         }
+    }
+
+    private fun bucketDataPoints (dataPoints: List<DataPoint>):List<DataPoint> {
+        var bucketedDataPoints =  listOf<DataPoint>()
+        for (dataPoint in dataPoints) {
+
+            bucketedDataPoints = bucketedDataPoints.plus(DataPoint(dataPoint.time,
+                when {
+                    dataPoint.value == -1f -> 0f
+                    dataPoint.value > 12000f -> 1f
+                    dataPoint.value > 10000f -> 2f
+                    dataPoint.value > 5000f -> 3f
+                    dataPoint.value > 2000f -> 4f
+                    dataPoint.value > 1000f -> 5f
+                    dataPoint.value > 400f -> 6f
+                    else -> 7f
+                }
+                ))
+        }
+        return bucketedDataPoints
     }
 
     private fun getAxisString(dataPoints: DataPoint):String {
@@ -249,7 +297,7 @@ class StatisticsFragment : Fragment() {
                         rangedTimeCounts.add(DataPoint(calIterator.time,existingTimeCount.offset))
                     }
                     else {
-                        rangedTimeCounts.add(DataPoint(calIterator.time,0f))
+                        rangedTimeCounts.add(DataPoint(calIterator.time,-1f))
                     }
                 }
             }
@@ -272,7 +320,7 @@ class StatisticsFragment : Fragment() {
                         rangedTimeCounts.add(DataPoint(calIterator.time,existingTimeCount.offset))
                     }
                     else {
-                        rangedTimeCounts.add(DataPoint(calIterator.time,0f))
+                        rangedTimeCounts.add(DataPoint(calIterator.time,-1f))
                     }
                 }
             }
@@ -295,7 +343,7 @@ class StatisticsFragment : Fragment() {
                         rangedTimeCounts.add(DataPoint(calIterator.time,existingTimeCount.offset))
                     }
                     else {
-                        rangedTimeCounts.add(DataPoint(calIterator.time,0f))
+                        rangedTimeCounts.add(DataPoint(calIterator.time,-1f))
                     }
                     calIterator.time = DateHelper.addUnitToDate(calIterator.time,1,Calendar.DATE)
                 }
@@ -312,7 +360,7 @@ class StatisticsFragment : Fragment() {
 
                 for (i in 0..11) {
 
-                    Log.i("test",calIterator.time.toString())
+                    //Log.i("test",calIterator.time.toString())
 
                     var existingTimeCount = timeCounts.filter {equalTimeUnit(it,calIterator,listOf(Calendar.MONTH,Calendar.YEAR))}.firstOrNull()
 
@@ -320,7 +368,7 @@ class StatisticsFragment : Fragment() {
                         rangedTimeCounts.add(DataPoint(calIterator.time,existingTimeCount.offset))
                     }
                     else {
-                        rangedTimeCounts.add(DataPoint(calIterator.time,0f))
+                        rangedTimeCounts.add(DataPoint(calIterator.time,-1f))
                     }
 
                     calIterator.time = DateHelper.addUnitToDate(calIterator.time,1,Calendar.MONTH)
@@ -479,8 +527,9 @@ class StatisticsFragment : Fragment() {
 }
 
 data class AverageLogOffset(val offset: Float, val time: Date)
-data class TimeCount(val time: Date, val count: Int, val offset: Float, val logs: List<Logs>)
+data class TimeCount(val time: Date, val count: Int, val offset: Float, val logs: List<DataLogs>)
 data class DataPoint(val time: Date, val value: Float)
 data class Filter(var view: LinearLayout, var selectedValue: String)
 
-data class MissingLog(var schedule: Schedules, var occurrence: Date)
+data class MissingLogs(var schedule: Schedules, var due: Date)
+data class DataLogs(var occurrence: Date, var due: Date)
