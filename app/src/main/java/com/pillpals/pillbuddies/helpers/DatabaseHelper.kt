@@ -52,6 +52,7 @@ class DatabaseHelper {
             for (schedule in schedules) {
                 Realm.getDefaultInstance().executeTransaction {
                     schedule.deleted = true
+                    schedule.deletedDate = DateHelper.today()
                 }
             }
         }
