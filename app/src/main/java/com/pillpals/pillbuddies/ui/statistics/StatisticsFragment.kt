@@ -307,11 +307,12 @@ class StatisticsFragment : Fragment() {
                 calIterator.set(Calendar.MINUTE, 0)
                 calIterator.set(Calendar.HOUR_OF_DAY, 1)
                 calIterator.set(Calendar.DAY_OF_YEAR, 1)
-                calIterator.set(Calendar.WEEK_OF_YEAR, 1)
+                calIterator.set(Calendar.MONTH, 0)
                 calIterator.set(Calendar.YEAR, cal.get(Calendar.YEAR))
 
                 for (i in 0..11) {
-                    calIterator.set(Calendar.MONTH, i)
+
+                    Log.i("test",calIterator.time.toString())
 
                     var existingTimeCount = timeCounts.filter {equalTimeUnit(it,calIterator,listOf(Calendar.MONTH,Calendar.YEAR))}.firstOrNull()
 
@@ -321,6 +322,8 @@ class StatisticsFragment : Fragment() {
                     else {
                         rangedTimeCounts.add(DataPoint(calIterator.time,0f))
                     }
+
+                    calIterator.time = DateHelper.addUnitToDate(calIterator.time,1,Calendar.MONTH)
                 }
             }
         }
@@ -330,22 +333,7 @@ class StatisticsFragment : Fragment() {
     }
 
     private fun renderBarChart() {
-        //set the header of the chart
-        val cal = Calendar.getInstance()
-        cal.time = currentDate
-        val firstDayOfWeekCal = Calendar.getInstance()
-        firstDayOfWeekCal.time = cal.time
-        firstDayOfWeekCal.set(Calendar.DAY_OF_WEEK,firstDayOfWeekCal.firstDayOfWeek)
-        val lastDayOfWeekCal = Calendar.getInstance()
-        lastDayOfWeekCal.time = firstDayOfWeekCal.time
-        lastDayOfWeekCal.time = DateHelper.addUnitToDate(lastDayOfWeekCal.time,6,Calendar.DATE)
-        graphHeader.text = when (timeSpanFilter.selectedValue) {
-            "Day" -> cal.getDisplayName(Calendar.MONTH,Calendar.SHORT,Locale.US) + " " + cal.get(Calendar.DAY_OF_MONTH).toString() + ", " + cal.get(Calendar.YEAR).toString()
-            "Week" -> firstDayOfWeekCal.getDisplayName(Calendar.MONTH,Calendar.SHORT,Locale.US) + " " + firstDayOfWeekCal.get(Calendar.DAY_OF_MONTH).toString() + " - " + lastDayOfWeekCal.getDisplayName(Calendar.MONTH,Calendar.SHORT,Locale.US) + " " + lastDayOfWeekCal.get(Calendar.DAY_OF_MONTH).toString()
-            "Month" -> cal.getDisplayName(Calendar.MONTH,Calendar.LONG,Locale.US) + " " + cal.get(Calendar.YEAR).toString()
-            "Year" -> cal.get(Calendar.YEAR).toString()
-            else -> ""
-        }
+        setChartHeader()
 
         determineMedicationSetData()
         barChart.setTouchEnabled(true)
@@ -380,6 +368,24 @@ class StatisticsFragment : Fragment() {
         barChart.data.barWidth = (groupWidth * barWidthRatio)/medicationSets.size
         if(medicationSets.size > 1) {
             barChart.groupBars(-0.5f, 1 - groupWidth, (groupWidth * (1 - barWidthRatio))/medicationSets.size)
+        }
+    }
+
+    private fun setChartHeader(){
+        val cal = Calendar.getInstance()
+        cal.time = currentDate
+        val firstDayOfWeekCal = Calendar.getInstance()
+        firstDayOfWeekCal.time = cal.time
+        firstDayOfWeekCal.set(Calendar.DAY_OF_WEEK,firstDayOfWeekCal.firstDayOfWeek)
+        val lastDayOfWeekCal = Calendar.getInstance()
+        lastDayOfWeekCal.time = firstDayOfWeekCal.time
+        lastDayOfWeekCal.time = DateHelper.addUnitToDate(lastDayOfWeekCal.time,6,Calendar.DATE)
+        graphHeader.text = when (timeSpanFilter.selectedValue) {
+            "Day" -> cal.getDisplayName(Calendar.MONTH,Calendar.SHORT,Locale.US) + " " + cal.get(Calendar.DAY_OF_MONTH).toString() + ", " + cal.get(Calendar.YEAR).toString()
+            "Week" -> firstDayOfWeekCal.getDisplayName(Calendar.MONTH,Calendar.SHORT,Locale.US) + " " + firstDayOfWeekCal.get(Calendar.DAY_OF_MONTH).toString() + " - " + lastDayOfWeekCal.getDisplayName(Calendar.MONTH,Calendar.SHORT,Locale.US) + " " + lastDayOfWeekCal.get(Calendar.DAY_OF_MONTH).toString()
+            "Month" -> cal.getDisplayName(Calendar.MONTH,Calendar.LONG,Locale.US) + " " + cal.get(Calendar.YEAR).toString()
+            "Year" -> cal.get(Calendar.YEAR).toString()
+            else -> ""
         }
     }
 
