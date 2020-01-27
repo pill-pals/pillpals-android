@@ -216,16 +216,16 @@ class StatisticsFragment : Fragment() {
                 //val schedule = it.schedules.first()!!
                 //val logs = schedule.logs!!
 
-                val bucketedDataPoints = bucketDataPoints(dataPoints)
-
                 val entries = ArrayList<BarEntry>()
                 axisStringList = ArrayList<String>()
 
-                for ((index, dataPoints) in bucketedDataPoints.withIndex()) {
+                for ((index, dataPoints) in dataPoints.withIndex()) {
                     val timeDifference = abs(dataPoints.value) / 1000 / 60 // Minutes
+                    var grade = bucketTimeDifference(timeDifference)
+                    if (dataPoints.value == -1f) grade = 0f
                     val dateString = getAxisString(dataPoints)
                     axisStringList.add(dateString)
-                    val currentEntry = BarEntry(index.toFloat(), timeDifference)
+                    val currentEntry = BarEntry(index.toFloat(), grade)
                     entries.add(currentEntry)
                 }
 
@@ -237,24 +237,16 @@ class StatisticsFragment : Fragment() {
         }
     }
 
-    private fun bucketDataPoints (dataPoints: List<DataPoint>):List<DataPoint> {
-        var bucketedDataPoints =  listOf<DataPoint>()
-        for (dataPoint in dataPoints) {
-
-            bucketedDataPoints = bucketedDataPoints.plus(DataPoint(dataPoint.time,
-                when {
-                    dataPoint.value == -1f -> 0f
-                    dataPoint.value > 12000f -> 1f
-                    dataPoint.value > 10000f -> 2f
-                    dataPoint.value > 5000f -> 3f
-                    dataPoint.value > 2000f -> 4f
-                    dataPoint.value > 1000f -> 5f
-                    dataPoint.value > 400f -> 6f
-                    else -> 7f
-                }
-                ))
+    private fun bucketTimeDifference (minuteDifference: Float):Float {
+        return when {
+            minuteDifference > 1200f -> 1f
+            minuteDifference > 600f -> 2f
+            minuteDifference > 120f -> 3f
+            minuteDifference > 60f -> 4f
+            minuteDifference > 20f -> 5f
+            minuteDifference > 10f -> 6f
+            else -> 7f
         }
-        return bucketedDataPoints
     }
 
     private fun getAxisString(dataPoints: DataPoint):String {
