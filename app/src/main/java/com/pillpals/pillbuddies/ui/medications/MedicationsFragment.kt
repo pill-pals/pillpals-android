@@ -31,6 +31,7 @@ import com.pillpals.pillbuddies.helpers.DatabaseHelper
 import com.pillpals.pillbuddies.helpers.DatabaseHelper.Companion.convertByteArrayToBitmap
 import com.pillpals.pillbuddies.helpers.DatabaseHelper.Companion.getByteArrayById
 import com.pillpals.pillbuddies.helpers.DatabaseHelper.Companion.getColorStringByID
+import com.pillpals.pillbuddies.helpers.DatabaseHelper.Companion.getCorrectIconDrawable
 import com.pillpals.pillbuddies.helpers.DatabaseHelper.Companion.getDrawableIconById
 import kotlinx.android.synthetic.main.delete_prompt.view.*
 import kotlinx.android.synthetic.main.drug_card.view.*
@@ -120,11 +121,7 @@ class MedicationsFragment : Fragment() {
         newCard.nameText.text = medication.name
         newCard.altText.text = medication.dosage
         newCard.iconBackground.setCardBackgroundColor(Color.parseColor(getColorStringByID(medication.color_id)))
-        if(medication.photo_icon){
-            newCard.icon.setImageDrawable(BitmapDrawable(resources, Bitmap.createScaledBitmap(convertByteArrayToBitmap(getByteArrayById(medication.photo_uid)), 64, 64, false)))
-        }else {
-            newCard.icon.setImageResource(getDrawableIconById(this.context!!, medication.icon_id))
-        }
+        newCard.icon.setImageDrawable(getCorrectIconDrawable(this.context!!, medication))
 
         newCard.button.setOnClickListener {
             val intent = Intent(context, AddDrugActivity::class.java)

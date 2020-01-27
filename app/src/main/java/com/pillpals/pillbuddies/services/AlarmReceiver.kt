@@ -26,6 +26,7 @@ import androidx.core.content.res.ResourcesCompat
 import com.pillpals.pillbuddies.helpers.DatabaseHelper.Companion.convertByteArrayToBitmap
 import com.pillpals.pillbuddies.helpers.DatabaseHelper.Companion.getByteArrayById
 import com.pillpals.pillbuddies.helpers.DatabaseHelper.Companion.getColorStringByID
+import com.pillpals.pillbuddies.helpers.DatabaseHelper.Companion.getCorrectIconDrawable
 import com.pillpals.pillbuddies.helpers.DatabaseHelper.Companion.getDrawableIconById
 
 
@@ -47,11 +48,7 @@ public class AlarmReceiver: BroadcastReceiver() {
 
         val pendingIntent = PendingIntent.getActivity(context, schedule.uid!!.hashCode(), mainIntent, PendingIntent.FLAG_UPDATE_CURRENT)
 
-        val drawable = if(medication.photo_icon){
-            BitmapDrawable(context.resources, Bitmap.createScaledBitmap(convertByteArrayToBitmap(getByteArrayById(medication.photo_uid)), 64, 64, false))
-        }else{
-            ContextCompat.getDrawable(context, getDrawableIconById(context, medication.icon_id))!!
-        }
+        val drawable = getCorrectIconDrawable(context, medication)
 
         val iconBitmap = Bitmap.createBitmap((drawable.intrinsicWidth * 1.1).toInt(), (drawable.intrinsicHeight * 1.1).toInt(), Bitmap.Config.ARGB_8888)
 

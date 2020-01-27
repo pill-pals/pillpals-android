@@ -3,6 +3,9 @@ package com.pillpals.pillbuddies.helpers
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.drawable.BitmapDrawable
+import android.graphics.drawable.Drawable
+import androidx.core.content.ContextCompat
 import com.pillpals.pillbuddies.data.model.*
 import io.realm.Realm
 import io.realm.RealmObject
@@ -87,6 +90,13 @@ class DatabaseHelper {
         }
         fun getByteArrayById(id: String): ByteArray?{
             return Realm.getDefaultInstance().where(Photos::class.java).equalTo("uid", id).findFirst()!!.icon
+        }
+        fun getCorrectIconDrawable(context: Context, medication: Medications): Drawable {
+            if(medication.photo_icon){
+                return BitmapDrawable(context.resources, Bitmap.createScaledBitmap(convertByteArrayToBitmap(getByteArrayById(medication.photo_uid)), 64, 64, false))
+            }else{
+                return ContextCompat.getDrawable(context, getDrawableIconById(context, medication.icon_id))!!
+            }
         }
     }
 }
