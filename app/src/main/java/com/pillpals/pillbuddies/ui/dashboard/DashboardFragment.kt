@@ -53,6 +53,7 @@ import androidx.core.content.ContextCompat
 import com.pillpals.pillbuddies.helpers.DatabaseHelper
 import com.pillpals.pillbuddies.helpers.DatabaseHelper.Companion.convertByteArrayToBitmap
 import com.pillpals.pillbuddies.helpers.DatabaseHelper.Companion.getByteArrayById
+import com.pillpals.pillbuddies.helpers.DatabaseHelper.Companion.getCorrectIconDrawable
 import com.pillpals.pillbuddies.helpers.DatabaseHelper.Companion.obliterateSchedule
 import com.pillpals.pillbuddies.ui.AddDrugActivity
 import io.realm.kotlin.createObject
@@ -369,11 +370,7 @@ class DashboardFragment : Fragment() {
         newCard.nameText.text = medication.name
         newCard.altText.text = DateHelper.dateToString(schedule.occurrence!!)
         newCard.iconBackground.setCardBackgroundColor(Color.parseColor(getColorStringByID(medication.color_id)))
-        if(medication.photo_icon){
-            newCard.icon.setImageDrawable(BitmapDrawable(resources, Bitmap.createScaledBitmap(convertByteArrayToBitmap(getByteArrayById(medication.photo_uid)), 64, 64, false)))
-        }else {
-            newCard.icon.setImageResource(getDrawableIconById(this.context!!, medication.icon_id))
-        }
+        newCard.icon.setImageDrawable(getCorrectIconDrawable(this.context!!, medication))
 
         val diff = schedule.occurrence!!.time - Date().time
         val seconds = diff / 1000
