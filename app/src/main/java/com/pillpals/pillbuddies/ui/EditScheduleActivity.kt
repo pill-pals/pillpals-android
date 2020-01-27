@@ -224,6 +224,7 @@ class EditScheduleActivity : AppCompatActivity() {
                                     UUID.randomUUID().toString()
                                 )
                                 schedule.occurrence = it.time
+                                schedule.startDate = it.time
                                 schedule.repetitionCount = 1
                                 schedule.repetitionUnit = 2
                                 schedules.add(schedule)
@@ -237,6 +238,7 @@ class EditScheduleActivity : AppCompatActivity() {
                                     )
                                     it.set(Calendar.DAY_OF_WEEK, 1)
                                     schedule.occurrence = it.time
+                                    schedule.startDate = it.time
                                     schedule.repetitionCount = 1
                                     schedule.repetitionUnit = 6
                                     schedules.add(schedule)
@@ -248,6 +250,7 @@ class EditScheduleActivity : AppCompatActivity() {
                                     )
                                     it.set(Calendar.DAY_OF_WEEK, 2)
                                     schedule.occurrence = it.time
+                                    schedule.startDate = it.time
                                     schedule.repetitionCount = 1
                                     schedule.repetitionUnit = 6
                                     schedules.add(schedule)
@@ -259,6 +262,7 @@ class EditScheduleActivity : AppCompatActivity() {
                                     )
                                     it.set(Calendar.DAY_OF_WEEK, 3)
                                     schedule.occurrence = it.time
+                                    schedule.startDate = it.time
                                     schedule.repetitionCount = 1
                                     schedule.repetitionUnit = 6
                                     schedules.add(schedule)
@@ -270,6 +274,7 @@ class EditScheduleActivity : AppCompatActivity() {
                                     )
                                     it.set(Calendar.DAY_OF_WEEK, 4)
                                     schedule.occurrence = it.time
+                                    schedule.startDate = it.time
                                     schedule.repetitionCount = 1
                                     schedule.repetitionUnit = 6
                                     schedules.add(schedule)
@@ -281,6 +286,7 @@ class EditScheduleActivity : AppCompatActivity() {
                                     )
                                     it.set(Calendar.DAY_OF_WEEK, 5)
                                     schedule.occurrence = it.time
+                                    schedule.startDate = it.time
                                     schedule.repetitionCount = 1
                                     schedule.repetitionUnit = 6
                                     schedules.add(schedule)
@@ -292,6 +298,7 @@ class EditScheduleActivity : AppCompatActivity() {
                                     )
                                     it.set(Calendar.DAY_OF_WEEK, 6)
                                     schedule.occurrence = it.time
+                                    schedule.startDate = it.time
                                     schedule.repetitionCount = 1
                                     schedule.repetitionUnit = 6
                                     schedules.add(schedule)
@@ -303,6 +310,7 @@ class EditScheduleActivity : AppCompatActivity() {
                                     )
                                     it.set(Calendar.DAY_OF_WEEK, 7)
                                     schedule.occurrence = it.time
+                                    schedule.startDate = it.time
                                     schedule.repetitionCount = 1
                                     schedule.repetitionUnit = 6
                                     schedules.add(schedule)
@@ -324,6 +332,7 @@ class EditScheduleActivity : AppCompatActivity() {
                             cal.set(Calendar.YEAR, startDatePicker.year)
 
                             schedule.occurrence = cal.time
+                            schedule.startDate = cal.time
                             schedule.repetitionCount = intervalNumBox.text.toString().toInt()
 
                             schedule.repetitionUnit = when (intervalScaleList.selectedItem) {
