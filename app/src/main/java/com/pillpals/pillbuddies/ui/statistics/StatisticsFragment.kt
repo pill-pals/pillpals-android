@@ -107,17 +107,13 @@ class StatisticsFragment : Fragment() {
         var missingLogs = listOf<MissingLogs>()
         counterSchedule.occurrence = schedule.startDate
 
-        Log.i("test","Start Date: " + schedule.startDate)
-        Log.i("test", "End Date: " + endDate)
-
         while (counterSchedule.occurrence!! < endDate) {
             val missing = schedule.logs.filter { it.due!! == counterSchedule.occurrence }.none()
-            Log.i("test","Occurrence: " + counterSchedule.occurrence)
             if(missing) {
                 // There's no log at counterSchedule.occurrence.
                 // Could create some new log, or add missing logs to a data class that's checked in averageLogsAcrossSchedules
                 // MissingLog is an example of a somewhat useful data class, just a placeholder though
-                Log.i("test","Missing Log: " + counterSchedule.occurrence)
+                // Log.i("test","Missing Log: " + counterSchedule.occurrence)
                 missingLogs = missingLogs.plus(MissingLogs(schedule, counterSchedule.occurrence!!))
             }
 
@@ -257,7 +253,7 @@ class StatisticsFragment : Fragment() {
             "Day" -> cal.get(Calendar.HOUR_OF_DAY).toString()
             "Week" -> cal.getDisplayName(Calendar.DAY_OF_WEEK,Calendar.SHORT,Locale.US)
             "Month" -> cal.get(Calendar.DAY_OF_MONTH).toString()
-            "Year" -> cal.getDisplayName(Calendar.MONTH,Calendar.SHORT,Locale.US)
+            "Year" -> cal.getDisplayName(Calendar.MONTH,Calendar.SHORT,Locale.US).first().toString()
             else -> ""
         }
     }
@@ -373,6 +369,10 @@ class StatisticsFragment : Fragment() {
     }
 
     private fun renderBarChart() {
+        val gradeStringList = listOf("","F","D","C","B","B+","A","A+")
+        var cal = Calendar.getInstance()
+        cal.time = currentDate
+
         setChartHeader()
 
         determineMedicationSetData()
@@ -387,8 +387,18 @@ class StatisticsFragment : Fragment() {
         barChart.xAxis.granularity = 1.0f
         //barChart.xAxis.labelCount = set.entryCount
         barChart.xAxis.textSize = 16f
+        barChart.xAxis.labelCount = when (timeSpanFilter.selectedValue) {
+            "Day" -> 8
+            "Week" -> 7
+            "Month" -> cal.getActualMaximum(Calendar.DAY_OF_MONTH)/4
+            "Year" -> 12
+            else -> 24
+        }
+
         barChart.axisLeft.textSize = 16f
         barChart.axisLeft.axisMinimum = 0f
+        barChart.axisLeft.axisMaximum = 7f
+        barChart.axisLeft.valueFormatter = IndexAxisValueFormatter(gradeStringList)
 
         barChart.description.isEnabled = false
         barChart.axisRight.isEnabled = false
@@ -401,6 +411,9 @@ class StatisticsFragment : Fragment() {
         barChart.setPinchZoom(false)
         barChart.setScaleEnabled(false)
         barChart.setDoubleTapToZoomEnabled(false)
+        barChart.setDrawBorders(true)
+
+        barChart.extraBottomOffset = 10f
 
         val groupWidth = 0.7f
         val barWidthRatio = 0.875f
