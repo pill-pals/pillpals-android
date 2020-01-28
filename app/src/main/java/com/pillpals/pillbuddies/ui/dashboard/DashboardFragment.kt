@@ -330,23 +330,26 @@ class DashboardFragment : Fragment() {
 
             val testSchedule = realm.copyFromRealm(databaseSchedule)
 
-            val loggedToday =
-                testSchedule.logs.filter { it.occurrence!! > DateHelper.today() && it.occurrence!! < DateHelper.tomorrow() }
-                    .count()
+            // Time range: Today OR the later half of yesterday
+
+            val loggedInTimeRange =
+                testSchedule.logs.filter {
+                    it.occurrence!! > DateHelper.yesterdayAt12pm() && it.occurrence!! < DateHelper.tomorrow()
+                }.count()
 
             val n = testSchedule.repetitionCount!!
             val u = DateHelper.getUnitByIndex(testSchedule.repetitionUnit!!)
 
-            while (testSchedule.occurrence!! < DateHelper.today()) {
+            while (testSchedule.occurrence!! < DateHelper.yesterdayAt12pm()) {
                 testSchedule.occurrence = DateHelper.addUnitToDate(testSchedule.occurrence!!, n, u)
             }
 
-            for (i in 1..loggedToday) {
+            for (i in 1..loggedInTimeRange) {
                 testSchedule.occurrence = DateHelper.addUnitToDate(testSchedule.occurrence!!, -n, u)
             }
 
             while (testSchedule.occurrence!! < DateHelper.tomorrow()) {
-                if (testSchedule.occurrence!! > DateHelper.today()) {
+                if (testSchedule.occurrence!! > DateHelper.yesterdayAt12pm()) {
                     val newSchedule = Schedules(
                         testSchedule.uid,
                         testSchedule.occurrence,
@@ -367,7 +370,12 @@ class DashboardFragment : Fragment() {
         var newCard = DrugCard(this.context!!)
 
         newCard.nameText.text = medication.name
-        newCard.altText.text = DateHelper.dateToString(schedule.occurrence!!)
+        newCard.altText.text = when(true) {
+            schedule.occurrence!! > DateHelper.today() -> DateHelper.dateToString(schedule.occurrence!!)
+            schedule.occurrence!! < DateHelper.today() && schedule.occurrence!! > DateHelper.yesterdayAt12pm() -> "${DateHelper.dateToString(schedule.occurrence!!)} Yesterday"
+            else -> DateHelper.dateToString(schedule.occurrence!!)
+        }
+
         newCard.iconBackground.setCardBackgroundColor(Color.parseColor(getColorStringByID(medication.color_id)))
         if(medication.photo_icon){
             newCard.icon.setImageDrawable(BitmapDrawable(resources, Bitmap.createScaledBitmap(convertByteArrayToBitmap(getByteArrayById(medication.photo_uid)), 64, 64, false)))
