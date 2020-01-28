@@ -604,7 +604,7 @@ class DashboardFragment : Fragment() {
                 schedules[i].occurrence = cal.time
                 schedules[i].repetitionCount = counts[i]
                 schedules[i].repetitionUnit = units[i]
-                schedules[i].startDate = cal.time
+                schedules[i].startDate = DateHelper.addUnitToDate(cal.time,-5,Calendar.DATE)
 
                 medication.schedules.add(schedules[i])
             }

@@ -15,6 +15,7 @@ open class Schedules(
     var repetitionUnit: Int? = null,
     var logs: RealmList<Logs> = RealmList(),
     var deleted: Boolean = false,
+    var deletedDate: Date? = null,
     @LinkingObjects("schedules")
     val medication: RealmResults<Medications>? = null
 ) : RealmObject(){}

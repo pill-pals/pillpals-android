@@ -98,23 +98,23 @@ class StatisticsFragment : Fragment() {
         return view
     }
 
-    private fun missingLogsForSchedule(schedule: Schedules, endDate: Date = DateHelper.today()): List<MissingLog> {
+    private fun getMissingLogsForSchedule(schedule: Schedules, endDate: Date = DateHelper.today()): List<MissingLogs> {
         val counterSchedule = realm.copyFromRealm(schedule)
 
         val n = schedule.repetitionCount!!
         val u = DateHelper.getUnitByIndex(schedule.repetitionUnit!!)
 
-        var missingLogs = listOf<MissingLog>()
+        var missingLogs = listOf<MissingLogs>()
         counterSchedule.occurrence = schedule.startDate
 
         while (counterSchedule.occurrence!! < endDate) {
             val missing = schedule.logs.filter { it.due!! == counterSchedule.occurrence }.none()
-
             if(missing) {
                 // There's no log at counterSchedule.occurrence.
                 // Could create some new log, or add missing logs to a data class that's checked in averageLogsAcrossSchedules
                 // MissingLog is an example of a somewhat useful data class, just a placeholder though
-                missingLogs = missingLogs.plus(MissingLog(schedule, counterSchedule.occurrence!!))
+                // Log.i("test","Missing Log: " + counterSchedule.occurrence)
+                missingLogs = missingLogs.plus(MissingLogs(schedule, counterSchedule.occurrence!!))
             }
 
             counterSchedule.occurrence = DateHelper.addUnitToDate(counterSchedule.occurrence!!, n, u)
@@ -127,9 +127,31 @@ class StatisticsFragment : Fragment() {
         val schedules = medication.schedules
 
         var allLogs = schedules.fold(listOf<Logs>()) { acc, it -> acc.plus(it.logs) }
-        allLogs = allLogs.sortedBy { it.due }
 
-        return allLogs.fold(mutableListOf<TimeCount>()) { acc, it ->
+        var allMissingLogs = schedules.fold(listOf<MissingLogs>()) { acc, it ->
+            var missingLogs = if (it.deleted) {
+                getMissingLogsForSchedule(it,it.deletedDate!!)
+            } else
+            {
+                getMissingLogsForSchedule(it)
+            }
+
+            acc.plus(missingLogs)
+        }
+
+        var dataLogs = listOf<DataLogs>()
+        for (log in allLogs) {
+            dataLogs = dataLogs.plus(DataLogs(log.occurrence!!,log.due!!))
+        }
+
+        //currently gives an offset of 1 whole day for a missed medication
+        for (missingLog in allMissingLogs) {
+            dataLogs = dataLogs.plus(DataLogs(DateHelper.addUnitToDate(missingLog.due,1,Calendar.DATE),missingLog.due))
+        }
+
+        dataLogs = dataLogs.sortedBy { it.due }
+
+        return dataLogs.fold(mutableListOf<TimeCount>()) { acc, it ->
             val logDate = Calendar.getInstance()
             logDate.time = it.due!!
             logDate.set(Calendar.MILLISECOND, 0)
@@ -195,9 +217,11 @@ class StatisticsFragment : Fragment() {
 
                 for ((index, dataPoints) in dataPoints.withIndex()) {
                     val timeDifference = abs(dataPoints.value) / 1000 / 60 // Minutes
+                    var grade = bucketTimeDifference(timeDifference)
+                    if (dataPoints.value == -1f) grade = 0f
                     val dateString = getAxisString(dataPoints)
                     axisStringList.add(dateString)
-                    val currentEntry = BarEntry(index.toFloat(), timeDifference)
+                    val currentEntry = BarEntry(index.toFloat(), grade)
                     entries.add(currentEntry)
                 }
 
@@ -209,6 +233,18 @@ class StatisticsFragment : Fragment() {
         }
     }
 
+    private fun bucketTimeDifference (minuteDifference: Float):Float {
+        return when {
+            minuteDifference > 1200f -> 1f
+            minuteDifference > 600f -> 2f
+            minuteDifference > 120f -> 3f
+            minuteDifference > 60f -> 4f
+            minuteDifference > 20f -> 5f
+            minuteDifference > 10f -> 6f
+            else -> 7f
+        }
+    }
+
     private fun getAxisString(dataPoints: DataPoint):String {
         var cal = Calendar.getInstance()
         cal.time = dataPoints.time
@@ -217,7 +253,7 @@ class StatisticsFragment : Fragment() {
             "Day" -> cal.get(Calendar.HOUR_OF_DAY).toString()
             "Week" -> cal.getDisplayName(Calendar.DAY_OF_WEEK,Calendar.SHORT,Locale.US)
             "Month" -> cal.get(Calendar.DAY_OF_MONTH).toString()
-            "Year" -> cal.getDisplayName(Calendar.MONTH,Calendar.SHORT,Locale.US)
+            "Year" -> cal.getDisplayName(Calendar.MONTH,Calendar.SHORT,Locale.US).first().toString()
             else -> ""
         }
     }
@@ -249,7 +285,7 @@ class StatisticsFragment : Fragment() {
                         rangedTimeCounts.add(DataPoint(calIterator.time,existingTimeCount.offset))
                     }
                     else {
-                        rangedTimeCounts.add(DataPoint(calIterator.time,0f))
+                        rangedTimeCounts.add(DataPoint(calIterator.time,-1f))
                     }
                 }
             }
@@ -272,7 +308,7 @@ class StatisticsFragment : Fragment() {
                         rangedTimeCounts.add(DataPoint(calIterator.time,existingTimeCount.offset))
                     }
                     else {
-                        rangedTimeCounts.add(DataPoint(calIterator.time,0f))
+                        rangedTimeCounts.add(DataPoint(calIterator.time,-1f))
                     }
                 }
             }
@@ -295,7 +331,7 @@ class StatisticsFragment : Fragment() {
                         rangedTimeCounts.add(DataPoint(calIterator.time,existingTimeCount.offset))
                     }
                     else {
-                        rangedTimeCounts.add(DataPoint(calIterator.time,0f))
+                        rangedTimeCounts.add(DataPoint(calIterator.time,-1f))
                     }
                     calIterator.time = DateHelper.addUnitToDate(calIterator.time,1,Calendar.DATE)
                 }
@@ -307,11 +343,12 @@ class StatisticsFragment : Fragment() {
                 calIterator.set(Calendar.MINUTE, 0)
                 calIterator.set(Calendar.HOUR_OF_DAY, 1)
                 calIterator.set(Calendar.DAY_OF_YEAR, 1)
-                calIterator.set(Calendar.WEEK_OF_YEAR, 1)
+                calIterator.set(Calendar.MONTH, 0)
                 calIterator.set(Calendar.YEAR, cal.get(Calendar.YEAR))
 
                 for (i in 0..11) {
-                    calIterator.set(Calendar.MONTH, i)
+
+                    //Log.i("test",calIterator.time.toString())
 
                     var existingTimeCount = timeCounts.filter {equalTimeUnit(it,calIterator,listOf(Calendar.MONTH,Calendar.YEAR))}.firstOrNull()
 
@@ -319,8 +356,10 @@ class StatisticsFragment : Fragment() {
                         rangedTimeCounts.add(DataPoint(calIterator.time,existingTimeCount.offset))
                     }
                     else {
-                        rangedTimeCounts.add(DataPoint(calIterator.time,0f))
+                        rangedTimeCounts.add(DataPoint(calIterator.time,-1f))
                     }
+
+                    calIterator.time = DateHelper.addUnitToDate(calIterator.time,1,Calendar.MONTH)
                 }
             }
         }
@@ -330,7 +369,62 @@ class StatisticsFragment : Fragment() {
     }
 
     private fun renderBarChart() {
-        //set the header of the chart
+        val gradeStringList = listOf("","F","D","C","B","B+","A","A+")
+        var cal = Calendar.getInstance()
+        cal.time = currentDate
+
+        setChartHeader()
+
+        determineMedicationSetData()
+        barChart.setTouchEnabled(true)
+        barChart.setPinchZoom(true)
+        barChart.xAxis.valueFormatter = IndexAxisValueFormatter(axisStringList)
+        barChart.setDrawMarkers(true)
+        //barChart.marker = marker
+        barChart.xAxis.position = XAxis.XAxisPosition.BOTTOM
+        barChart.animateY(400)
+        barChart.xAxis.isGranularityEnabled = true
+        barChart.xAxis.granularity = 1.0f
+        //barChart.xAxis.labelCount = set.entryCount
+        barChart.xAxis.textSize = 16f
+        barChart.xAxis.labelCount = when (timeSpanFilter.selectedValue) {
+            "Day" -> 8
+            "Week" -> 7
+            "Month" -> cal.getActualMaximum(Calendar.DAY_OF_MONTH)/4
+            "Year" -> 12
+            else -> 24
+        }
+
+        barChart.axisLeft.textSize = 16f
+        barChart.axisLeft.axisMinimum = 0f
+        barChart.axisLeft.axisMaximum = 7f
+        barChart.axisLeft.valueFormatter = IndexAxisValueFormatter(gradeStringList)
+
+        barChart.description.isEnabled = false
+        barChart.axisRight.isEnabled = false
+        barChart.legend.isEnabled = false
+
+        barChart.data = BarData(medicationSets)
+        barChart.data.setValueTextSize(0f)
+
+        barChart.data.setHighlightEnabled(false)
+        barChart.setPinchZoom(false)
+        barChart.setScaleEnabled(false)
+        barChart.setDoubleTapToZoomEnabled(false)
+        barChart.setDrawBorders(true)
+
+        barChart.extraBottomOffset = 10f
+
+        val groupWidth = 0.7f
+        val barWidthRatio = 0.875f
+
+        barChart.data.barWidth = (groupWidth * barWidthRatio)/medicationSets.size
+        if(medicationSets.size > 1) {
+            barChart.groupBars(-0.5f, 1 - groupWidth, (groupWidth * (1 - barWidthRatio))/medicationSets.size)
+        }
+    }
+
+    private fun setChartHeader(){
         val cal = Calendar.getInstance()
         cal.time = currentDate
         val firstDayOfWeekCal = Calendar.getInstance()
@@ -345,41 +439,6 @@ class StatisticsFragment : Fragment() {
             "Month" -> cal.getDisplayName(Calendar.MONTH,Calendar.LONG,Locale.US) + " " + cal.get(Calendar.YEAR).toString()
             "Year" -> cal.get(Calendar.YEAR).toString()
             else -> ""
-        }
-
-        determineMedicationSetData()
-        barChart.setTouchEnabled(true)
-        barChart.setPinchZoom(true)
-        barChart.xAxis.valueFormatter = IndexAxisValueFormatter(axisStringList)
-        barChart.setDrawMarkers(true)
-        //barChart.marker = marker
-        barChart.xAxis.position = XAxis.XAxisPosition.BOTTOM
-        barChart.animateY(400)
-        barChart.xAxis.isGranularityEnabled = true
-        barChart.xAxis.granularity = 1.0f
-        //barChart.xAxis.labelCount = set.entryCount
-        barChart.xAxis.textSize = 16f
-        barChart.axisLeft.textSize = 16f
-        barChart.axisLeft.axisMinimum = 0f
-
-        barChart.description.isEnabled = false
-        barChart.axisRight.isEnabled = false
-        barChart.legend.isEnabled = false
-
-        barChart.data = BarData(medicationSets)
-        barChart.data.setValueTextSize(0f)
-
-        barChart.data.setHighlightEnabled(false)
-        barChart.setPinchZoom(false)
-        barChart.setScaleEnabled(false)
-        barChart.setDoubleTapToZoomEnabled(false)
-
-        val groupWidth = 0.7f
-        val barWidthRatio = 0.875f
-
-        barChart.data.barWidth = (groupWidth * barWidthRatio)/medicationSets.size
-        if(medicationSets.size > 1) {
-            barChart.groupBars(-0.5f, 1 - groupWidth, (groupWidth * (1 - barWidthRatio))/medicationSets.size)
         }
     }
 
@@ -473,8 +532,9 @@ class StatisticsFragment : Fragment() {
 }
 
 data class AverageLogOffset(val offset: Float, val time: Date)
-data class TimeCount(val time: Date, val count: Int, val offset: Float, val logs: List<Logs>)
+data class TimeCount(val time: Date, val count: Int, val offset: Float, val logs: List<DataLogs>)
 data class DataPoint(val time: Date, val value: Float)
 data class Filter(var view: LinearLayout, var selectedValue: String)
 
-data class MissingLog(var schedule: Schedules, var occurrence: Date)
+data class MissingLogs(var schedule: Schedules, var due: Date)
+data class DataLogs(var occurrence: Date, var due: Date)
