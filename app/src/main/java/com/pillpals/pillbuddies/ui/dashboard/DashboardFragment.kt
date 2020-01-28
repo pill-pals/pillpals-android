@@ -1,5 +1,6 @@
 package com.pillpals.pillbuddies.ui.dashboard
 
+import android.animation.LayoutTransition
 import android.content.Context
 import android.os.Bundle
 import androidx.fragment.app.Fragment
@@ -89,13 +90,7 @@ class DashboardFragment : Fragment() {
         setUpScheduleCards(readAllData(Schedules::class.java) as RealmResults<out Schedules>)
         setUpMoodTracker()
 
-        upcomingCollapseBtn.setOnClickListener {
-            toggleCollapse(upcomingStack, upcomingCollapseBtn)
-        }
-
-        completedCollapseBtn.setOnClickListener {
-            toggleCollapse(completedStack, completedCollapseBtn)
-        }
+        setUpCollapsing()
 
         val handler = Handler()
         val timer = Timer()
@@ -104,15 +99,6 @@ class DashboardFragment : Fragment() {
                 handler.post(Runnable {
                     try {
                         update()
-
-                        if (prefs.getBoolean(getString(R.string.completed_stack_collapsed), true)) {
-                            toggleCollapse(completedStack, completedCollapseBtn) //Collapsed by default
-                        }
-                        if (!prefs.contains(getString(R.string.completed_stack_collapsed))) {
-
-                        } else {
-
-                        }
                     } catch (e: Exception) {
                     }
                 })
@@ -177,6 +163,24 @@ class DashboardFragment : Fragment() {
                 image.imageTintList = ColorStateList.valueOf(ResourcesCompat.getColor(getResources(), R.color.colorGrey, null))
             }
         }
+    }
+
+    private fun setUpCollapsing() {
+        upcomingCollapseBtn.setOnClickListener {
+            toggleCollapse(upcomingStack, upcomingCollapseBtn)
+        }
+        if (prefs.getBoolean(getString(R.string.upcoming_stack_collapsed), false)) {
+            upcomingCollapseBtn.setImageResource(R.drawable.ic_circle_chevron_right)
+        }
+        upcomingStack.layoutTransition.enableTransitionType(LayoutTransition.CHANGING)
+
+        completedCollapseBtn.setOnClickListener {
+            toggleCollapse(completedStack, completedCollapseBtn)
+        }
+        if (prefs.getBoolean(getString(R.string.completed_stack_collapsed), true)) {
+            completedCollapseBtn.setImageResource(R.drawable.ic_circle_chevron_right)
+        }
+        completedStack.layoutTransition.enableTransitionType(LayoutTransition.CHANGING)
     }
 
     //TODO: Add animations
@@ -456,17 +460,22 @@ class DashboardFragment : Fragment() {
         if (currentLog.count() > 0) {
             // Completed
             newCard.logtimeLabel.text = DateHelper.dateToString(currentLog.first().occurrence!!)
-            newCard.logtimeLabel.setVisibility(LinearLayout.VISIBLE)
+            newCard.logtimeLabel.visibility = LinearLayout.VISIBLE
             newCard.drugCard.setCardBackgroundColor(this.resources.getColor(R.color.colorGrey))
             newCard.overflowMenu.setOnClickListener {
                 popoverMenuCompleted(newCard, schedule, currentLog.first())
             }
+
+            if (prefs.getBoolean(getString(R.string.completed_stack_collapsed), true)) {
+                newCard.visibility = View.GONE
+            }
+
             completedStack.addView(newCard)
         } else if (currentDate.time >= schedule.occurrence!!) {
             // Current
-            newCard.button.setVisibility(LinearLayout.VISIBLE)
+            newCard.button.visibility = LinearLayout.VISIBLE
             if (lateDate.time >= schedule.occurrence!!) {
-                newCard.lateText.setVisibility(LinearLayout.VISIBLE)
+                newCard.lateText.visibility = LinearLayout.VISIBLE
             }
             newCard.drugCard.setCardBackgroundColor(this.resources.getColor(R.color.colorWhite))
             newCard.overflowMenu.setOnClickListener {
@@ -477,11 +486,16 @@ class DashboardFragment : Fragment() {
             NotificationUtils.startAlarm(this.context!!, schedule)
         } else {
             // Upcoming
-            newCard.countdownLabel.setVisibility(LinearLayout.VISIBLE)
+            newCard.countdownLabel.visibility = LinearLayout.VISIBLE
             newCard.drugCard.setCardBackgroundColor(this.resources.getColor(R.color.colorWhite))
             newCard.overflowMenu.setOnClickListener {
                 popoverMenuUpcoming(newCard, schedule)
             }
+
+            if (prefs.getBoolean(getString(R.string.upcoming_stack_collapsed), false)) {
+                newCard.visibility = View.GONE
+            }
+
             upcomingStack.addView(newCard)
         }
     }
