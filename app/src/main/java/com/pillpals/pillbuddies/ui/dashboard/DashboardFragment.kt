@@ -32,6 +32,7 @@ import android.view.LayoutInflater
 import android.content.Intent
 import android.content.res.ColorStateList
 import android.graphics.*
+import android.graphics.drawable.AnimatedVectorDrawable
 import androidx.cardview.widget.CardView
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.view.children
@@ -174,12 +175,14 @@ class DashboardFragment : Fragment() {
                 if (previouslyCollapsed) {
                     if (!buttonChanged) {
                         button.setImageResource(R.drawable.ic_circle_chevron_down)
+                        (button.drawable as AnimatedVectorDrawable).start()
                         buttonChanged = true
                     }
                     view.visibility = View.VISIBLE
                 } else {
                     if (!buttonChanged) {
                         button.setImageResource(R.drawable.ic_circle_chevron_right)
+                        (button.drawable as AnimatedVectorDrawable).start()
                         buttonChanged = true
                     }
                     view.visibility = View.GONE
