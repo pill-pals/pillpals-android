@@ -1,5 +1,6 @@
 package com.pillpals.pillbuddies.ui.dashboard
 
+import android.content.Context
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import com.pillpals.pillbuddies.R
@@ -30,6 +31,7 @@ import java.util.*
 import android.widget.TextView
 import android.view.LayoutInflater
 import android.content.Intent
+import android.content.SharedPreferences
 import android.content.res.ColorStateList
 import android.graphics.*
 import android.graphics.drawable.AnimatedVectorDrawable
@@ -52,6 +54,8 @@ class DashboardFragment : Fragment() {
     public lateinit var completedCollapseBtn: ImageButton
     //public var selectedMoodImage: String? = null
 
+    private lateinit var prefs: SharedPreferences
+
     private lateinit var realm: Realm
 
     override fun onCreateView(
@@ -61,6 +65,8 @@ class DashboardFragment : Fragment() {
     ): View? {
         super.onCreateView(inflater, container, savedInstanceState)
         val view = inflater!!.inflate(R.layout.fragment_dashboard, container, false)
+
+        prefs = activity!!.getPreferences(Context.MODE_PRIVATE)
 
         //Realm.deleteRealm(Realm.getDefaultConfiguration())
         realm = Realm.getDefaultInstance()
@@ -98,7 +104,15 @@ class DashboardFragment : Fragment() {
                 handler.post(Runnable {
                     try {
                         update()
-                        toggleCollapse(completedStack, completedCollapseBtn) //Collapse completed stack by default
+
+                        if (prefs.getBoolean(getString(R.string.completed_stack_collapsed), true)) {
+                            toggleCollapse(completedStack, completedCollapseBtn) //Collapsed by default
+                        }
+                        if (!prefs.contains(getString(R.string.completed_stack_collapsed))) {
+
+                        } else {
+
+                        }
                     } catch (e: Exception) {
                     }
                 })
@@ -168,7 +182,7 @@ class DashboardFragment : Fragment() {
     //TODO: Add animations
     private fun toggleCollapse(stack: LinearLayout, button: ImageButton) {
         var buttonChanged = false
-        var previouslyCollapsed: Boolean
+        var previouslyCollapsed = false
         for (view in stack.children) {
             if (stack.indexOfChild(view) != 0) {
                 previouslyCollapsed = (view.visibility == View.GONE)
@@ -188,6 +202,18 @@ class DashboardFragment : Fragment() {
                     view.visibility = View.GONE
                 }
             }
+        }
+
+        var prefKey = ""
+        if (stack == upcomingStack) {
+            prefKey = getString(R.string.upcoming_stack_collapsed)
+        } else { //stack == completedStack
+            prefKey = getString(R.string.completed_stack_collapsed)
+        }
+        with (prefs.edit()) {
+            //Set preference to collapse completed stack by default
+            putBoolean(prefKey, !previouslyCollapsed)
+            commit()
         }
     }
 
