@@ -50,6 +50,7 @@ import android.graphics.drawable.BitmapDrawable
 import androidx.cardview.widget.CardView
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
+import androidx.core.view.children
 import com.pillpals.pillbuddies.helpers.DatabaseHelper
 import com.pillpals.pillbuddies.helpers.DatabaseHelper.Companion.convertByteArrayToBitmap
 import com.pillpals.pillbuddies.helpers.DatabaseHelper.Companion.getByteArrayById
@@ -65,7 +66,10 @@ class DashboardFragment : Fragment() {
     public lateinit var upcomingStack: LinearLayout
     public lateinit var completedStack: LinearLayout
     public lateinit var moodIconList: LinearLayout
+    public lateinit var collapseButton: ImageButton
     //public var selectedMoodImage: String? = null
+
+    private var completedCollapsed = false
 
     private lateinit var realm: Realm
 
@@ -84,6 +88,7 @@ class DashboardFragment : Fragment() {
         upcomingStack = view!!.findViewById(R.id.upcomingStack)
         completedStack = view!!.findViewById(R.id.completedStack)
         moodIconList = view!!.findViewById(R.id.moodIconList)
+        collapseButton = view!!.findViewById(R.id.completedCollapseBtn)
 
         //region
         // Testing
@@ -95,6 +100,10 @@ class DashboardFragment : Fragment() {
 
         setUpScheduleCards(readAllData(Schedules::class.java) as RealmResults<out Schedules>)
         setUpMoodTracker()
+
+        collapseButton.setOnClickListener {
+            toggleCompletedCollapse()
+        }
 
         val handler = Handler()
         val timer = Timer()
@@ -167,6 +176,25 @@ class DashboardFragment : Fragment() {
                 image.imageTintList = ColorStateList.valueOf(ResourcesCompat.getColor(getResources(), R.color.colorGrey, null))
             }
         }
+    }
+
+    private fun toggleCompletedCollapse() {
+        if (completedCollapsed) {
+            collapseButton.setImageResource(R.drawable.ic_circle_chevron_down)
+            for (view in completedStack.children) {
+                if (completedStack.indexOfChild(view) != 0) {
+                    view.visibility = View.GONE
+                }
+            }
+        } else {
+            collapseButton.setImageResource(R.drawable.ic_circle_chevron_right)
+            for (view in completedStack.children) {
+                if (completedStack.indexOfChild(view) != 0) {
+                    view.visibility = View.VISIBLE
+                }
+            }
+        }
+        completedCollapsed = !completedCollapsed
     }
 
     //Popover menus
