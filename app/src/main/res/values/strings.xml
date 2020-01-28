@@ -10,4 +10,6 @@
         <item>Days</item>
         <item>Weeks</item>
     </string-array>
+    <string name="upcoming_stack_collapsed">UPCOMING_STACK_COLLAPSED</string>
+    <string name="completed_stack_collapsed">COMPLETED_STACK_COLLAPSED</string>
 </resources>

@@ -1,6 +1,6 @@
 package com.pillpals.pillbuddies.ui.dashboard
 
-import android.app.NotificationManager
+import android.content.Context
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import com.pillpals.pillbuddies.R
@@ -13,7 +13,6 @@ import com.pillpals.pillbuddies.data.model.MoodLogs
 import io.realm.RealmResults
 import com.pillpals.pillbuddies.helpers.DateHelper
 import androidx.core.content.res.ResourcesCompat
-import android.util.Log
 import com.pillpals.pillbuddies.ui.DrugCard
 
 import com.pillpals.pillbuddies.helpers.NotificationUtils
@@ -25,38 +24,24 @@ import android.view.*
 import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import com.pillpals.pillbuddies.helpers.DatabaseHelper.Companion.getColorStringByID
-import com.pillpals.pillbuddies.helpers.DatabaseHelper.Companion.getDrawableIconById
-import com.pillpals.pillbuddies.ui.DosageTimeBox
-import kotlinx.android.synthetic.main.delete_prompt.view.*
 import kotlinx.android.synthetic.main.drug_card.view.*
 import kotlinx.android.synthetic.main.time_prompt.view.*
 import kotlinx.android.synthetic.main.time_prompt.view.dialogCancelBtn
 import java.util.*
-import androidx.core.widget.PopupWindowCompat.showAsDropDown
-import android.graphics.drawable.Drawable
-import android.widget.FrameLayout
-import android.widget.PopupWindow
-import android.view.View.MeasureSpec
-import android.view.View.MeasureSpec.UNSPECIFIED
 import android.widget.TextView
-import android.content.Context.LAYOUT_INFLATER_SERVICE
-import androidx.core.content.ContextCompat.getSystemService
 import android.view.LayoutInflater
-import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.content.res.ColorStateList
 import android.graphics.*
-import android.graphics.drawable.BitmapDrawable
+import android.graphics.drawable.AnimatedVectorDrawable
 import androidx.cardview.widget.CardView
 import androidx.core.app.NotificationManagerCompat
-import androidx.core.content.ContextCompat
+import androidx.core.view.children
 import com.pillpals.pillbuddies.helpers.DatabaseHelper
-import com.pillpals.pillbuddies.helpers.DatabaseHelper.Companion.convertByteArrayToBitmap
-import com.pillpals.pillbuddies.helpers.DatabaseHelper.Companion.getByteArrayById
 import com.pillpals.pillbuddies.helpers.DatabaseHelper.Companion.getCorrectIconDrawable
 import com.pillpals.pillbuddies.helpers.DatabaseHelper.Companion.obliterateSchedule
 import com.pillpals.pillbuddies.ui.AddDrugActivity
-import io.realm.kotlin.createObject
 
 
 class DashboardFragment : Fragment() {
@@ -65,7 +50,11 @@ class DashboardFragment : Fragment() {
     public lateinit var upcomingStack: LinearLayout
     public lateinit var completedStack: LinearLayout
     public lateinit var moodIconList: LinearLayout
+    public lateinit var upcomingCollapseBtn: ImageButton
+    public lateinit var completedCollapseBtn: ImageButton
     //public var selectedMoodImage: String? = null
+
+    private lateinit var prefs: SharedPreferences
 
     private lateinit var realm: Realm
 
@@ -77,6 +66,8 @@ class DashboardFragment : Fragment() {
         super.onCreateView(inflater, container, savedInstanceState)
         val view = inflater!!.inflate(R.layout.fragment_dashboard, container, false)
 
+        prefs = activity!!.getPreferences(Context.MODE_PRIVATE)
+
         //Realm.deleteRealm(Realm.getDefaultConfiguration())
         realm = Realm.getDefaultInstance()
 
@@ -84,6 +75,8 @@ class DashboardFragment : Fragment() {
         upcomingStack = view!!.findViewById(R.id.upcomingStack)
         completedStack = view!!.findViewById(R.id.completedStack)
         moodIconList = view!!.findViewById(R.id.moodIconList)
+        upcomingCollapseBtn = view!!.findViewById(R.id.upcomingCollapseBtn)
+        completedCollapseBtn = view!!.findViewById(R.id.completedCollapseBtn)
 
         //region
         // Testing
@@ -96,6 +89,14 @@ class DashboardFragment : Fragment() {
         setUpScheduleCards(readAllData(Schedules::class.java) as RealmResults<out Schedules>)
         setUpMoodTracker()
 
+        upcomingCollapseBtn.setOnClickListener {
+            toggleCollapse(upcomingStack, upcomingCollapseBtn)
+        }
+
+        completedCollapseBtn.setOnClickListener {
+            toggleCollapse(completedStack, completedCollapseBtn)
+        }
+
         val handler = Handler()
         val timer = Timer()
         val doAsynchronousTask = object : TimerTask() {
@@ -103,6 +104,15 @@ class DashboardFragment : Fragment() {
                 handler.post(Runnable {
                     try {
                         update()
+
+                        if (prefs.getBoolean(getString(R.string.completed_stack_collapsed), true)) {
+                            toggleCollapse(completedStack, completedCollapseBtn) //Collapsed by default
+                        }
+                        if (!prefs.contains(getString(R.string.completed_stack_collapsed))) {
+
+                        } else {
+
+                        }
                     } catch (e: Exception) {
                     }
                 })
@@ -166,6 +176,44 @@ class DashboardFragment : Fragment() {
                 card.setCardBackgroundColor(Color.parseColor("#00FFFFFF"))
                 image.imageTintList = ColorStateList.valueOf(ResourcesCompat.getColor(getResources(), R.color.colorGrey, null))
             }
+        }
+    }
+
+    //TODO: Add animations
+    private fun toggleCollapse(stack: LinearLayout, button: ImageButton) {
+        var buttonChanged = false
+        var previouslyCollapsed = false
+        for (view in stack.children) {
+            if (stack.indexOfChild(view) != 0) {
+                previouslyCollapsed = (view.visibility == View.GONE)
+                if (previouslyCollapsed) {
+                    if (!buttonChanged) {
+                        button.setImageResource(R.drawable.ic_circle_chevron_down)
+                        (button.drawable as AnimatedVectorDrawable).start()
+                        buttonChanged = true
+                    }
+                    view.visibility = View.VISIBLE
+                } else {
+                    if (!buttonChanged) {
+                        button.setImageResource(R.drawable.ic_circle_chevron_right)
+                        (button.drawable as AnimatedVectorDrawable).start()
+                        buttonChanged = true
+                    }
+                    view.visibility = View.GONE
+                }
+            }
+        }
+
+        var prefKey = ""
+        if (stack == upcomingStack) {
+            prefKey = getString(R.string.upcoming_stack_collapsed)
+        } else { //stack == completedStack
+            prefKey = getString(R.string.completed_stack_collapsed)
+        }
+        with (prefs.edit()) {
+            //Set preference to collapse completed stack by default
+            putBoolean(prefKey, !previouslyCollapsed)
+            commit()
         }
     }
 
