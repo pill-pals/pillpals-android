@@ -70,6 +70,24 @@ class DateHelper {
             cal.set(Calendar.HOUR_OF_DAY, 0)
             return cal.time
         }
+        fun yesterday(): Date {
+            val date = Date()
+            val cal = Calendar.getInstance()
+            cal.time = date
+            cal.add(Calendar.DATE, -1)
+            cal.set(Calendar.MILLISECOND, 0)
+            cal.set(Calendar.SECOND, 0)
+            cal.set(Calendar.MINUTE, 0)
+            cal.set(Calendar.HOUR_OF_DAY, 0)
+            return cal.time
+        }
+        fun yesterdayAt12pm(): Date {
+            val date = yesterday()
+            val cal = Calendar.getInstance()
+            cal.time = date
+            cal.set(Calendar.HOUR_OF_DAY, 12)
+            return cal.time
+        }
         fun addUnitToDate(date: Date, n: Int, u: Int): Date {
             var cal = Calendar.getInstance()
             cal.time = date
