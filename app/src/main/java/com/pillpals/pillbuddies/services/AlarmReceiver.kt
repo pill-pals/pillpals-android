@@ -23,6 +23,7 @@ import android.opengl.ETC1.getWidth
 import android.graphics.drawable.BitmapDrawable
 import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
+import androidx.preference.PreferenceManager
 import com.pillpals.pillbuddies.helpers.DatabaseHelper.Companion.convertByteArrayToBitmap
 import com.pillpals.pillbuddies.helpers.DatabaseHelper.Companion.getByteArrayById
 import com.pillpals.pillbuddies.helpers.DatabaseHelper.Companion.getColorStringByID
@@ -78,6 +79,9 @@ public class AlarmReceiver: BroadcastReceiver() {
 
         val notificationManager = NotificationManagerCompat.from(context)
         // notificationId is a unique int for each notification that you must define
-        notificationManager.notify(schedule.uid!!.hashCode(), mBuilder.build())
+        val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
+        if(sharedPreferences.getBoolean("notifications", false) == false) {
+            notificationManager.notify(schedule.uid!!.hashCode(), mBuilder.build())
+        }
     }
 }
