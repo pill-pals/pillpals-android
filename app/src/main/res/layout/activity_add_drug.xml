@@ -219,7 +219,7 @@
         </LinearLayout>
     </ScrollView>
 
-    <com.pillpals.pillbuddies.ui.BottomOptions
+    <com.pillpals.pillpals.ui.BottomOptions
         android:id="@+id/bottomOptions"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

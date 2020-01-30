@@ -7,7 +7,7 @@
     android:animateLayoutChanges="true"
     tools:context=".ui.dashboard.DashboardFragment">
 
-    <com.pillpals.pillbuddies.ui.ColorFadeScrollView
+    <com.pillpals.pillpals.ui.ColorFadeScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:background="@color/colorLightGrey"
@@ -187,7 +187,7 @@
 
             </LinearLayout>
         </androidx.constraintlayout.widget.ConstraintLayout>
-    </com.pillpals.pillbuddies.ui.ColorFadeScrollView>
+    </com.pillpals.pillpals.ui.ColorFadeScrollView>
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/constraintLayout2"
