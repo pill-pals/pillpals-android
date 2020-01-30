@@ -12,12 +12,14 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import com.pillpals.pillbuddies.R
 import android.os.*
+import android.view.View.GONE
 import android.view.animation.Animation
 import android.view.animation.LinearInterpolator
 import android.view.animation.RotateAnimation
 import android.widget.*
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.marginEnd
+import androidx.transition.Visibility
 import com.google.gson.Gson
 import com.pillpals.pillbuddies.data.model.Medications
 import com.pillpals.pillbuddies.helpers.DatabaseHelper
@@ -37,6 +39,7 @@ class SearchFragment : Fragment() {
     public lateinit var searchView: android.widget.SearchView
     public lateinit var rootSearchView: ConstraintLayout
     public lateinit var searchResults: LinearLayout
+    public lateinit var apiWarning: TextView
     public var handler: Handler = Handler(Looper.getMainLooper())
     public var runnable: Runnable? = null
     public var suggestions: MutableList<String> = mutableListOf()
@@ -45,10 +48,12 @@ class SearchFragment : Fragment() {
     public var clearQueriesFlag: Boolean = false
     public var showResultsFlag: Boolean = false
     public var refreshCardsFlag: Boolean = false
+    public var apiDown: Boolean = false
     public var drugCards: MutableList<DrugCard?> = mutableListOf()
     public var upcomingDrugCards: MutableList<DrugCard?> = mutableListOf()
     public lateinit var loadingAnimation: RotateAnimation
     public var lastQuery: String? = null
+    public var searchingUpcomingDrugs = false
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         super.onCreateView(inflater, container, savedInstanceState)
@@ -57,6 +62,10 @@ class SearchFragment : Fragment() {
         searchView = view.findViewById(R.id.searchView)
         rootSearchView = view.findViewById(R.id.rootSearchView)
         searchResults = view.findViewById(R.id.searchResults)
+        apiWarning = view.findViewById(R.id.warningText)
+
+        apiWarning.visibility = GONE
+
         outerContext = this
         handler = Handler(Looper.getMainLooper())
 
@@ -166,16 +175,17 @@ class SearchFragment : Fragment() {
             override fun run() {
                 handler.post {
                     try {
-                        when(true) {
-                            updateSuggestionsFlag -> updateSuggestions()
-                            clearQueriesFlag -> clearQueries()
-                            showResultsFlag -> showResults()
-                            refreshCardsFlag -> refreshCards()
-                        }
+                        if(updateSuggestionsFlag) updateSuggestions()
+                        if(clearQueriesFlag) clearQueries()
+                        if(showResultsFlag) showResults()
+                        if(refreshCardsFlag) refreshCards()
+                        if(apiDown) showApiWarning()
+
                         updateSuggestionsFlag = false
                         clearQueriesFlag = false
                         showResultsFlag = false
                         refreshCardsFlag = false
+                        apiDown = false
                     } catch (e: Exception) { }
                 }
             }
@@ -219,14 +229,20 @@ class SearchFragment : Fragment() {
     }
 
     private fun multipleDrugsExistsWithName(drug: DrugProduct): Boolean {
-        return upcomingDrugCards.filter {
+        searchingUpcomingDrugs = true
+        val res = upcomingDrugCards.filter {
             it?.nameText?.text.toString() == drug.brand_name
         }.count() > 1
+        searchingUpcomingDrugs = false
+        return res
     }
 
     private fun showResults() {
         searchResults.removeAllViews()
         drugCards = mutableListOf()
+        while(searchingUpcomingDrugs) {
+            Thread.sleep(50)
+        }
         upcomingDrugCards = mutableListOf()
 
         val dispatcher = Dispatcher()
@@ -253,7 +269,10 @@ class SearchFragment : Fragment() {
             client.newCall(request).enqueue(object : Callback {
                 override fun onFailure(call: Call, e: IOException) {
                     e.printStackTrace()
-                    drugCards[index] = null
+                    if(index < drugCards.count()) {
+                        drugCards[index] = null
+                    }
+                    apiDown = true
                     refreshCardsFlag = true
                 }
 
@@ -291,6 +310,10 @@ class SearchFragment : Fragment() {
                             startActivityForResult(infoIntent, 1)
                         }
 
+
+                        while(searchingUpcomingDrugs) {
+                            Thread.sleep(50)
+                        }
                         upcomingDrugCards.add(newCard)
 
                         if(multipleDrugsExistsWithName(firstDrugProduct)) {
@@ -306,7 +329,10 @@ class SearchFragment : Fragment() {
                         client.newCall(request).enqueue(object : Callback {
                             override fun onFailure(call: Call, e: IOException) {
                                 e.printStackTrace()
-                                drugCards[index] = null
+                                if(index < drugCards.count()) {
+                                    drugCards[index] = null
+                                }
+                                apiDown = true
                                 refreshCardsFlag = true
                             }
 
@@ -331,7 +357,10 @@ class SearchFragment : Fragment() {
                                     client.newCall(request).enqueue(object : Callback {
                                         override fun onFailure(call: Call, e: IOException) {
                                             e.printStackTrace()
-                                            drugCards[index] = null
+                                            if(index < drugCards.count()) {
+                                                drugCards[index] = null
+                                            }
+                                            apiDown = true
                                             refreshCardsFlag = true
                                         }
 
@@ -404,6 +433,10 @@ class SearchFragment : Fragment() {
             }
             searchResults.addView(it)
         }
+    }
+
+    private fun showApiWarning() {
+        apiWarning.visibility = View.VISIBLE
     }
 
     private fun administrationRouteToIcon(route: String): Int {
