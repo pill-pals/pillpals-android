@@ -7,25 +7,25 @@
 
     <fragment
         android:id="@+id/navigation_medications"
-        android:name="com.pillpals.pillbuddies.ui.medications.MedicationsFragment"
+        android:name="com.pillpals.pillpals.ui.medications.MedicationsFragment"
         android:label="Medications"
         tools:layout="@layout/fragment_medications" />
 
     <fragment
         android:id="@+id/navigation_dashboard"
-        android:name="com.pillpals.pillbuddies.ui.dashboard.DashboardFragment"
+        android:name="com.pillpals.pillpals.ui.dashboard.DashboardFragment"
         android:label="Dashboard"
         tools:layout="@layout/fragment_dashboard" />
 
     <fragment
         android:id="@+id/navigation_statistics"
-        android:name="com.pillpals.pillbuddies.ui.statistics.StatisticsFragment"
+        android:name="com.pillpals.pillpals.ui.statistics.StatisticsFragment"
         android:label="Statistics"
         tools:layout="@layout/fragment_statistics" />
 
     <fragment
         android:id="@+id/navigation_search"
-        android:name="com.pillpals.pillbuddies.ui.search.SearchFragment"
+        android:name="com.pillpals.pillpals.ui.search.SearchFragment"
         android:label="Search"
         tools:layout="@layout/fragment_search" />
 </navigation>
