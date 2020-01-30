@@ -1,6 +1,7 @@
 package com.pillpals.pillbuddies.ui.medications.medication_info
 
 import android.content.Intent
+import android.graphics.Color
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
@@ -22,7 +23,10 @@ import io.realm.Realm
 import androidx.core.app.ComponentActivity.ExtraData
 import androidx.core.content.ContextCompat.getSystemService
 import android.icu.lang.UCharacter.GraphemeClusterBreak.T
+import android.util.Log
 import android.view.MenuItem
+import android.widget.ImageView
+import androidx.cardview.widget.CardView
 import androidx.core.app.NavUtils
 
 
@@ -31,7 +35,17 @@ class MedicationInfoActivity : AppCompatActivity() {
     public lateinit var tabLayout: TabLayout
     public lateinit var tabViewPager: ViewPager
     public lateinit var addButton: Button
+    public lateinit var iconBackground: CardView
+    public lateinit var medicationIcon: ImageView
+    public lateinit var nameText: TextView
+    public lateinit var dosageText: TextView
     public var drugCode: Int = 0
+    public var colorString: String = "#D3D3D3"
+    public var administrationRoutes = listOf<String>()
+    public var activeIngredients = listOf<String>()
+    public var iconResource = R.drawable.ic_pill_v5
+    public var dosageString = ""
+    public var nameString = ""
 
     private var tabFragments: List<MedicationInfoTextFragment> = mutableListOf(
         MedicationInfoTextFragment(),
@@ -63,7 +77,25 @@ class MedicationInfoActivity : AppCompatActivity() {
         tabLayout = findViewById(R.id.tabLayout)
         tabViewPager = findViewById(R.id.tabViewPager)
         tabLayout.setupWithViewPager(tabViewPager)
+        iconBackground = findViewById(R.id.iconBackground)
+        medicationIcon = findViewById(R.id.medicationIcon)
+        nameText = findViewById(R.id.nameText)
+        dosageText = findViewById(R.id.dosageText)
+
         drugCode = intent.getIntExtra("drug-code", 0)
+        colorString = intent.getStringExtra("icon-color")!!
+        administrationRoutes = intent.getStringArrayListExtra("administration-routes")!!.toList()
+        activeIngredients = intent.getStringArrayListExtra("active-ingredients")!!.toList()
+        dosageString = intent.getStringExtra("dosage-string")!!
+        nameString = intent.getStringExtra("name-text")!!
+        if(intent.hasExtra("icon-resource")) {
+            iconResource = intent.getIntExtra("icon-resource", R.drawable.ic_pill_v5)
+        }
+
+        iconBackground.setCardBackgroundColor(Color.parseColor(colorString))
+        medicationIcon.setImageResource(iconResource)
+        nameText.text = nameString
+        dosageText.text = dosageString
 
         tabPagerAdapter = TabPagerAdapter(supportFragmentManager)
         tabViewPager.adapter = tabPagerAdapter
@@ -78,9 +110,17 @@ class MedicationInfoActivity : AppCompatActivity() {
         }
     }
 
+    public fun tabFragmentLoaded() {
+        setTabText(0, listOf("Active Ingredients", "Administration Routes"), listOf(bulletedList(activeIngredients), bulletedList(administrationRoutes)))
+    }
+
+    private fun bulletedList(list: List<String>): String {
+        return "• " + list.joinToString("\n• ")
+    }
+
     //Assumes that the headers and bodyText lists are ordered and have indices that correspond with each other 1:1
     private fun setTabText(tabIndex: Int, headers: List<String>, bodyText: List<String>) {
-        var layout: LinearLayout = tabFragments[tabIndex].layout
+        val layout: LinearLayout = tabPagerAdapter.getItem(tabIndex).layout
         resetText(layout)
         for ((index, headerText) in headers.withIndex()) {
             addHeader(layout, headerText)
@@ -110,7 +150,7 @@ class MedicationInfoActivity : AppCompatActivity() {
     }
 
     private inner class TabPagerAdapter(fm: FragmentManager) : FragmentStatePagerAdapter(fm) {
-        override fun getItem(position: Int) : Fragment {
+        override fun getItem(position: Int) : MedicationInfoTextFragment {
             return tabFragments[position]
         }
 

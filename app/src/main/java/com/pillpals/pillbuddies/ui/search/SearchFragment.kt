@@ -33,6 +33,7 @@ import kotlinx.android.synthetic.main.drug_card.view.*
 import okhttp3.*
 import okio.IOException
 import java.util.*
+import java.util.concurrent.TimeUnit
 
 class SearchFragment : Fragment() {
     public lateinit var medications: RealmResults<out Medications>
@@ -83,6 +84,8 @@ class SearchFragment : Fragment() {
 
         val client = OkHttpClient
             .Builder()
+            .connectTimeout(30, TimeUnit.SECONDS)
+            .readTimeout(30, TimeUnit.SECONDS)
             .addNetworkInterceptor(netInterceptor)
             .dispatcher(dispatcher)
             .build()
@@ -250,6 +253,8 @@ class SearchFragment : Fragment() {
 
         val client = OkHttpClient
             .Builder()
+            .connectTimeout(30, TimeUnit.SECONDS)
+            .readTimeout(30, TimeUnit.SECONDS)
             .dispatcher(dispatcher)
             .build()
 
@@ -303,13 +308,6 @@ class SearchFragment : Fragment() {
                         newCard.button.margin(right = 0F)
 
                         newCard.drugCode = firstDrugProduct.drug_code
-                        // Add button action here, using drug code ^
-                        newCard.button.setOnClickListener {
-                            val infoIntent = Intent(outerContext.context, MedicationInfoActivity::class.java)
-                            infoIntent.putExtra("drug-code", firstDrugProduct.drug_code)
-                            startActivityForResult(infoIntent, 1)
-                        }
-
 
                         while(searchingUpcomingDrugs) {
                             Thread.sleep(50)
@@ -348,6 +346,20 @@ class SearchFragment : Fragment() {
                                         acc.plus(it.ingredient_name)
                                     }
 
+                                    val dosageValues = activeIngredients.fold("") { acc, it ->
+                                        if(acc.isNotEmpty()) acc + "/" + it.strength
+                                        else acc + it.strength
+                                    }
+
+                                    val dosageUnits = activeIngredients.fold(listOf<String>()) { acc, it ->
+                                        if(acc.contains(it.strength_unit)) acc
+                                        else acc.plus(it.strength_unit)
+                                    }.joinToString("/")
+
+                                    newCard.dosageString = "$dosageValues $dosageUnits"
+
+                                    newCard.activeIngredients = ingredientNameList
+
                                     newCard.timeText.text = ingredientNameList.joinToString()
 
                                     val url = "https://health-products.canada.ca/api/drug/route/?id=${firstDrugProduct.drug_code}"
@@ -372,22 +384,40 @@ class SearchFragment : Fragment() {
                                                 val gson = Gson()
                                                 val administrationRoutes = gson.fromJson(jsonString, Array<AdministrationRoute>::class.java).toList()
 
+                                                var colorString =
+                                                    DatabaseHelper.getRandomColorString()
+                                                while(colorString == "#000000") { // Let's not let black be selected randomly
+                                                    colorString = DatabaseHelper.getRandomColorString()
+                                                }
+                                                newCard.iconBackground.setCardBackgroundColor(Color.parseColor(colorString))
+
+                                                var administrationRoutesList = listOf<String>()
+
                                                 val firstRoute = administrationRoutes.firstOrNull()
                                                 if(firstRoute != null) {
                                                     newCard.icon.setImageResource(administrationRouteToIcon(firstRoute.route_of_administration_name))
 
-                                                    var colorString =
-                                                        DatabaseHelper.getRandomColorString()
-                                                    while(colorString == "#000000") { // Let's not let black be selected randomly
-                                                        colorString = DatabaseHelper.getRandomColorString()
-                                                    }
-                                                    newCard.iconBackground.setCardBackgroundColor(Color.parseColor(colorString))
-
-                                                    val administrationRoutesList = administrationRoutes.fold(listOf<String>()) { acc, it ->
+                                                    administrationRoutesList = administrationRoutes.fold(listOf<String>()) { acc, it ->
                                                         acc.plus(it.route_of_administration_name)
                                                     }
 
                                                     newCard.lateText.text = administrationRoutesList.joinToString()
+                                                }
+
+                                                // Add button action here, using drug code
+                                                newCard.button.setOnClickListener {
+                                                    val infoIntent = Intent(outerContext.context, MedicationInfoActivity::class.java)
+                                                    infoIntent.putExtra("drug-code", newCard.drugCode)
+                                                    infoIntent.putExtra("icon-color", colorString)
+                                                    infoIntent.putStringArrayListExtra("administration-routes", ArrayList(administrationRoutesList))
+                                                    infoIntent.putStringArrayListExtra("active-ingredients", ArrayList(newCard.activeIngredients))
+                                                    infoIntent.putExtra("dosage-string", newCard.dosageString)
+                                                    infoIntent.putExtra("name-text", newCard.nameText.text.toString())
+                                                    if(firstRoute != null) {
+                                                        infoIntent.putExtra("icon-resource", administrationRouteToIcon(firstRoute.route_of_administration_name))
+                                                    }
+
+                                                    startActivityForResult(infoIntent, 1)
                                                 }
 
                                                 drugCards[index] = newCard

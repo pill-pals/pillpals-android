@@ -29,6 +29,8 @@ class DrugCard : LinearLayout {
     public lateinit var iconBackground: CardView
     public lateinit var overflowMenu: ImageButton
     public var drugCode: Int = 0
+    public var activeIngredients = listOf<String>()
+    public var dosageString = ""
 
     constructor(context: Context) : super(context) {
         init()
