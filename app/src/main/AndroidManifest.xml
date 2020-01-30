@@ -51,6 +51,9 @@
         <activity android:name=".ui.AddDrugActivity"></activity>
         <activity android:name=".ui.EditMedicationIcon"></activity>
         <activity android:name=".ui.DrugGallery"></activity>
+        <activity android:name=".ui.SettingsActivity"
+            android:theme="@style/PreferenceTheme">
+        </activity>
 
         <activity android:name=".ui.medications.medication_info.MedicationInfoActivity">
             <meta-data
