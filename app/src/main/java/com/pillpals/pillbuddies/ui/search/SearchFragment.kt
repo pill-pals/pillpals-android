@@ -53,6 +53,7 @@ class SearchFragment : Fragment() {
     public var upcomingDrugCards: MutableList<DrugCard?> = mutableListOf()
     public lateinit var loadingAnimation: RotateAnimation
     public var lastQuery: String? = null
+    public var searchingUpcomingDrugs = false
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         super.onCreateView(inflater, container, savedInstanceState)
@@ -228,14 +229,20 @@ class SearchFragment : Fragment() {
     }
 
     private fun multipleDrugsExistsWithName(drug: DrugProduct): Boolean {
-        return upcomingDrugCards.filter {
+        searchingUpcomingDrugs = true
+        val res = upcomingDrugCards.filter {
             it?.nameText?.text.toString() == drug.brand_name
         }.count() > 1
+        searchingUpcomingDrugs = false
+        return res
     }
 
     private fun showResults() {
         searchResults.removeAllViews()
         drugCards = mutableListOf()
+        while(searchingUpcomingDrugs) {
+            Thread.sleep(50)
+        }
         upcomingDrugCards = mutableListOf()
 
         val dispatcher = Dispatcher()
@@ -303,6 +310,10 @@ class SearchFragment : Fragment() {
                             startActivityForResult(infoIntent, 1)
                         }
 
+
+                        while(searchingUpcomingDrugs) {
+                            Thread.sleep(50)
+                        }
                         upcomingDrugCards.add(newCard)
 
                         if(multipleDrugsExistsWithName(firstDrugProduct)) {

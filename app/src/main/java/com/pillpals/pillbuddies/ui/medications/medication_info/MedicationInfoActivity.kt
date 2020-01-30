@@ -68,6 +68,7 @@ class MedicationInfoActivity : AppCompatActivity() {
         tabPagerAdapter = TabPagerAdapter(supportFragmentManager)
         tabViewPager.adapter = tabPagerAdapter
         tabViewPager.offscreenPageLimit = 3
+        tabViewPager.pageMargin = 48
 
         textParams.topMargin = textTopMargin
 

@@ -129,7 +129,7 @@
                 app:backgroundTint="@color/colorGreen"
                 app:cornerRadius="8dp"
                 app:layout_constraintBottom_toBottomOf="parent"
-                android:layout_marginRight="16dp"
+                android:layout_marginEnd="16dp"
                 app:layout_constraintEnd_toStartOf="@+id/overflowMenu"
                 app:layout_constraintTop_toTopOf="parent" />
 
