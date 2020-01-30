@@ -26,4 +26,10 @@ class MedicationInfoTextFragment : Fragment() {
 
         return view
     }
+
+    // in the fragment
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        (activity as MedicationInfoActivity).tabFragmentLoaded()
+    }
 }
