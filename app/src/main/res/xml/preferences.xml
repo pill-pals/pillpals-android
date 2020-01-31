@@ -7,7 +7,7 @@
 
         <SwitchPreferenceCompat
             android:key="notifications"
-            android:title="Enable message notifications"/>
+            android:title="Disable schedule notifications"/>
 
     </PreferenceCategory>
 
