@@ -280,13 +280,7 @@ class StatisticsFragment : Fragment() {
                     calIterator.set(Calendar.HOUR_OF_DAY, i)
 
                     var existingTimeCount = timeCounts.filter {equalTimeUnit(it,calIterator,listOf(Calendar.HOUR_OF_DAY,Calendar.DAY_OF_YEAR,Calendar.YEAR))}.firstOrNull()
-
-                    if(existingTimeCount != null) {
-                        rangedTimeCounts.add(DataPoint(calIterator.time,existingTimeCount.offset))
-                    }
-                    else {
-                        rangedTimeCounts.add(DataPoint(calIterator.time,-1f))
-                    }
+                    rangedTimeCounts.add(DataPoint(calIterator.time, getConditionalValueFromTimeCount(existingTimeCount)))
                 }
             }
             "Week" -> {
@@ -303,13 +297,7 @@ class StatisticsFragment : Fragment() {
                     calIterator.set(Calendar.DAY_OF_WEEK, i)
 
                     var existingTimeCount = timeCounts.filter {equalTimeUnit(it,calIterator,listOf(Calendar.DAY_OF_WEEK,Calendar.DAY_OF_YEAR,Calendar.YEAR))}.firstOrNull()
-
-                    if(existingTimeCount != null) {
-                        rangedTimeCounts.add(DataPoint(calIterator.time,existingTimeCount.offset))
-                    }
-                    else {
-                        rangedTimeCounts.add(DataPoint(calIterator.time,-1f))
-                    }
+                    rangedTimeCounts.add(DataPoint(calIterator.time, getConditionalValueFromTimeCount(existingTimeCount)))
                 }
             }
             "Month" -> {
@@ -326,13 +314,8 @@ class StatisticsFragment : Fragment() {
                 for (i in 1..cal.getActualMaximum(Calendar.DAY_OF_MONTH)) {
 
                     var existingTimeCount = timeCounts.filter {equalTimeUnit(it,calIterator,listOf(Calendar.DAY_OF_MONTH,Calendar.DAY_OF_YEAR,Calendar.YEAR))}.firstOrNull()
+                    rangedTimeCounts.add(DataPoint(calIterator.time, getConditionalValueFromTimeCount(existingTimeCount)))
 
-                    if(existingTimeCount != null) {
-                        rangedTimeCounts.add(DataPoint(calIterator.time,existingTimeCount.offset))
-                    }
-                    else {
-                        rangedTimeCounts.add(DataPoint(calIterator.time,-1f))
-                    }
                     calIterator.time = DateHelper.addUnitToDate(calIterator.time,1,Calendar.DATE)
                 }
             }
@@ -348,26 +331,19 @@ class StatisticsFragment : Fragment() {
 
                 for (i in 0..11) {
 
-                    //Log.i("test",calIterator.time.toString())
-
                     var existingTimeCount = timeCounts.filter {equalTimeUnit(it,calIterator,listOf(Calendar.MONTH,Calendar.YEAR))}.firstOrNull()
-
-                    if(existingTimeCount != null) {
-                        rangedTimeCounts.add(DataPoint(calIterator.time,existingTimeCount.offset))
-                    }
-                    else {
-                        rangedTimeCounts.add(DataPoint(calIterator.time,-1f))
-                    }
+                    rangedTimeCounts.add(DataPoint(calIterator.time, getConditionalValueFromTimeCount(existingTimeCount)))
 
                     calIterator.time = DateHelper.addUnitToDate(calIterator.time,1,Calendar.MONTH)
                 }
             }
         }
-
-
         return rangedTimeCounts
     }
 
+    private fun getConditionalValueFromTimeCount(timeCount: TimeCount?):Float {
+        return timeCount?.offset ?: -1f
+    }
     private fun averageTimeCounts(timeCounts: List<TimeCount>):MutableList<DataPoint> {
 
         var averagedData = mutableListOf<DataPoint>()
