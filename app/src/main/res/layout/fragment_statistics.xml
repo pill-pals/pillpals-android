@@ -21,48 +21,49 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_marginHorizontal="16dp"
+                android:layout_marginTop="8dp"
                 android:orientation="horizontal">
 
                 <Button
                     android:id="@+id/day"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_width="match_parent"
+                    android:layout_height="40dp"
                     android:layout_weight="1"
-                    android:insetTop="8dp"
-                    android:insetBottom="8dp"
+                    android:insetTop="4dp"
+                    android:insetBottom="4dp"
                     android:tag="Day"
                     android:text="Day"
                     android:textColor="@color/colorBlack" />
 
                 <Button
                     android:id="@+id/week"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_width="match_parent"
+                    android:layout_height="40dp"
                     android:layout_weight="1"
-                    android:insetTop="8dp"
-                    android:insetBottom="8dp"
+                    android:insetTop="4dp"
+                    android:insetBottom="4dp"
                     android:tag="Week"
                     android:text="Week"
                     android:textColor="@color/colorBlack" />
 
                 <Button
                     android:id="@+id/month"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_width="match_parent"
+                    android:layout_height="40dp"
                     android:layout_weight="1"
-                    android:insetTop="8dp"
-                    android:insetBottom="8dp"
+                    android:insetTop="4dp"
+                    android:insetBottom="4dp"
                     android:tag="Month"
                     android:text="Month"
                     android:textColor="@color/colorBlack" />
 
                 <Button
                     android:id="@+id/year"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_width="match_parent"
+                    android:layout_height="40dp"
                     android:layout_weight="1"
-                    android:insetTop="8dp"
-                    android:insetBottom="8dp"
+                    android:insetTop="4dp"
+                    android:insetBottom="4dp"
                     android:tag="Year"
                     android:text="Year"
                     android:textColor="@color/colorBlack" />
@@ -73,26 +74,27 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_marginHorizontal="16dp"
+                android:layout_marginBottom="8dp"
                 android:orientation="horizontal">
 
                 <Button
                     android:id="@+id/timeline"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_width="match_parent"
+                    android:layout_height="40dp"
                     android:layout_weight="1"
-                    android:insetTop="8dp"
-                    android:insetBottom="8dp"
+                    android:insetTop="4dp"
+                    android:insetBottom="4dp"
                     android:tag="Timeline"
                     android:text="Timeline"
                     android:textColor="@color/colorBlack" />
 
                 <Button
                     android:id="@+id/trends"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_width="match_parent"
+                    android:layout_height="40dp"
                     android:layout_weight="1"
-                    android:insetTop="8dp"
-                    android:insetBottom="8dp"
+                    android:insetTop="4dp"
+                    android:insetBottom="4dp"
                     android:tag="Trends"
                     android:text="Trends"
                     android:textColor="@color/colorBlack" />
@@ -100,56 +102,99 @@
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="16dp">
-
-                <TextView
-                    android:id="@+id/graphHeader"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="4dp"
-                    android:text="DATE"
-                    android:textAppearance="@style/TextAppearance.AppCompat.Large"
-                    android:textColor="@color/colorBlack"
-                    android:textSize="24dp"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/view" />
-
-                <ImageButton
-                    android:id="@+id/leftTimeButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:backgroundTint="@color/colorGrey"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:srcCompat="@drawable/arrow_back_24px" />
-
-                <ImageButton
-                    android:id="@+id/rightTimeButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:backgroundTint="@color/colorGrey"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:srcCompat="@drawable/arrow_forward_24px" />
-            </androidx.constraintlayout.widget.ConstraintLayout>
-
-            <androidx.constraintlayout.widget.ConstraintLayout
-                android:layout_width="match_parent"
                 android:layout_height="match_parent">
 
-                <com.github.mikephil.charting.charts.BarChart
-                    android:id="@+id/chart"
+                <View
+                    android:id="@+id/view4"
                     android:layout_width="match_parent"
-                    android:layout_height="300dp"
-                    android:layout_marginStart="16dp"
-                    android:layout_marginTop="16dp"
-                    android:layout_marginEnd="16dp"
-
-                    app:layout_constraintBottom_toBottomOf="parent"
+                    android:layout_height="1dp"
+                    android:layout_marginBottom="7dp"
+                    android:background="#4D4F4F4F"
+                    app:layout_constraintBottom_toTopOf="@+id/cardView"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
+
+                <androidx.cardview.widget.CardView
+                    android:id="@+id/cardView"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:backgroundTint="@color/colorWhite"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/view4">
+
+                    <androidx.constraintlayout.widget.ConstraintLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_marginVertical="8dp">
+
+                        <androidx.constraintlayout.widget.ConstraintLayout
+                            android:id="@+id/constraintLayout3"
+                            android:layout_width="match_parent"
+                            android:layout_height="40dp"
+                            android:layout_marginHorizontal="16dp"
+                            app:layout_constraintTop_toTopOf="parent"
+                            tools:layout_editor_absoluteX="16dp">
+
+                            <TextView
+                                android:id="@+id/graphHeader"
+                                android:layout_width="wrap_content"
+                                android:layout_height="32dp"
+                                android:layout_marginVertical="4dp"
+                                android:text="DATE"
+                                android:textAppearance="@style/TextAppearance.AppCompat.Large"
+                                android:textColor="@color/colorBlack"
+                                android:textSize="24dp"
+                                app:layout_constraintBottom_toBottomOf="parent"
+                                app:layout_constraintEnd_toEndOf="parent"
+                                app:layout_constraintStart_toStartOf="parent"
+                                app:layout_constraintTop_toBottomOf="@+id/view" />
+
+                            <ImageButton
+                                android:id="@+id/leftTimeButton"
+                                android:layout_width="54dp"
+                                android:layout_height="40dp"
+                                android:backgroundTint="@color/colorLightGrey"
+                                app:layout_constraintBottom_toBottomOf="parent"
+                                app:layout_constraintStart_toStartOf="parent"
+                                app:layout_constraintTop_toTopOf="parent"
+                                app:srcCompat="@drawable/arrow_back_24px" />
+
+                            <ImageButton
+                                android:id="@+id/rightTimeButton"
+                                android:layout_width="54dp"
+                                android:layout_height="40dp"
+                                android:backgroundTint="@color/colorLightGrey"
+                                app:layout_constraintBottom_toBottomOf="parent"
+                                app:layout_constraintEnd_toEndOf="parent"
+                                app:layout_constraintTop_toTopOf="parent"
+                                app:srcCompat="@drawable/arrow_forward_24px" />
+                        </androidx.constraintlayout.widget.ConstraintLayout>
+
+                        <com.github.mikephil.charting.charts.BarChart
+                            android:id="@+id/chart"
+                            android:layout_width="match_parent"
+                            android:layout_height="300dp"
+                            android:layout_marginHorizontal="16dp"
+
+                            android:layout_marginVertical="0dp"
+                            app:layout_constraintTop_toBottomOf="@+id/constraintLayout3"
+                            tools:layout_editor_absoluteX="16dp" />
+                    </androidx.constraintlayout.widget.ConstraintLayout>
+
+                </androidx.cardview.widget.CardView>
+
+                <View
+                    android:id="@+id/view3"
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="#4D4F4F4F"
+                    app:layout_constraintBottom_toBottomOf="@+id/cardView"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/cardView" />
+
             </androidx.constraintlayout.widget.ConstraintLayout>
 
             <TextView
@@ -157,7 +202,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="30dp"
                 android:layout_marginStart="16dp"
-                android:layout_marginTop="16dp"
+                android:layout_marginTop="8dp"
                 android:layout_marginBottom="8dp"
                 android:text="Legend"
                 android:textAppearance="@style/TextAppearance.AppCompat.Large"

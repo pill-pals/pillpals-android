@@ -663,7 +663,7 @@ class DashboardFragment : Fragment() {
                 log.due = due
                 val cal = Calendar.getInstance()
                 cal.time = due
-                cal.add(Calendar.MINUTE, (-10..10).random())
+                cal.add(Calendar.MINUTE, (-1300..1300).random())
                 log.occurrence = cal.time
                 schedule.logs.add(log)
             }
