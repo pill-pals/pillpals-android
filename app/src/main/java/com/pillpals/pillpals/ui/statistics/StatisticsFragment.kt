@@ -168,7 +168,7 @@ class StatisticsFragment : Fragment() {
             if(existingTimeCount != null) {
                 val logsList = existingTimeCount.logs.plus(it)
                 val average = logsList.fold(0f) { sum, log ->
-                    val logOffset = (it.occurrence!!.time - it.due!!.time).toFloat() // Calculate y value of bar here
+                    val logOffset = abs(it.occurrence!!.time - it.due!!.time).toFloat() // Calculate y value of bar here
                     sum + logOffset
                 } / logsList.count()
                 acc[acc.indexOf(existingTimeCount)] = TimeCount(logDate.time, existingTimeCount.count + 1, average, logsList)
@@ -213,7 +213,7 @@ class StatisticsFragment : Fragment() {
                 axisStringList = ArrayList<String>()
 
                 for ((index, dataPoints) in dataPoints.withIndex()) {
-                    val timeDifference = abs(dataPoints.value) / 1000 / 60 // Minutes
+                    val timeDifference = dataPoints.value / 1000 / 60 // Minutes
                     var grade = bucketTimeDifference(timeDifference)
                     if (dataPoints.value == -1f) grade = 0f
                     val dateString = getAxisString(dataPoints)
@@ -528,7 +528,6 @@ class StatisticsFragment : Fragment() {
     }
 }
 
-data class AverageLogOffset(val offset: Float, val time: Date)
 data class TimeCount(val time: Date, val count: Int, val offset: Float, val logs: List<DataLogs>)
 data class DataPoint(val time: Date, val value: Float)
 data class Filter(var view: LinearLayout, var selectedValue: String)
