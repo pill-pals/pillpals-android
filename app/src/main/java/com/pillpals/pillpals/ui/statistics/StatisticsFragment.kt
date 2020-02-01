@@ -370,127 +370,68 @@ class StatisticsFragment : Fragment() {
 
     private fun averageTimeCounts(timeCounts: List<TimeCount>):MutableList<DataPoint> {
 
-        var averagedTimeCounts = mutableListOf<DataPoint>()
+        var averagedData = mutableListOf<DataPoint>()
+
+        val calIterator = Calendar.getInstance()
+        calIterator.set(Calendar.MILLISECOND, 0)
+        calIterator.set(Calendar.SECOND, 0)
+        calIterator.set(Calendar.MINUTE, 0)
+        calIterator.set(Calendar.HOUR_OF_DAY, 1)
+        calIterator.set(Calendar.DAY_OF_YEAR, 1)
+        calIterator.set(Calendar.MONTH, 0)
+        calIterator.set(Calendar.YEAR, 2020)
 
         when (timeSpanFilter.selectedValue) {
             "Day" -> {
-                val calIterator = Calendar.getInstance()
-                calIterator.set(Calendar.MILLISECOND, 0)
-                calIterator.set(Calendar.SECOND, 0)
-                calIterator.set(Calendar.MINUTE, 0)
-                calIterator.set(Calendar.DAY_OF_YEAR, 1)
-                calIterator.set(Calendar.MONTH, 0)
-                calIterator.set(Calendar.YEAR, 2020)
-
                 for (i in 1..24) {
                     calIterator.set(Calendar.HOUR_OF_DAY, i)
 
                     var relevantTimeCounts = timeCounts.filter {equalTimeUnit(it,calIterator,listOf(Calendar.HOUR_OF_DAY))}
-
-                    if(relevantTimeCounts.isNotEmpty()) {
-                        var sum = 0f
-                        for (i in relevantTimeCounts) {
-                           sum += i.offset
-                        }
-                        var avg = sum/relevantTimeCounts.size
-                        averagedTimeCounts.add(DataPoint(calIterator.time,avg))
-                    }
-                    else {
-                        averagedTimeCounts.add(DataPoint(calIterator.time,-1f))
-                    }
+                    averagedData.add(DataPoint(calIterator.time,averageRelevantTimeCounts(relevantTimeCounts)))
                 }
             }
             "Week" -> {
-                val calIterator = Calendar.getInstance()
-                calIterator.set(Calendar.MILLISECOND, 0)
-                calIterator.set(Calendar.SECOND, 0)
-                calIterator.set(Calendar.MINUTE, 0)
-                calIterator.set(Calendar.HOUR, 0)
-                calIterator.set(Calendar.WEEK_OF_YEAR, 1)
-                calIterator.set(Calendar.MONTH, 0)
-                calIterator.set(Calendar.YEAR, 2020)
-
                 for (i in 1..7) {
                     calIterator.set(Calendar.DAY_OF_WEEK, i)
 
                     var relevantTimeCounts = timeCounts.filter {equalTimeUnit(it,calIterator,listOf(Calendar.DAY_OF_WEEK))}
+                    averagedData.add(DataPoint(calIterator.time,averageRelevantTimeCounts(relevantTimeCounts)))
 
-                    if(relevantTimeCounts.isNotEmpty()) {
-                        var sum = 0f
-                        for (i in relevantTimeCounts) {
-                            sum += i.offset
-                        }
-                        var avg = sum/relevantTimeCounts.size
-                        averagedTimeCounts.add(DataPoint(calIterator.time,avg))
-                    }
-                    else {
-                        averagedTimeCounts.add(DataPoint(calIterator.time,-1f))
-                    }
                 }
             }
             "Month" -> {
-                val calIterator = Calendar.getInstance()
-                calIterator.set(Calendar.MILLISECOND, 0)
-                calIterator.set(Calendar.SECOND, 0)
-                calIterator.set(Calendar.MINUTE, 0)
-                calIterator.set(Calendar.HOUR, 0)
-                calIterator.set(Calendar.WEEK_OF_YEAR, 1)
-                calIterator.set(Calendar.MONTH, 0)
-                calIterator.set(Calendar.DAY_OF_MONTH, 1)
-                calIterator.set(Calendar.YEAR, 2020)
-
                 for (i in 1..31) {
 
                     var relevantTimeCounts = timeCounts.filter {equalTimeUnit(it,calIterator,listOf(Calendar.DAY_OF_MONTH))}
-
-                    if(relevantTimeCounts.isNotEmpty()) {
-                        var sum = 0f
-                        for (i in relevantTimeCounts) {
-                            sum += i.offset
-                        }
-                        var avg = sum/relevantTimeCounts.size
-                        averagedTimeCounts.add(DataPoint(calIterator.time,avg))
-                    }
-                    else {
-                        averagedTimeCounts.add(DataPoint(calIterator.time,-1f))
-                    }
+                    averagedData.add(DataPoint(calIterator.time,averageRelevantTimeCounts(relevantTimeCounts)))
 
                     calIterator.time = DateHelper.addUnitToDate(calIterator.time,1,Calendar.DATE)
-
                 }
             }
             "Year" -> {
-                val calIterator = Calendar.getInstance()
-                calIterator.set(Calendar.MILLISECOND, 0)
-                calIterator.set(Calendar.SECOND, 0)
-                calIterator.set(Calendar.MINUTE, 0)
-                calIterator.set(Calendar.HOUR_OF_DAY, 1)
-                calIterator.set(Calendar.DAY_OF_YEAR, 1)
-                calIterator.set(Calendar.MONTH, 0)
-                calIterator.set(Calendar.YEAR, 2020)
-
                 for (i in 0..11) {
-
                     var relevantTimeCounts = timeCounts.filter {equalTimeUnit(it,calIterator,listOf(Calendar.MONTH))}
-
-                    if(relevantTimeCounts.isNotEmpty()) {
-                        var sum = 0f
-                        for (i in relevantTimeCounts) {
-                            sum += i.offset
-                        }
-                        var avg = sum/relevantTimeCounts.size
-                        averagedTimeCounts.add(DataPoint(calIterator.time,avg))
-                    }
-                    else {
-                        averagedTimeCounts.add(DataPoint(calIterator.time,-1f))
-                    }
+                    averagedData.add(DataPoint(calIterator.time,averageRelevantTimeCounts(relevantTimeCounts)))
 
                     calIterator.time = DateHelper.addUnitToDate(calIterator.time,1,Calendar.MONTH)
                 }
             }
         }
 
-        return averagedTimeCounts
+        return averagedData
+    }
+
+    private fun averageRelevantTimeCounts(relevantTimeCounts: List<TimeCount>):Float {
+        if(relevantTimeCounts.isNotEmpty()) {
+            var sum = 0f
+            for (i in relevantTimeCounts) {
+                sum += i.offset
+            }
+            return sum/relevantTimeCounts.size
+        }
+        else {
+            return -1f
+        }
     }
 
     private fun renderBarChart() {
