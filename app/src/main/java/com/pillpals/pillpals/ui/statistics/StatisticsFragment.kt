@@ -36,6 +36,7 @@ import kotlin.math.abs
 import android.widget.TextView
 import com.pillpals.pillpals.data.model.Schedules
 import java.util.Calendar
+import android.util.Log
 
 class StatisticsFragment : Fragment() {
 
@@ -206,6 +207,8 @@ class StatisticsFragment : Fragment() {
                 // Get timeCounts for data in time range only
                 val dataPoints = if(viewModeFilter.selectedValue=="Timeline") {getTimeCountsInRange(timeCounts)} else {averageTimeCounts(timeCounts)}
 
+                Log.i("test",dataPoints.toString())
+
                 //val schedule = it.schedules.first()!!
                 //val logs = schedule.logs!!
 
@@ -366,10 +369,6 @@ class StatisticsFragment : Fragment() {
     }
 
     private fun averageTimeCounts(timeCounts: List<TimeCount>):MutableList<DataPoint> {
-        //get the range and step unit.
-        //range will later be changeable from the buttons
-        var cal = Calendar.getInstance()
-        cal.time = currentDate
 
         var averagedTimeCounts = mutableListOf<DataPoint>()
 
@@ -379,16 +378,16 @@ class StatisticsFragment : Fragment() {
                 calIterator.set(Calendar.MILLISECOND, 0)
                 calIterator.set(Calendar.SECOND, 0)
                 calIterator.set(Calendar.MINUTE, 0)
-                calIterator.set(Calendar.DAY_OF_YEAR, cal.get(Calendar.DAY_OF_YEAR))
-                calIterator.set(Calendar.MONTH, cal.get(Calendar.MONTH))
-                calIterator.set(Calendar.YEAR, cal.get(Calendar.YEAR))
+                calIterator.set(Calendar.DAY_OF_YEAR, 1)
+                calIterator.set(Calendar.MONTH, 0)
+                calIterator.set(Calendar.YEAR, 2020)
 
                 for (i in 1..24) {
                     calIterator.set(Calendar.HOUR_OF_DAY, i)
 
                     var relevantTimeCounts = timeCounts.filter {equalTimeUnit(it,calIterator,listOf(Calendar.HOUR_OF_DAY))}
 
-                    if(relevantTimeCounts != null) {
+                    if(relevantTimeCounts.isNotEmpty()) {
                         var sum = 0f
                         for (i in relevantTimeCounts) {
                            sum += i.offset
@@ -407,16 +406,16 @@ class StatisticsFragment : Fragment() {
                 calIterator.set(Calendar.SECOND, 0)
                 calIterator.set(Calendar.MINUTE, 0)
                 calIterator.set(Calendar.HOUR, 0)
-                calIterator.set(Calendar.WEEK_OF_YEAR, cal.get(Calendar.WEEK_OF_YEAR))
-                calIterator.set(Calendar.MONTH, cal.get(Calendar.MONTH))
-                calIterator.set(Calendar.YEAR, cal.get(Calendar.YEAR))
+                calIterator.set(Calendar.WEEK_OF_YEAR, 1)
+                calIterator.set(Calendar.MONTH, 0)
+                calIterator.set(Calendar.YEAR, 2020)
 
                 for (i in 1..7) {
                     calIterator.set(Calendar.DAY_OF_WEEK, i)
 
                     var relevantTimeCounts = timeCounts.filter {equalTimeUnit(it,calIterator,listOf(Calendar.DAY_OF_WEEK))}
 
-                    if(relevantTimeCounts != null) {
+                    if(relevantTimeCounts.isNotEmpty()) {
                         var sum = 0f
                         for (i in relevantTimeCounts) {
                             sum += i.offset
@@ -435,16 +434,16 @@ class StatisticsFragment : Fragment() {
                 calIterator.set(Calendar.SECOND, 0)
                 calIterator.set(Calendar.MINUTE, 0)
                 calIterator.set(Calendar.HOUR, 0)
-                calIterator.set(Calendar.WEEK_OF_YEAR, cal.get(Calendar.WEEK_OF_YEAR))
-                calIterator.set(Calendar.MONTH, cal.get(Calendar.MONTH))
+                calIterator.set(Calendar.WEEK_OF_YEAR, 1)
+                calIterator.set(Calendar.MONTH, 0)
                 calIterator.set(Calendar.DAY_OF_MONTH, 1)
-                calIterator.set(Calendar.YEAR, cal.get(Calendar.YEAR))
+                calIterator.set(Calendar.YEAR, 2020)
 
-                for (i in 1..cal.getActualMaximum(Calendar.DAY_OF_MONTH)) {
+                for (i in 1..31) {
 
                     var relevantTimeCounts = timeCounts.filter {equalTimeUnit(it,calIterator,listOf(Calendar.DAY_OF_MONTH))}
 
-                    if(relevantTimeCounts != null) {
+                    if(relevantTimeCounts.isNotEmpty()) {
                         var sum = 0f
                         for (i in relevantTimeCounts) {
                             sum += i.offset
@@ -455,6 +454,9 @@ class StatisticsFragment : Fragment() {
                     else {
                         averagedTimeCounts.add(DataPoint(calIterator.time,-1f))
                     }
+
+                    calIterator.time = DateHelper.addUnitToDate(calIterator.time,1,Calendar.DATE)
+
                 }
             }
             "Year" -> {
@@ -465,13 +467,13 @@ class StatisticsFragment : Fragment() {
                 calIterator.set(Calendar.HOUR_OF_DAY, 1)
                 calIterator.set(Calendar.DAY_OF_YEAR, 1)
                 calIterator.set(Calendar.MONTH, 0)
-                calIterator.set(Calendar.YEAR, cal.get(Calendar.YEAR))
+                calIterator.set(Calendar.YEAR, 2020)
 
                 for (i in 0..11) {
 
                     var relevantTimeCounts = timeCounts.filter {equalTimeUnit(it,calIterator,listOf(Calendar.MONTH))}
 
-                    if(relevantTimeCounts != null) {
+                    if(relevantTimeCounts.isNotEmpty()) {
                         var sum = 0f
                         for (i in relevantTimeCounts) {
                             sum += i.offset
@@ -513,14 +515,18 @@ class StatisticsFragment : Fragment() {
         barChart.xAxis.labelCount = when (timeSpanFilter.selectedValue) {
             "Day" -> 8
             "Week" -> 7
-            "Month" -> cal.getActualMaximum(Calendar.DAY_OF_MONTH)/4
+            "Month" -> if(viewModeFilter.selectedValue == "Timeline") {
+                cal.getActualMaximum(Calendar.DAY_OF_MONTH)/4
+            } else {
+                8
+            }
             "Year" -> 12
             else -> 24
         }
 
         barChart.axisLeft.textSize = 16f
-        barChart.axisLeft.axisMinimum = 0f
-        barChart.axisLeft.axisMaximum = 7f
+        barChart.axisLeft.axisMinimum = 0.5f
+        barChart.axisLeft.axisMaximum = 7.5f
         barChart.axisLeft.valueFormatter = IndexAxisValueFormatter(gradeStringList)
 
         barChart.description.isEnabled = false
