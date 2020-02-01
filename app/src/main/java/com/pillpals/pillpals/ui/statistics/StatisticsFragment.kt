@@ -259,19 +259,19 @@ class StatisticsFragment : Fragment() {
     }
 
     private fun getTimeCountsInRange(timeCounts: List<TimeCount>):MutableList<DataPoint> {
-        //get the range and step unit.
-        //range will later be changeable from the buttons
         var cal = Calendar.getInstance()
         cal.time = currentDate
 
         var rangedTimeCounts = mutableListOf<DataPoint>()
 
+        val calIterator = Calendar.getInstance()
+        calIterator.set(Calendar.MILLISECOND, 0)
+        calIterator.set(Calendar.SECOND, 0)
+        calIterator.set(Calendar.MINUTE, 0)
+        calIterator.set(Calendar.HOUR_OF_DAY, 1)
+
         when (timeSpanFilter.selectedValue) {
             "Day" -> {
-                val calIterator = Calendar.getInstance()
-                calIterator.set(Calendar.MILLISECOND, 0)
-                calIterator.set(Calendar.SECOND, 0)
-                calIterator.set(Calendar.MINUTE, 0)
                 calIterator.set(Calendar.DAY_OF_YEAR, cal.get(Calendar.DAY_OF_YEAR))
                 calIterator.set(Calendar.MONTH, cal.get(Calendar.MONTH))
                 calIterator.set(Calendar.YEAR, cal.get(Calendar.YEAR))
@@ -284,11 +284,6 @@ class StatisticsFragment : Fragment() {
                 }
             }
             "Week" -> {
-                val calIterator = Calendar.getInstance()
-                calIterator.set(Calendar.MILLISECOND, 0)
-                calIterator.set(Calendar.SECOND, 0)
-                calIterator.set(Calendar.MINUTE, 0)
-                calIterator.set(Calendar.HOUR, 0)
                 calIterator.set(Calendar.WEEK_OF_YEAR, cal.get(Calendar.WEEK_OF_YEAR))
                 calIterator.set(Calendar.MONTH, cal.get(Calendar.MONTH))
                 calIterator.set(Calendar.YEAR, cal.get(Calendar.YEAR))
@@ -301,11 +296,6 @@ class StatisticsFragment : Fragment() {
                 }
             }
             "Month" -> {
-                val calIterator = Calendar.getInstance()
-                calIterator.set(Calendar.MILLISECOND, 0)
-                calIterator.set(Calendar.SECOND, 0)
-                calIterator.set(Calendar.MINUTE, 0)
-                calIterator.set(Calendar.HOUR, 0)
                 calIterator.set(Calendar.WEEK_OF_YEAR, cal.get(Calendar.WEEK_OF_YEAR))
                 calIterator.set(Calendar.MONTH, cal.get(Calendar.MONTH))
                 calIterator.set(Calendar.DAY_OF_MONTH, 1)
@@ -320,11 +310,6 @@ class StatisticsFragment : Fragment() {
                 }
             }
             "Year" -> {
-                val calIterator = Calendar.getInstance()
-                calIterator.set(Calendar.MILLISECOND, 0)
-                calIterator.set(Calendar.SECOND, 0)
-                calIterator.set(Calendar.MINUTE, 0)
-                calIterator.set(Calendar.HOUR_OF_DAY, 1)
                 calIterator.set(Calendar.DAY_OF_YEAR, 1)
                 calIterator.set(Calendar.MONTH, 0)
                 calIterator.set(Calendar.YEAR, cal.get(Calendar.YEAR))
