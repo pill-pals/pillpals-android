@@ -41,6 +41,7 @@ import com.pillpals.pillpals.helpers.DatabaseHelper
 import com.pillpals.pillpals.helpers.DatabaseHelper.Companion.getCorrectIconDrawable
 import com.pillpals.pillpals.helpers.DatabaseHelper.Companion.obliterateSchedule
 import com.pillpals.pillpals.ui.AddDrugActivity
+import com.pillpals.pillpals.ui.medications.medication_info.MedicationInfoActivity
 import kotlinx.android.synthetic.main.time_prompt.view.*
 
 
@@ -86,7 +87,7 @@ class DashboardFragment : Fragment() {
         //populateAllStacks(8)
         //endregion
 
-        setUpScheduleCards(readAllData(Schedules::class.java) as RealmResults<out Schedules>)
+        setUpScheduleCards((readAllData(Schedules::class.java) as RealmResults<out Schedules>).sort("occurrence"))
         setUpMoodTracker()
 
         setUpCollapsing()
@@ -139,8 +140,6 @@ class DashboardFragment : Fragment() {
             val image = card.getChildAt(0) as ImageView
 
             card.setOnClickListener {
-                //selectedMoodImage = image.tag as String
-                //Log.v("HELLO", selectedMoodImage)
                 createOrUpdateCurrentMoodLog(DatabaseHelper.getMoodIconIDByString(image.tag as String))
                 updateMoodStyles()
             }
@@ -222,10 +221,17 @@ class DashboardFragment : Fragment() {
 
     //Popover menus
     //region
-    private fun popoverMenuCurrent(v: View, schedule: Schedules) {
+    private fun popoverMenuCurrent(v: View, medication: Medications, schedule: Schedules) {
         val popup = PopupMenu(context, v.overflowMenu)
         val inflater: MenuInflater = popup.menuInflater
-        inflater.inflate(R.menu.current_schedule, popup.menu)
+        val dpdObject = medication.dpd_object?.firstOrNull()
+        if(dpdObject == null) {
+            inflater.inflate(R.menu.current_schedule, popup.menu)
+        }
+        else {
+            inflater.inflate(R.menu.current_schedule_dpd, popup.menu)
+        }
+
         popup.setOnMenuItemClickListener { item ->
             when(item.itemId) {
                 R.id.currentLogAtTime -> {
@@ -263,16 +269,34 @@ class DashboardFragment : Fragment() {
                         timeAlertDialog.dismiss()
                     }
                 }
+                R.id.viewDrugInfo -> {
+                    if(dpdObject == null) return@setOnMenuItemClickListener true
+
+                    val intent = Intent(context, MedicationInfoActivity::class.java)
+                    intent.putExtra("drug-code", dpdObject.dpd_id)
+                    intent.putExtra("icon-color", getColorStringByID(medication.color_id))
+                    intent.putStringArrayListExtra("administration-routes", ArrayList(dpdObject.administrationRoutes))
+                    intent.putStringArrayListExtra("active-ingredients",  ArrayList(dpdObject.activeIngredients))
+                    intent.putExtra("dosage-string", dpdObject.dosageString)
+                    intent.putExtra("name-text", dpdObject.name)
+                    startActivityForResult(intent, 2)
+                }
             }
             true
         }
         popup.show()
     }
 
-    private fun popoverMenuUpcoming(v: View, schedule: Schedules) {
+    private fun popoverMenuUpcoming(v: View, medication: Medications, schedule: Schedules) {
         val popup = PopupMenu(context, v.overflowMenu)
         val inflater: MenuInflater = popup.menuInflater
-        inflater.inflate(R.menu.upcoming_schedule, popup.menu)
+        val dpdObject = medication.dpd_object?.firstOrNull()
+        if(dpdObject == null) {
+            inflater.inflate(R.menu.upcoming_schedule, popup.menu)
+        }
+        else {
+            inflater.inflate(R.menu.upcoming_schedule_dpd, popup.menu)
+        }
         popup.setOnMenuItemClickListener { item ->
             when(item.itemId) {
                 R.id.upcomingLogAtTime -> {
@@ -310,16 +334,34 @@ class DashboardFragment : Fragment() {
                         timeAlertDialog.dismiss()
                     }
                 }
+                R.id.viewDrugInfo -> {
+                    if(dpdObject == null) return@setOnMenuItemClickListener true
+
+                    val intent = Intent(context, MedicationInfoActivity::class.java)
+                    intent.putExtra("drug-code", dpdObject.dpd_id)
+                    intent.putExtra("icon-color", getColorStringByID(medication.color_id))
+                    intent.putStringArrayListExtra("administration-routes", ArrayList(dpdObject.administrationRoutes))
+                    intent.putStringArrayListExtra("active-ingredients",  ArrayList(dpdObject.activeIngredients))
+                    intent.putExtra("dosage-string", dpdObject.dosageString)
+                    intent.putExtra("name-text", dpdObject.name)
+                    startActivityForResult(intent, 2)
+                }
             }
             true
         }
         popup.show()
     }
 
-    private fun popoverMenuCompleted(v: View, schedule: Schedules, log: Logs) {
+    private fun popoverMenuCompleted(v: View, medication: Medications, schedule: Schedules, log: Logs) {
         val popup = PopupMenu(context, v.overflowMenu)
         val inflater: MenuInflater = popup.menuInflater
-        inflater.inflate(R.menu.completed_schedule, popup.menu)
+        val dpdObject = medication.dpd_object?.firstOrNull()
+        if(dpdObject == null) {
+            inflater.inflate(R.menu.completed_schedule, popup.menu)
+        }
+        else {
+            inflater.inflate(R.menu.completed_schedule_dpd, popup.menu)
+        }
         popup.setOnMenuItemClickListener { item ->
             when(item.itemId) {
                 R.id.completedChangeLogTime -> {
@@ -362,6 +404,18 @@ class DashboardFragment : Fragment() {
                 R.id.completedUndoLog -> {
                     undoLog(log)
                     update()
+                }
+                R.id.viewDrugInfo -> {
+                    if(dpdObject == null) return@setOnMenuItemClickListener true
+
+                    val intent = Intent(context, MedicationInfoActivity::class.java)
+                    intent.putExtra("drug-code", dpdObject.dpd_id)
+                    intent.putExtra("icon-color", getColorStringByID(medication.color_id))
+                    intent.putStringArrayListExtra("administration-routes", ArrayList(dpdObject.administrationRoutes))
+                    intent.putStringArrayListExtra("active-ingredients",  ArrayList(dpdObject.activeIngredients))
+                    intent.putExtra("dosage-string", dpdObject.dosageString)
+                    intent.putExtra("name-text", dpdObject.name)
+                    startActivityForResult(intent, 2)
                 }
             }
             true
@@ -462,7 +516,7 @@ class DashboardFragment : Fragment() {
             newCard.logtimeLabel.visibility = LinearLayout.VISIBLE
             newCard.drugCard.setCardBackgroundColor(this.resources.getColor(R.color.colorGrey))
             newCard.overflowMenu.setOnClickListener {
-                popoverMenuCompleted(newCard, schedule, currentLog.first())
+                popoverMenuCompleted(newCard, medication, schedule, currentLog.first())
             }
 
             if (prefs.getBoolean(getString(R.string.completed_stack_collapsed), true)) {
@@ -478,7 +532,7 @@ class DashboardFragment : Fragment() {
             }
             newCard.drugCard.setCardBackgroundColor(this.resources.getColor(R.color.colorWhite))
             newCard.overflowMenu.setOnClickListener {
-                popoverMenuCurrent(newCard, schedule)
+                popoverMenuCurrent(newCard, medication, schedule)
             }
             currentStack.addView(newCard)
             // Send notification
@@ -488,7 +542,7 @@ class DashboardFragment : Fragment() {
             newCard.countdownLabel.visibility = LinearLayout.VISIBLE
             newCard.drugCard.setCardBackgroundColor(this.resources.getColor(R.color.colorWhite))
             newCard.overflowMenu.setOnClickListener {
-                popoverMenuUpcoming(newCard, schedule)
+                popoverMenuUpcoming(newCard, medication, schedule)
             }
 
             if (prefs.getBoolean(getString(R.string.upcoming_stack_collapsed), false)) {
@@ -538,7 +592,7 @@ class DashboardFragment : Fragment() {
         currentStack.removeViews(1, currentStack.childCount - 1)
         upcomingStack.removeViews(1, upcomingStack.childCount - 1)
         completedStack.removeViews(1, completedStack.childCount - 1)
-        setUpScheduleCards(readAllData(Schedules::class.java) as RealmResults<out Schedules>)
+        setUpScheduleCards((readAllData(Schedules::class.java) as RealmResults<out Schedules>).sort("occurrence"))
         hideEmptyStacks()
     }
 

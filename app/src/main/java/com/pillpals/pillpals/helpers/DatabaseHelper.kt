@@ -21,6 +21,9 @@ class DatabaseHelper {
         fun getScheduleByUid(uid: String): Schedules? {
             return Realm.getDefaultInstance().where(Schedules::class.java).equalTo("uid", uid).findFirst()
         }
+        fun getDPDObjectById(id: Int): DPDObjects? {
+            return Realm.getDefaultInstance().where(DPDObjects::class.java).equalTo("dpd_id", id).findFirst()
+        }
         fun getMedicationByUid(uid: String): Medications? {
             return Realm.getDefaultInstance().where(Medications::class.java).equalTo("uid", uid).findFirst()
         }

@@ -9,6 +9,7 @@ import android.os.Bundle
 import android.text.SpannableString
 import android.text.Spanned
 import android.text.style.ForegroundColorSpan
+import android.util.Log
 import android.view.LayoutInflater
 import android.widget.*
 import androidx.appcompat.app.AlertDialog
@@ -159,8 +160,12 @@ class AddDrugActivity : AppCompatActivity() {
                 }
             }
         } else {
-            colorString = getRandomUniqueColorString()  // Can't be black, otherwise tries to get an unused colour if possible
-            imageDrawable = getRandomIcon()
+            // Can't be black, otherwise tries to get an unused colour if possible
+            colorString = intent.getStringExtra("color-string") ?: getRandomUniqueColorString()
+            imageDrawable = intent.getStringExtra("image-string") ?: getRandomIcon()
+            editText.setText(intent.getStringExtra("name-string") ?: "")
+            editText2.setText(intent.getStringExtra("dosage-string") ?: "")
+
             iconButton.backgroundTintList = ColorStateList.valueOf(Color.parseColor(colorString))
             iconButton.icon = resources.getDrawable(DatabaseHelper.getDrawableIconById(this, getIconIDByString(imageDrawable)), theme)
 
@@ -345,16 +350,23 @@ class AddDrugActivity : AppCompatActivity() {
             medication.notes = drugNote
             medication.photo_icon = photoBoolean
             medication.color_id = getColorIDByString(colorString)
-            if(photoBoolean){
+
+            if(photoBoolean) {
                 medication.photo_uid = imageDrawable
-            }else {
+            } else {
                 medication.icon_id = getIconIDByString(imageDrawable)
             }
 
-            if(::scheduleIdList.isInitialized){
+            if(::scheduleIdList.isInitialized) {
                 toBeAdded.forEach {
                     medication.schedules.add(it)
                 }
+            }
+
+            if(intent.hasExtra("dpd-id")) {
+                val dpdId = intent.getIntExtra("dpd-id", 0)
+                val dpdObject = DatabaseHelper.getDPDObjectById(dpdId)
+                dpdObject!!.medications.add(medication)
             }
         }
     }
@@ -417,7 +429,6 @@ class AddDrugActivity : AppCompatActivity() {
                     }
                     if(data.hasExtra("image-string")) {
                         imageDrawable = data.getStringExtra("image-string")!!
-                        //Log.i("test", imageDrawable)
                         iconButton.icon = BitmapDrawable(resources, Bitmap.createScaledBitmap(convertByteArrayToBitmap(getByteArrayById(imageDrawable)), 64, 64, false))
                         iconButton.iconTint = null
                     }
@@ -427,5 +438,3 @@ class AddDrugActivity : AppCompatActivity() {
 
     }
 }
-
-
