@@ -441,7 +441,7 @@ class DashboardFragment : Fragment() {
             update()
         }
 
-        newCard.icon.setOnClickListener {
+        newCard.setOnClickListener {
             val intent = Intent(context, AddDrugActivity::class.java)
             intent.putExtra("medication-uid", medication.uid)
             startActivityForResult(intent, 1)
