@@ -22,7 +22,7 @@
   <target android:name="rotationGroup"> *
     <aapt:attr name="android:animation">
       <objectAnimator
-          android:duration="200"
+          android:duration="400"
           android:propertyName="rotation"
           android:valueFrom="-180"
           android:valueTo="0" />
