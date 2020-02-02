@@ -4,21 +4,47 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto">
+
     <androidx.cardview.widget.CardView
         android:id="@+id/LogCard"
         android:layout_width="match_parent"
-        android:layout_height="64dp"
+        android:layout_height="wrap_content"
 
         android:layout_gravity="bottom"
-        app:cardCornerRadius="8dp"
+        android:layout_marginBottom="8dp"
         app:cardBackgroundColor="@color/colorWhite"
+        app:cardCornerRadius="8dp"
         app:cardElevation="0dp"
-        app:cardUseCompatPadding="false"
-        android:layout_marginBottom="8dp">
+        app:cardUseCompatPadding="false">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="wrap_content"
+            android:background="@color/colorGrey"
+            android:visibility="visible">
+
+            <LinearLayout
+                android:id="@+id/scheduleStack"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginEnd="8dp"
+                android:orientation="vertical"
+                android:visibility="gone"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
+
+                <Space
+                    android:layout_width="match_parent"
+                    android:layout_height="70dp" />
+            </LinearLayout>
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="64dp"
+            android:background="@color/colorWhite">
 
             <androidx.cardview.widget.CardView
                 android:id="@+id/iconBackground"
@@ -59,10 +85,10 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:maxWidth="160dp"
+                    android:singleLine="true"
                     android:text="8:00 AM"
                     android:textColor="@color/colorDarkGrey"
                     app:autoSizeTextType="uniform"
-                    android:singleLine="true"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintStart_toStartOf="parent" />
 
@@ -85,9 +111,9 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
                 android:layout_marginTop="8dp"
-                android:text="Test Medication"
-                android:singleLine="true"
                 android:maxWidth="160dp"
+                android:singleLine="true"
+                android:text="Test Medication"
                 android:textAppearance="@style/TextAppearance.baseText"
                 app:layout_constraintStart_toEndOf="@+id/iconBackground"
                 app:layout_constraintTop_toTopOf="parent" />
@@ -97,10 +123,10 @@
                 android:layout_width="132dp"
                 android:layout_height="32dp"
                 android:layout_marginTop="20dp"
+                android:layout_marginEnd="16dp"
                 android:gravity="end"
                 android:text="Countdown"
                 android:textAppearance="@style/TextAppearance.baseText"
-                android:layout_marginEnd="16dp"
                 app:layout_constraintEnd_toStartOf="@+id/overflowMenu"
                 app:layout_constraintTop_toTopOf="parent" />
 
@@ -121,6 +147,7 @@
                 android:layout_width="68dp"
                 android:layout_height="48dp"
                 android:layout_marginTop="8dp"
+                android:layout_marginEnd="16dp"
                 android:layout_marginBottom="8dp"
                 android:gravity="center"
                 android:text="Log"
@@ -129,7 +156,6 @@
                 app:backgroundTint="@color/colorGreen"
                 app:cornerRadius="8dp"
                 app:layout_constraintBottom_toBottomOf="parent"
-                android:layout_marginEnd="16dp"
                 app:layout_constraintEnd_toStartOf="@+id/overflowMenu"
                 app:layout_constraintTop_toTopOf="parent" />
 
@@ -139,9 +165,9 @@
                 android:layout_height="match_parent"
                 android:layout_marginTop="0dp"
                 android:layout_marginEnd="8dp"
+                android:background="@null"
                 android:contentDescription="Overflow Menu"
                 android:src="@drawable/ic_more_vert_black_24dp"
-                android:background="@null"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 

@@ -23,6 +23,8 @@ import android.widget.PopupMenu
 import android.widget.TextView
 import com.pillpals.pillpals.helpers.DatabaseHelper.Companion.getColorStringByID
 import com.pillpals.pillpals.helpers.DatabaseHelper.Companion.getCorrectIconDrawable
+import com.pillpals.pillpals.helpers.calculateScheduleRecords
+import com.pillpals.pillpals.ui.ScheduleRecord
 import kotlinx.android.synthetic.main.delete_prompt.view.*
 import kotlinx.android.synthetic.main.drug_card.view.*
 
@@ -124,6 +126,13 @@ class MedicationsFragment : Fragment() {
         newCard.overflowMenu.setOnClickListener {
             popoverMenuMedication(newCard, medication)
         }
+
+        var recordList = calculateScheduleRecords(medication.schedules, activity!!)
+        recordList.forEach { record ->
+            record.deleteScheduleImage.visibility = View.GONE
+            newCard.scheduleStack.addView(record)
+        }
+        newCard.scheduleStack.visibility = View.VISIBLE
         
         stack.addView(newCard)
     }
