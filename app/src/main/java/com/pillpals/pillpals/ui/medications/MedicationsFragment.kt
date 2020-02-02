@@ -1,11 +1,11 @@
 package com.pillpals.pillpals.ui.medications
 
+import android.animation.LayoutTransition
+import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
-import android.widget.LinearLayout
 import androidx.fragment.app.Fragment
 import com.pillpals.pillpals.R
 import com.pillpals.pillpals.data.model.Medications
@@ -14,18 +14,23 @@ import com.pillpals.pillpals.ui.DrugCard
 import io.realm.Realm
 import java.util.*
 import android.content.Intent
+import android.content.SharedPreferences
 import android.graphics.Color
+import android.graphics.drawable.AnimatedVectorDrawable
 import android.text.SpannableString
 import android.text.Spanned
 import android.text.style.ForegroundColorSpan
 import android.util.Log
 import android.view.MenuInflater
-import android.widget.PopupMenu
-import android.widget.TextView
+import android.widget.*
+import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.view.children
 import com.pillpals.pillpals.data.model.DPDObjects
 import com.pillpals.pillpals.helpers.DatabaseHelper
 import com.pillpals.pillpals.helpers.DatabaseHelper.Companion.getColorStringByID
 import com.pillpals.pillpals.helpers.DatabaseHelper.Companion.getCorrectIconDrawable
+import com.pillpals.pillpals.helpers.calculateScheduleRecords
+import com.pillpals.pillpals.ui.ScheduleRecord
 import com.pillpals.pillpals.ui.medications.medication_info.MedicationInfoActivity
 import kotlinx.android.synthetic.main.delete_prompt.view.*
 import kotlinx.android.synthetic.main.drug_card.view.*
@@ -35,6 +40,8 @@ class MedicationsFragment : Fragment() {
     public lateinit var drugButton: Button
     public lateinit var stack: LinearLayout
 
+    private lateinit var prefs: SharedPreferences
+
     private lateinit var realm: Realm
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -43,7 +50,10 @@ class MedicationsFragment : Fragment() {
 
         realm = Realm.getDefaultInstance()
 
+        prefs = activity!!.getPreferences(Context.MODE_PRIVATE)
+
         stack = view!!.findViewById(R.id.stack)
+        stack.layoutTransition.enableTransitionType(LayoutTransition.CHANGING) //Makes collapsing smooth
 
         drugButton = view!!.findViewById(R.id.drugButton)
 
@@ -159,8 +169,47 @@ class MedicationsFragment : Fragment() {
         newCard.overflowMenu.setOnClickListener {
             popoverMenuMedication(newCard, medication)
         }
+
+        newCard.drugCardLayout.layoutTransition.enableTransitionType(LayoutTransition.CHANGING)
+
+        var recordList = calculateScheduleRecords(medication.schedules, activity!!)
+        recordList.forEach { record ->
+            record.deleteScheduleImage.visibility = View.GONE
+            newCard.scheduleStack.addView(record)
+        }
+
+        newCard.scheduleContainer.visibility = View.VISIBLE
+        if (prefs.getBoolean(getString(R.string.schedule_preview_collapsed_prefix) + medication.uid, false)) {
+            newCard.scheduleStack.visibility = View.GONE
+            newCard.collapseButton.setImageResource(R.drawable.ic_circle_chevron_down_from_up)
+        }
+
+        newCard.collapseButton.setOnClickListener {
+            toggleCollapse(newCard.scheduleStack, newCard.collapseButton, medication)
+        }
         
         stack.addView(newCard)
+    }
+
+    private fun toggleCollapse(stack: LinearLayout, button: ImageButton, medication: Medications) {
+        var previouslyCollapsed = (stack.visibility == View.GONE)
+        if (previouslyCollapsed) {
+            button.setImageResource(R.drawable.ic_circle_chevron_up_from_down)
+            (button.drawable as AnimatedVectorDrawable).start()
+            stack.visibility = View.VISIBLE
+
+        } else {
+            button.setImageResource(R.drawable.ic_circle_chevron_down_from_up)
+            (button.drawable as AnimatedVectorDrawable).start()
+            stack.visibility = View.GONE
+        }
+
+        with (prefs.edit()) {
+            putBoolean(getString(R.string.schedule_preview_collapsed_prefix) + medication.uid, !previouslyCollapsed)
+            commit()
+        }
+
+        //TODO: Use preferences to save collapsed state of each stack, similar to dashboard
     }
 
     private fun createMedicationData(drugName: String, drugDose: String) {

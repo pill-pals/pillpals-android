@@ -39,6 +39,7 @@ import com.pillpals.pillpals.helpers.DatabaseHelper.Companion.getIconIDByString
 import com.pillpals.pillpals.helpers.DatabaseHelper.Companion.getRandomIcon
 import com.pillpals.pillpals.helpers.DatabaseHelper.Companion.getRandomUniqueColorString
 import com.pillpals.pillpals.helpers.DatabaseHelper.Companion.getScheduleByUid
+import com.pillpals.pillpals.helpers.calculateScheduleRecords
 import io.realm.RealmObject.deleteFromRealm
 import kotlinx.android.synthetic.main.delete_prompt.view.*
 
@@ -101,7 +102,7 @@ class AddDrugActivity : AppCompatActivity() {
                 iconButton.iconTint = ColorStateList.valueOf(Color.parseColor("#0F0F0F"))
             }
 
-            calculateScheduleRecords(medication.schedules)
+            addScheduleRecords(calculateScheduleRecords(medication.schedules, this, scheduleRecordsSetToDelete))
 
             //region Bottom button listeners
             bottomOptions.leftButton.setOnClickListener{
@@ -318,70 +319,7 @@ class AddDrugActivity : AppCompatActivity() {
         }
     }
 
-    private fun calculateScheduleRecords(schedules: List<Schedules>) {
-        // To contain all records that will be written to the view
-        var scheduleRecords = mutableListOf<ScheduleRecord>()
 
-        // The record set that contains the days of the week on which the medication is scheduled to reoccur weekly
-        // Eg. To result in the string '8:00 AM on Mon, Wed' when added to scheduleRecords
-        var compiledScheduleRecords = mutableListOf<CompiledScheduleRecord>()
-
-        schedules.forEach {
-            if (it.deleted ||
-                scheduleRecordExistsByUid(scheduleRecordsSetToDelete, it.uid!!)) {
-                return@forEach
-            }
-
-            val timeString = DateHelper.dateToString(it.occurrence!!)
-            if(isWeeklyRecurrence(it)) {
-                val cal = Calendar.getInstance()
-                cal.time = it.occurrence
-                if(compiledScheduleRecordExists(timeString, compiledScheduleRecords)) {
-                    //add day of week to existing compiled schedule record
-                    val compiledScheduleRecord = compiledScheduleRecords.find {it.time == timeString}
-                    compiledScheduleRecord!!.daysOfWeek[cal.get(Calendar.DAY_OF_WEEK) - 1] = 1
-                    compiledScheduleRecord.schedules.add(it)
-                } else {
-                    //create new compiled schedule record
-                    val compiledScheduleRecord = CompiledScheduleRecord(timeString)
-                    compiledScheduleRecord.daysOfWeek[cal.get(Calendar.DAY_OF_WEEK) - 1] = 1
-                    compiledScheduleRecord.schedules.add(it)
-                    compiledScheduleRecords.add(compiledScheduleRecord)
-                }
-            } else {
-                val scheduleRecord = ScheduleRecord(this)
-
-                scheduleRecord.timeText.text = timeString
-                scheduleRecord.recurrenceText.text = "every"
-                scheduleRecord.dateText.text = getRecurrenceString(it.repetitionUnit!!,it.repetitionCount!!)
-                scheduleRecord.schedules = listOf(it)
-                scheduleRecords.add(scheduleRecord)
-            }
-        }
-
-        //create scheduleRecords from compiledScheduleRecords
-        compiledScheduleRecords.forEach {
-            val scheduleRecord = ScheduleRecord(this)
-
-            scheduleRecord.timeText.text = it.time
-            scheduleRecord.recurrenceText.text = "on"
-            scheduleRecord.dateText.text = getDaysOfWeekList(it.daysOfWeek)
-            scheduleRecord.schedules = it.schedules
-            scheduleRecords.add(scheduleRecord)
-        }
-
-        addScheduleRecords(scheduleRecords, schedules)
-    }
-
-    private fun addScheduleRecords(scheduleRecords: List<ScheduleRecord>, schedules: List<Schedules>) {
-        scheduleRecords.forEach { record ->
-            record.deleteScheduleImage.setOnClickListener {
-                scheduleRecordsSetToDelete.add(record)
-                updateScheduleList()
-            }
-            scheduleStack.addView(record)
-        }
-    }
 
     private fun updateMedicationData(medication: Medications, drugName: String, drugDose: String, drugNote: String) {
         Realm.getDefaultInstance().executeTransaction {
@@ -439,63 +377,22 @@ class AddDrugActivity : AppCompatActivity() {
         }
     }
 
-    private fun isWeeklyRecurrence(schedule: Schedules):Boolean {
-        val a = (schedule.repetitionCount == 7 && DateHelper.getUnitByIndex(schedule.repetitionUnit!!) == Calendar.DATE)
-        val b = (schedule.repetitionCount == 1 && DateHelper.getUnitByIndex(schedule.repetitionUnit!!) == Calendar.WEEK_OF_YEAR)
-        return (a || b)
-    }
-
-    private fun getRecurrenceString(repetitionUnit: Int, repetitionCount: Int):String {
-        if (repetitionCount == 1) {
-            return when (DateHelper.getUnitByIndex(repetitionUnit)) {
-                Calendar.YEAR -> "year"
-                Calendar.MONTH -> "month"
-                Calendar.WEEK_OF_YEAR -> "week"
-                Calendar.DATE -> "day"
-                Calendar.HOUR_OF_DAY -> "hour"
-                Calendar.MINUTE -> "minute"
-                Calendar.SECOND -> "second"
-                else -> "MISSING"
+    private fun addScheduleRecords(scheduleRecords: List<ScheduleRecord>) {
+        scheduleRecords.forEach { record ->
+            record.deleteScheduleImage.setOnClickListener {
+                scheduleRecordsSetToDelete.add(record)
+                updateScheduleList()
             }
-        } else {
-            return when (DateHelper.getUnitByIndex(repetitionUnit)) {
-                Calendar.YEAR -> "$repetitionCount years"
-                Calendar.MONTH -> "$repetitionCount months"
-                Calendar.WEEK_OF_YEAR -> "$repetitionCount weeks"
-                Calendar.DATE -> "$repetitionCount days"
-                Calendar.HOUR_OF_DAY -> "$repetitionCount hours"
-                Calendar.MINUTE -> "$repetitionCount minutes"
-                Calendar.SECOND ->  "$repetitionCount seconds"
-                else -> "MISSING"
-            }
+            scheduleStack.addView(record)
         }
-    }
-
-    private fun compiledScheduleRecordExists(timeString: String, compiledScheduleRecords: MutableList<CompiledScheduleRecord>):Boolean {
-        return compiledScheduleRecords.filter { it.time == timeString }.count() > 0
-    }
-
-    private fun scheduleRecordExistsByUid(scheduleRecords: List<ScheduleRecord>, uid: String): Boolean {
-        return scheduleRecords.filter { scheduleRecord -> scheduleRecord.schedules.map { it.uid }.contains(uid) }.count() > 0
-    }
-
-    private fun getDaysOfWeekList(daysOfWeek: IntArray):String {
-        val daysOfWeekList = listOf("Sun","Mon","Tue","Wed","Thurs","Fri","Sat")
-
-        val daysList = daysOfWeek.mapIndexed { index, value ->
-            if (value == 1) daysOfWeekList[index]
-            else null
-        }.filterNotNull()
-
-        return daysList.joinToString()
     }
 
     private fun updateScheduleList() {
         scheduleStack.removeAllViews()
         if (intent.hasExtra("medication-uid")) {
-            calculateScheduleRecords(getMedicationByUid(intent.getStringExtra("medication-uid"))!!.schedules)
+            calculateScheduleRecords(getMedicationByUid(intent.getStringExtra("medication-uid"))!!.schedules, this, scheduleRecordsSetToDelete)
         }
-        calculateScheduleRecords(toBeAdded)
+        calculateScheduleRecords(toBeAdded, this, scheduleRecordsSetToDelete)
     }
 
     override fun onActivityResult(requestCode:Int, resultCode:Int, data:Intent?) {
@@ -540,9 +437,4 @@ class AddDrugActivity : AppCompatActivity() {
         }
 
     }
-}
-
-data class CompiledScheduleRecord(val time: String) {
-    var daysOfWeek: IntArray = IntArray(7) {0}
-    var schedules: MutableList<Schedules> = mutableListOf()
 }
