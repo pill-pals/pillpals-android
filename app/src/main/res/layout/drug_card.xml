@@ -12,165 +12,195 @@
 
         android:layout_gravity="bottom"
         android:layout_marginBottom="8dp"
+        android:animateLayoutChanges="true"
         app:cardBackgroundColor="@color/colorWhite"
         app:cardCornerRadius="8dp"
         app:cardElevation="0dp"
         app:cardUseCompatPadding="false">
 
         <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/drugCardLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@color/colorGrey"
-            android:visibility="visible">
-
-            <LinearLayout
-                android:id="@+id/scheduleStack"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:layout_marginEnd="8dp"
-                android:orientation="vertical"
-                android:visibility="gone"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent">
-
-                <Space
-                    android:layout_width="match_parent"
-                    android:layout_height="70dp" />
-            </LinearLayout>
-        </androidx.constraintlayout.widget.ConstraintLayout>
-
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:layout_width="match_parent"
-            android:layout_height="64dp"
-            android:background="@color/colorWhite">
-
-            <androidx.cardview.widget.CardView
-                android:id="@+id/iconBackground"
-                android:layout_width="0dp"
-                android:layout_height="0dp"
-                android:layout_marginStart="8dp"
-                android:layout_marginTop="8dp"
-                android:layout_marginBottom="8dp"
-                app:cardBackgroundColor="#C1DCFF"
-                app:cardCornerRadius="8dp"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintDimensionRatio="1:1"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent">
-
-                <ImageView
-                    android:id="@+id/icon"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_marginStart="4dp"
-                    android:layout_marginTop="4dp"
-                    android:layout_marginEnd="4dp"
-                    android:layout_marginBottom="4dp"
-                    app:srcCompat="@drawable/ic_pill_v5" />
-            </androidx.cardview.widget.CardView>
+            android:animateLayoutChanges="true">
 
             <androidx.constraintlayout.widget.ConstraintLayout
-                android:id="@+id/constraintLayout"
-                android:layout_width="wrap_content"
-                android:layout_height="56dp"
-                android:layout_marginStart="8dp"
-                android:layout_marginBottom="8dp"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toEndOf="@+id/iconBackground">
+                android:id="@+id/cardBodyLayout"
+                android:layout_width="match_parent"
+                android:layout_height="64dp"
+                android:animateLayoutChanges="true"
+                android:background="@color/colorWhite"
+                app:layout_constraintTop_toTopOf="parent">
+
+                <androidx.cardview.widget.CardView
+                    android:id="@+id/iconBackground"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginBottom="8dp"
+                    app:cardBackgroundColor="#C1DCFF"
+                    app:cardCornerRadius="8dp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintDimensionRatio="1:1"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent">
+
+                    <ImageView
+                        android:id="@+id/icon"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_marginStart="4dp"
+                        android:layout_marginTop="4dp"
+                        android:layout_marginEnd="4dp"
+                        android:layout_marginBottom="4dp"
+                        app:srcCompat="@drawable/ic_pill_v5" />
+                </androidx.cardview.widget.CardView>
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/constraintLayout"
+                    android:layout_width="wrap_content"
+                    android:layout_height="56dp"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginBottom="8dp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toEndOf="@+id/iconBackground">
+
+                    <me.grantland.widget.AutofitTextView
+                        android:id="@+id/timeText"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:maxWidth="160dp"
+                        android:singleLine="true"
+                        android:text="8:00 AM"
+                        android:textColor="@color/colorDarkGrey"
+                        app:autoSizeTextType="uniform"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintStart_toStartOf="parent" />
+
+                    <TextView
+                        android:id="@+id/lateText"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="16dp"
+                        android:layout_marginLeft="16dp"
+                        android:text="Late"
+                        android:textColor="@color/colorRed"
+
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintStart_toEndOf="@+id/timeText" />
+                </androidx.constraintlayout.widget.ConstraintLayout>
 
                 <me.grantland.widget.AutofitTextView
-                    android:id="@+id/timeText"
+                    android:id="@+id/nameText"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginTop="8dp"
                     android:maxWidth="160dp"
                     android:singleLine="true"
-                    android:text="8:00 AM"
-                    android:textColor="@color/colorDarkGrey"
-                    app:autoSizeTextType="uniform"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintStart_toStartOf="parent" />
+                    android:text="Test Medication"
+                    android:textAppearance="@style/TextAppearance.baseText"
+                    app:layout_constraintStart_toEndOf="@+id/iconBackground"
+                    app:layout_constraintTop_toTopOf="parent" />
 
                 <TextView
-                    android:id="@+id/lateText"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="16dp"
-                    android:layout_marginLeft="16dp"
-                    android:text="Late"
-                    android:textColor="@color/colorRed"
+                    android:id="@+id/countdownLabel"
+                    android:layout_width="132dp"
+                    android:layout_height="32dp"
+                    android:layout_marginTop="20dp"
+                    android:layout_marginEnd="16dp"
+                    android:gravity="end"
+                    android:text="Countdown"
+                    android:textAppearance="@style/TextAppearance.baseText"
+                    app:layout_constraintEnd_toStartOf="@+id/overflowMenu"
+                    app:layout_constraintTop_toTopOf="parent" />
 
+                <TextView
+                    android:id="@+id/logtimeLabel"
+                    android:layout_width="132dp"
+                    android:layout_height="32dp"
+                    android:layout_marginTop="20dp"
+                    android:layout_marginEnd="16dp"
+                    android:gravity="end"
+                    android:text="Countdown"
+                    android:textAppearance="@style/TextAppearance.baseText"
+                    app:layout_constraintEnd_toStartOf="@+id/overflowMenu"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <Button
+                    android:id="@+id/button"
+                    android:layout_width="68dp"
+                    android:layout_height="48dp"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginEnd="16dp"
+                    android:layout_marginBottom="8dp"
+                    android:gravity="center"
+                    android:text="Log"
+                    android:textColor="@color/colorWhite"
+                    android:textSize="18dp"
+                    app:backgroundTint="@color/colorGreen"
+                    app:cornerRadius="8dp"
                     app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintStart_toEndOf="@+id/timeText" />
+                    app:layout_constraintEnd_toStartOf="@+id/overflowMenu"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <ImageButton
+                    android:id="@+id/overflowMenu"
+                    android:layout_width="16dp"
+                    android:layout_height="match_parent"
+                    android:layout_marginTop="0dp"
+                    android:layout_marginEnd="8dp"
+                    android:background="@null"
+                    android:contentDescription="Overflow Menu"
+                    android:src="@drawable/ic_more_vert_black_24dp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
             </androidx.constraintlayout.widget.ConstraintLayout>
 
-            <me.grantland.widget.AutofitTextView
-                android:id="@+id/nameText"
-                android:layout_width="wrap_content"
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/scheduleContainer"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:layout_marginTop="8dp"
-                android:maxWidth="160dp"
-                android:singleLine="true"
-                android:text="Test Medication"
-                android:textAppearance="@style/TextAppearance.baseText"
-                app:layout_constraintStart_toEndOf="@+id/iconBackground"
-                app:layout_constraintTop_toTopOf="parent" />
+                android:animateLayoutChanges="true"
+                android:background="@color/colorGrey"
+                android:visibility="gone"
+                app:layout_constraintTop_toBottomOf="@id/cardBodyLayout">
 
-            <TextView
-                android:id="@+id/countdownLabel"
-                android:layout_width="132dp"
-                android:layout_height="32dp"
-                android:layout_marginTop="20dp"
-                android:layout_marginEnd="16dp"
-                android:gravity="end"
-                android:text="Countdown"
-                android:textAppearance="@style/TextAppearance.baseText"
-                app:layout_constraintEnd_toStartOf="@+id/overflowMenu"
-                app:layout_constraintTop_toTopOf="parent" />
+                <LinearLayout
+                    android:id="@+id/scheduleStack"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginEnd="8dp"
+                    android:orientation="vertical"
+                    android:visibility="visible"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
 
-            <TextView
-                android:id="@+id/logtimeLabel"
-                android:layout_width="132dp"
-                android:layout_height="32dp"
-                android:layout_marginTop="20dp"
-                android:layout_marginEnd="16dp"
-                android:gravity="end"
-                android:text="Countdown"
-                android:textAppearance="@style/TextAppearance.baseText"
-                app:layout_constraintEnd_toStartOf="@+id/overflowMenu"
-                app:layout_constraintTop_toTopOf="parent" />
+                <View
+                    android:id="@+id/collapseLine"
+                    android:layout_width="0dp"
+                    android:layout_height="1dp"
+                    android:background="@color/colorGrey"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/scheduleStack" />
 
-            <Button
-                android:id="@+id/button"
-                android:layout_width="68dp"
-                android:layout_height="48dp"
-                android:layout_marginTop="8dp"
-                android:layout_marginEnd="16dp"
-                android:layout_marginBottom="8dp"
-                android:gravity="center"
-                android:text="Log"
-                android:textColor="@color/colorWhite"
-                android:textSize="18dp"
-                app:backgroundTint="@color/colorGreen"
-                app:cornerRadius="8dp"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toStartOf="@+id/overflowMenu"
-                app:layout_constraintTop_toTopOf="parent" />
-
-            <ImageButton
-                android:id="@+id/overflowMenu"
-                android:layout_width="16dp"
-                android:layout_height="match_parent"
-                android:layout_marginTop="0dp"
-                android:layout_marginEnd="8dp"
-                android:background="@null"
-                android:contentDescription="Overflow Menu"
-                android:src="@drawable/ic_more_vert_black_24dp"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
-
+                <ImageButton
+                    android:id="@+id/collapseButton"
+                    android:layout_width="0dp"
+                    android:layout_height="28dp"
+                    android:background="@color/colorWhite"
+                    android:backgroundTint="@color/colorWhite"
+                    android:tint="@color/colorBlack"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/collapseLine"
+                    app:srcCompat="@drawable/ic_circle_chevron_up_from_down" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
         </androidx.constraintlayout.widget.ConstraintLayout>
 
     </androidx.cardview.widget.CardView>

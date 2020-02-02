@@ -168,7 +168,7 @@ class DashboardFragment : Fragment() {
             toggleCollapse(upcomingStack, upcomingCollapseBtn)
         }
         if (prefs.getBoolean(getString(R.string.upcoming_stack_collapsed), false)) {
-            upcomingCollapseBtn.setImageResource(R.drawable.ic_circle_chevron_right)
+            upcomingCollapseBtn.setImageResource(R.drawable.ic_circle_chevron_right_from_down)
         }
         upcomingStack.layoutTransition.enableTransitionType(LayoutTransition.CHANGING)
 
@@ -176,12 +176,11 @@ class DashboardFragment : Fragment() {
             toggleCollapse(completedStack, completedCollapseBtn)
         }
         if (prefs.getBoolean(getString(R.string.completed_stack_collapsed), true)) {
-            completedCollapseBtn.setImageResource(R.drawable.ic_circle_chevron_right)
+            completedCollapseBtn.setImageResource(R.drawable.ic_circle_chevron_right_from_down)
         }
         completedStack.layoutTransition.enableTransitionType(LayoutTransition.CHANGING)
     }
 
-    //TODO: Add animations
     private fun toggleCollapse(stack: LinearLayout, button: ImageButton) {
         var buttonChanged = false
         var previouslyCollapsed = false
@@ -190,14 +189,14 @@ class DashboardFragment : Fragment() {
                 previouslyCollapsed = (view.visibility == View.GONE)
                 if (previouslyCollapsed) {
                     if (!buttonChanged) {
-                        button.setImageResource(R.drawable.ic_circle_chevron_down)
+                        button.setImageResource(R.drawable.ic_circle_chevron_down_from_right)
                         (button.drawable as AnimatedVectorDrawable).start()
                         buttonChanged = true
                     }
                     view.visibility = View.VISIBLE
                 } else {
                     if (!buttonChanged) {
-                        button.setImageResource(R.drawable.ic_circle_chevron_right)
+                        button.setImageResource(R.drawable.ic_circle_chevron_right_from_down)
                         (button.drawable as AnimatedVectorDrawable).start()
                         buttonChanged = true
                     }

@@ -1,11 +1,10 @@
 package com.pillpals.pillpals.ui.medications
 
+import android.animation.LayoutTransition
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
-import android.widget.LinearLayout
 import androidx.fragment.app.Fragment
 import com.pillpals.pillpals.R
 import com.pillpals.pillpals.data.model.Medications
@@ -15,13 +14,15 @@ import io.realm.Realm
 import java.util.*
 import android.content.Intent
 import android.graphics.Color
+import android.graphics.drawable.AnimatedVectorDrawable
 import android.text.SpannableString
 import android.text.Spanned
 import android.text.style.ForegroundColorSpan
 import android.util.Log
 import android.view.MenuInflater
-import android.widget.PopupMenu
-import android.widget.TextView
+import android.widget.*
+import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.view.children
 import com.pillpals.pillpals.data.model.DPDObjects
 import com.pillpals.pillpals.helpers.DatabaseHelper
 import com.pillpals.pillpals.helpers.DatabaseHelper.Companion.getColorStringByID
@@ -36,6 +37,7 @@ class MedicationsFragment : Fragment() {
 
     public lateinit var drugButton: Button
     public lateinit var stack: LinearLayout
+    public lateinit var stackLayout: ConstraintLayout
 
     private lateinit var realm: Realm
 
@@ -46,6 +48,9 @@ class MedicationsFragment : Fragment() {
         realm = Realm.getDefaultInstance()
 
         stack = view!!.findViewById(R.id.stack)
+
+        stackLayout = view!!.findViewById(R.id.stackLayout)
+        stackLayout.layoutTransition.enableTransitionType(LayoutTransition.CHANGING)
 
         drugButton = view!!.findViewById(R.id.drugButton)
 
@@ -158,6 +163,8 @@ class MedicationsFragment : Fragment() {
         newCard.button.layoutParams.width = ViewGroup.LayoutParams.WRAP_CONTENT
         newCard.button.visibility = View.VISIBLE
 
+        newCard.drugCardLayout.layoutTransition.enableTransitionType(LayoutTransition.CHANGING)
+
         newCard.overflowMenu.setOnClickListener {
             popoverMenuMedication(newCard, medication)
         }
@@ -167,9 +174,26 @@ class MedicationsFragment : Fragment() {
             record.deleteScheduleImage.visibility = View.GONE
             newCard.scheduleStack.addView(record)
         }
-        newCard.scheduleStack.visibility = View.VISIBLE
+        newCard.scheduleContainer.visibility = View.VISIBLE
+        newCard.collapseButton.setOnClickListener {
+            toggleCollapse(newCard.scheduleStack, newCard.collapseButton)
+        }
         
         stack.addView(newCard)
+    }
+
+    private fun toggleCollapse(stack: LinearLayout, button: ImageButton) {
+        if (stack.visibility == View.GONE) {
+            button.setImageResource(R.drawable.ic_circle_chevron_up_from_down)
+            (button.drawable as AnimatedVectorDrawable).start()
+            stack.visibility = View.VISIBLE
+        } else {
+            button.setImageResource(R.drawable.ic_circle_chevron_down_from_up)
+            (button.drawable as AnimatedVectorDrawable).start()
+            stack.visibility = View.GONE
+        }
+
+        //TODO: Use preferences to save collapsed state of each stack, similar to dashboard
     }
 
     private fun createMedicationData(drugName: String, drugDose: String) {
