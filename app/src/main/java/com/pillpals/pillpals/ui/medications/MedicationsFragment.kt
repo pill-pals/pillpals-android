@@ -1,6 +1,7 @@
 package com.pillpals.pillpals.ui.medications
 
 import android.animation.LayoutTransition
+import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -13,6 +14,7 @@ import com.pillpals.pillpals.ui.DrugCard
 import io.realm.Realm
 import java.util.*
 import android.content.Intent
+import android.content.SharedPreferences
 import android.graphics.Color
 import android.graphics.drawable.AnimatedVectorDrawable
 import android.text.SpannableString
@@ -38,6 +40,8 @@ class MedicationsFragment : Fragment() {
     public lateinit var drugButton: Button
     public lateinit var stack: LinearLayout
 
+    private lateinit var prefs: SharedPreferences
+
     private lateinit var realm: Realm
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -45,6 +49,8 @@ class MedicationsFragment : Fragment() {
         val view = inflater!!.inflate(R.layout.fragment_medications, container,false)
 
         realm = Realm.getDefaultInstance()
+
+        prefs = activity!!.getPreferences(Context.MODE_PRIVATE)
 
         stack = view!!.findViewById(R.id.stack)
         stack.layoutTransition.enableTransitionType(LayoutTransition.CHANGING) //Makes collapsing smooth
@@ -171,23 +177,36 @@ class MedicationsFragment : Fragment() {
             record.deleteScheduleImage.visibility = View.GONE
             newCard.scheduleStack.addView(record)
         }
+
         newCard.scheduleContainer.visibility = View.VISIBLE
+        if (prefs.getBoolean(getString(R.string.schedule_preview_collapsed_prefix) + medication.uid, false)) {
+            newCard.scheduleStack.visibility = View.GONE
+            newCard.collapseButton.setImageResource(R.drawable.ic_circle_chevron_down_from_up)
+        }
+
         newCard.collapseButton.setOnClickListener {
-            toggleCollapse(newCard.scheduleStack, newCard.collapseButton)
+            toggleCollapse(newCard.scheduleStack, newCard.collapseButton, medication)
         }
         
         stack.addView(newCard)
     }
 
-    private fun toggleCollapse(stack: LinearLayout, button: ImageButton) {
-        if (stack.visibility == View.GONE) {
+    private fun toggleCollapse(stack: LinearLayout, button: ImageButton, medication: Medications) {
+        var previouslyCollapsed = (stack.visibility == View.GONE)
+        if (previouslyCollapsed) {
             button.setImageResource(R.drawable.ic_circle_chevron_up_from_down)
             (button.drawable as AnimatedVectorDrawable).start()
             stack.visibility = View.VISIBLE
+
         } else {
             button.setImageResource(R.drawable.ic_circle_chevron_down_from_up)
             (button.drawable as AnimatedVectorDrawable).start()
             stack.visibility = View.GONE
+        }
+
+        with (prefs.edit()) {
+            putBoolean(getString(R.string.schedule_preview_collapsed_prefix) + medication.uid, !previouslyCollapsed)
+            commit()
         }
 
         //TODO: Use preferences to save collapsed state of each stack, similar to dashboard
