@@ -18,11 +18,15 @@ import android.graphics.Color
 import android.text.SpannableString
 import android.text.Spanned
 import android.text.style.ForegroundColorSpan
+import android.util.Log
 import android.view.MenuInflater
 import android.widget.PopupMenu
 import android.widget.TextView
+import com.pillpals.pillpals.data.model.DPDObjects
+import com.pillpals.pillpals.helpers.DatabaseHelper
 import com.pillpals.pillpals.helpers.DatabaseHelper.Companion.getColorStringByID
 import com.pillpals.pillpals.helpers.DatabaseHelper.Companion.getCorrectIconDrawable
+import com.pillpals.pillpals.ui.medications.medication_info.MedicationInfoActivity
 import kotlinx.android.synthetic.main.delete_prompt.view.*
 import kotlinx.android.synthetic.main.drug_card.view.*
 
@@ -56,7 +60,13 @@ class MedicationsFragment : Fragment() {
     private fun popoverMenuMedication(v: View, medication: Medications) {
         val popup = PopupMenu(context, v.overflowMenu)
         val inflater: MenuInflater = popup.menuInflater
-        inflater.inflate(R.menu.medication, popup.menu)
+        val dpdObject = medication.dpd_object?.firstOrNull()
+        if(dpdObject == null) {
+            inflater.inflate(R.menu.medication, popup.menu)
+        }
+        else {
+            inflater.inflate(R.menu.medication_dpd, popup.menu)
+        }
         popup.setOnMenuItemClickListener { item ->
             when(item.itemId) {
                 R.id.medicationDelete -> {
@@ -87,6 +97,18 @@ class MedicationsFragment : Fragment() {
                         deleteAlertDialog.dismiss()
                     }
                 }
+                R.id.viewDrugInfo -> {
+                    if(dpdObject == null) return@setOnMenuItemClickListener true
+
+                    val intent = Intent(context, MedicationInfoActivity::class.java)
+                    intent.putExtra("drug-code", dpdObject.dpd_id)
+                    intent.putExtra("icon-color", getColorStringByID(medication.color_id))
+                    intent.putStringArrayListExtra("administration-routes", ArrayList(dpdObject.administrationRoutes))
+                    intent.putStringArrayListExtra("active-ingredients",  ArrayList(dpdObject.activeIngredients))
+                    intent.putExtra("dosage-string", dpdObject.dosageString)
+                    intent.putExtra("name-text", dpdObject.name)
+                    startActivityForResult(intent, 2)
+                }
             }
             true
         }
@@ -100,7 +122,7 @@ class MedicationsFragment : Fragment() {
                 continue
             }
 
-            addDrugCard(realm.copyFromRealm(drug))
+            addDrugCard(drug)
         }
     }
 
@@ -111,6 +133,19 @@ class MedicationsFragment : Fragment() {
         newCard.altText.text = medication.dosage
         newCard.iconBackground.setCardBackgroundColor(Color.parseColor(getColorStringByID(medication.color_id)))
         newCard.icon.setImageDrawable(getCorrectIconDrawable(this.context!!, medication))
+
+        newCard.setOnClickListener {
+            val dpdObject = medication.dpd_object?.firstOrNull() ?: return@setOnClickListener
+
+            val intent = Intent(context, MedicationInfoActivity::class.java)
+            intent.putExtra("drug-code", dpdObject.dpd_id)
+            intent.putExtra("icon-color", getColorStringByID(medication.color_id))
+            intent.putStringArrayListExtra("administration-routes", ArrayList(dpdObject.administrationRoutes))
+            intent.putStringArrayListExtra("active-ingredients",  ArrayList(dpdObject.activeIngredients))
+            intent.putExtra("dosage-string", dpdObject.dosageString)
+            intent.putExtra("name-text", dpdObject.name)
+            startActivityForResult(intent, 2)
+        }
 
         newCard.button.setOnClickListener {
             val intent = Intent(context, AddDrugActivity::class.java)

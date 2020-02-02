@@ -1,8 +1,10 @@
 package com.pillpals.pillpals.ui.medications.medication_info
 
 import android.content.Intent
+import android.content.res.ColorStateList
 import android.graphics.Color
 import android.os.Bundle
+import android.util.Log
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.LinearLayout
@@ -18,8 +20,15 @@ import com.pillpals.pillpals.R
 import com.pillpals.pillpals.ui.AddDrugActivity
 import io.realm.Realm
 import android.view.MenuItem
+import android.view.View
 import android.widget.ImageView
 import androidx.cardview.widget.CardView
+import androidx.core.content.ContextCompat
+import androidx.core.content.res.ResourcesCompat
+import com.pillpals.pillpals.data.model.DPDObjects
+import com.pillpals.pillpals.helpers.DatabaseHelper
+import io.realm.RealmList
+import org.w3c.dom.Text
 
 
 class MedicationInfoActivity : AppCompatActivity() {
@@ -31,6 +40,7 @@ class MedicationInfoActivity : AppCompatActivity() {
     public lateinit var medicationIcon: ImageView
     public lateinit var nameText: TextView
     public lateinit var dosageText: TextView
+    public lateinit var alreadyAdded: TextView
     public var drugCode: Int = 0
     public var colorString: String = "#D3D3D3"
     public var administrationRoutes = listOf<String>()
@@ -38,6 +48,9 @@ class MedicationInfoActivity : AppCompatActivity() {
     public var iconResource = R.drawable.ic_pill_v5
     public var dosageString = ""
     public var nameString = ""
+    public var iconResourceString: String? = null
+
+    private lateinit var realm: Realm
 
     private var tabFragments: List<MedicationInfoTextFragment> = mutableListOf(
         MedicationInfoTextFragment(),
@@ -61,11 +74,13 @@ class MedicationInfoActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Realm.init(this)
+        realm = Realm.getDefaultInstance()
         setContentView(R.layout.activity_medication_info)
 
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
 
         addButton = findViewById(R.id.addButton)
+        alreadyAdded = findViewById(R.id.alreadyAdded)
         tabLayout = findViewById(R.id.tabLayout)
         tabViewPager = findViewById(R.id.tabViewPager)
         tabLayout.setupWithViewPager(tabViewPager)
@@ -80,9 +95,20 @@ class MedicationInfoActivity : AppCompatActivity() {
         activeIngredients = intent.getStringArrayListExtra("active-ingredients")!!.toList()
         dosageString = intent.getStringExtra("dosage-string")!!
         nameString = intent.getStringExtra("name-text")!!
-        if(intent.hasExtra("icon-resource")) {
-            iconResource = intent.getIntExtra("icon-resource", R.drawable.ic_pill_v5)
+
+        iconResourceString = intent.getStringExtra("icon-resource")
+        if (iconResourceString == null) {
+            iconResourceString = "ic_pill_v5"
         }
+
+        alreadyAdded.visibility = View.INVISIBLE
+        if(userTakesDrug()) {
+            addButton.setTextColor(resources.getColor(R.color.colorLightGrey))
+            addButton.backgroundTintList = ColorStateList.valueOf(ResourcesCompat.getColor(resources, R.color.colorDarkishGrey, null))
+            alreadyAdded.visibility = View.VISIBLE
+        }
+
+        iconResource = DatabaseHelper.getDrawableIconById(this, DatabaseHelper.getIconIDByString(iconResourceString!!))
 
         iconBackground.setCardBackgroundColor(Color.parseColor(colorString))
         medicationIcon.setImageResource(iconResource)
@@ -98,8 +124,15 @@ class MedicationInfoActivity : AppCompatActivity() {
 
         addButton.setOnClickListener {
             val intent = Intent(this, AddDrugActivity::class.java)
+            intent.putExtra("dpd-id", drugCode)
+            intent.putExtra("color-string", colorString)
+            intent.putExtra("image-string", iconResourceString)
+            intent.putExtra("name-string", nameString)
+            intent.putExtra("dosage-string", dosageString)
             startActivityForResult(intent, 1)
         }
+
+        addDrugToDPDTable()
     }
 
     public fun tabFragmentLoaded() {
@@ -118,6 +151,28 @@ class MedicationInfoActivity : AppCompatActivity() {
             addHeader(layout, headerText)
             addBody(layout, bodyText[index])
         }
+    }
+
+    private fun addDrugToDPDTable() {
+        val existingRow = realm.where(DPDObjects::class.java).equalTo("dpd_id", drugCode).findFirst()
+        if(existingRow != null) return
+
+        realm.executeTransaction {
+            val dpdObject = it.createObject(DPDObjects::class.java, drugCode)
+            dpdObject.name = nameString
+            val administrationRoutesRealmList = RealmList<String>()
+            administrationRoutesRealmList.addAll(administrationRoutes)
+            dpdObject.administrationRoutes = administrationRoutesRealmList
+            val activeIngredientsRealmList = RealmList<String>()
+            activeIngredientsRealmList.addAll(activeIngredients)
+            dpdObject.activeIngredients = activeIngredientsRealmList
+            dpdObject.dosageString = dosageString
+        }
+    }
+
+    private fun userTakesDrug(): Boolean {
+        val dpdObject = realm.where(DPDObjects::class.java).equalTo("dpd_id", drugCode).findFirst() ?: return false
+        return dpdObject.medications.filter { !it.deleted }.count() > 0
     }
 
     private fun resetText(layout: ViewGroup) {

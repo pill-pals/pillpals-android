@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/completedChangeLogTime"
+        android:icon="@drawable/ic_clock"
+        android:title="Change log time" />
+
+    <item
+        android:id="@+id/completedUndoLog"
+        android:icon="@drawable/ic_undo_black_24dp"
+        android:title="Undo log" />
+
+    <item
+        android:id="@+id/viewDrugInfo"
+        android:icon="@drawable/ic_clock"
+        android:title="View drug info" />
+
+</menu>

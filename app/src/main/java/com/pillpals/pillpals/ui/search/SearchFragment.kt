@@ -51,7 +51,7 @@ class SearchFragment : Fragment() {
     public var lastQuery: String? = null
     public var searchingUpcomingDrugs = false
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    override public fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         super.onCreateView(inflater, container, savedInstanceState)
         val view = inflater!!.inflate(R.layout.fragment_search, container, false)
 
@@ -409,7 +409,7 @@ class SearchFragment : Fragment() {
                                                     infoIntent.putExtra("dosage-string", newCard.dosageString)
                                                     infoIntent.putExtra("name-text", newCard.nameText.text.toString())
                                                     if(firstRoute != null) {
-                                                        infoIntent.putExtra("icon-resource", administrationRouteToIcon(firstRoute.route_of_administration_name))
+                                                        infoIntent.putExtra("icon-resource", administrationRouteToIconString(firstRoute.route_of_administration_name))
                                                     }
 
                                                     startActivityForResult(infoIntent, 1)
@@ -471,6 +471,16 @@ class SearchFragment : Fragment() {
             route.startsWith("Rectal") -> R.drawable.ic_tablet
             route.startsWith("Inhalation") -> R.drawable.ic_inhaler
             else -> R.drawable.ic_dropper
+        }
+    }
+
+    private fun administrationRouteToIconString(route: String): String {
+        return when(true) {
+            route.startsWith("Intra") -> "ic_syringe"
+            route.startsWith("Oral") -> "ic_pill_v5"
+            route.startsWith("Rectal") -> "ic_tablet"
+            route.startsWith("Inhalation") -> "ic_inhaler"
+            else -> "ic_dropper"
         }
     }
 }
