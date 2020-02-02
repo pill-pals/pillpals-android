@@ -37,7 +37,6 @@ class MedicationsFragment : Fragment() {
 
     public lateinit var drugButton: Button
     public lateinit var stack: LinearLayout
-    public lateinit var stackLayout: ConstraintLayout
 
     private lateinit var realm: Realm
 
@@ -48,9 +47,7 @@ class MedicationsFragment : Fragment() {
         realm = Realm.getDefaultInstance()
 
         stack = view!!.findViewById(R.id.stack)
-
-        stackLayout = view!!.findViewById(R.id.stackLayout)
-        stackLayout.layoutTransition.enableTransitionType(LayoutTransition.CHANGING)
+        stack.layoutTransition.enableTransitionType(LayoutTransition.CHANGING) //Makes collapsing smooth
 
         drugButton = view!!.findViewById(R.id.drugButton)
 
@@ -163,11 +160,11 @@ class MedicationsFragment : Fragment() {
         newCard.button.layoutParams.width = ViewGroup.LayoutParams.WRAP_CONTENT
         newCard.button.visibility = View.VISIBLE
 
-        newCard.drugCardLayout.layoutTransition.enableTransitionType(LayoutTransition.CHANGING)
-
         newCard.overflowMenu.setOnClickListener {
             popoverMenuMedication(newCard, medication)
         }
+
+        newCard.drugCardLayout.layoutTransition.enableTransitionType(LayoutTransition.CHANGING)
 
         var recordList = calculateScheduleRecords(medication.schedules, activity!!)
         recordList.forEach { record ->
