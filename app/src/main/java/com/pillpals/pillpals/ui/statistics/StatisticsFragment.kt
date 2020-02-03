@@ -1,5 +1,6 @@
 package com.pillpals.pillpals.ui.statistics
 
+import android.content.Intent
 import android.content.res.ColorStateList
 import android.graphics.Color
 import android.os.Bundle
@@ -13,9 +14,6 @@ import com.github.mikephil.charting.charts.*
 import com.github.mikephil.charting.data.*
 import com.github.mikephil.charting.data.BarData
 import com.github.mikephil.charting.interfaces.datasets.IBarDataSet
-import android.widget.CheckBox
-import android.widget.ImageButton
-import android.widget.LinearLayout
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.graphics.ColorUtils
 import androidx.core.view.children
@@ -33,10 +31,11 @@ import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
 import kotlin.math.abs
-import android.widget.TextView
 import com.pillpals.pillpals.data.model.Schedules
 import java.util.Calendar
 import android.util.Log
+import android.widget.*
+import com.pillpals.pillpals.ui.MedicationScoresActivity
 
 class StatisticsFragment : Fragment() {
 
@@ -56,6 +55,7 @@ class StatisticsFragment : Fragment() {
     public lateinit var viewModeFilter: Filter
     public lateinit var graphHeader: TextView
     public var currentDate = DateHelper.today()
+    public lateinit var medicationScoresButton: Button
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -76,6 +76,12 @@ class StatisticsFragment : Fragment() {
         graphHeader = view.findViewById(R.id.graphHeader)
         leftTimeButton = view.findViewById(R.id.leftTimeButton)
         rightTimeButton = view.findViewById(R.id.rightTimeButton)
+        medicationScoresButton = view.findViewById(R.id.medicationScoresButton)
+
+        medicationScoresButton.setOnClickListener {
+            val intent = Intent(context, MedicationScoresActivity::class.java)
+            startActivityForResult(intent, 1)
+        }
 
         leftTimeButton.setOnClickListener{timeButtonClick(-1)}
         rightTimeButton.setOnClickListener{timeButtonClick(1)}
