@@ -36,6 +36,7 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:layout_marginBottom="2dp"
+        android:layout_marginEnd="8dp"
         app:layout_constraintBottom_toBottomOf="@+id/iconBackground"
         app:layout_constraintEnd_toStartOf="@+id/addButton"
         app:layout_constraintStart_toEndOf="@+id/iconBackground">
@@ -46,6 +47,7 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="2dp"
             android:text="5 mg"
+            android:singleLine="true"
             android:textColor="@color/colorDarkGrey"
             android:textSize="16sp"
             app:layout_constraintBottom_toBottomOf="parent"
@@ -61,6 +63,7 @@
         android:layout_marginTop="2dp"
         android:layout_marginEnd="8dp"
         android:text="Test Medication"
+        android:singleLine="true"
         android:textAppearance="@style/TextAppearance.baseText"
         android:textSize="20sp"
         app:layout_constraintEnd_toStartOf="@+id/addButton"
