@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.graphics.Color
 import android.graphics.drawable.AnimatedVectorDrawable
+import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.util.Log
 import android.view.View
@@ -14,13 +15,19 @@ import android.widget.LinearLayout
 import androidx.appcompat.app.AppCompatActivity
 import com.pillpals.pillpals.R
 import com.pillpals.pillpals.data.model.Medications
+import com.pillpals.pillpals.data.model.MoodLogs
 
 import com.pillpals.pillpals.helpers.DatabaseHelper
 import com.pillpals.pillpals.helpers.DatabaseHelper.Companion.getColorStringByID
+import com.pillpals.pillpals.helpers.DateHelper
+import com.pillpals.pillpals.helpers.StatsHelper
 import com.pillpals.pillpals.ui.DataPair
 import com.pillpals.pillpals.ui.DrugCard
 import kotlinx.android.synthetic.main.drug_card.view.*
 import io.realm.Realm
+import io.realm.RealmResults
+import java.util.*
+import kotlin.math.roundToInt
 
 
 class MedicationScoresActivity : AppCompatActivity() {
@@ -90,16 +97,17 @@ class MedicationScoresActivity : AppCompatActivity() {
     private fun calculateDataPairs(medication: Medications):MutableList<DataPair> {
         var dataPairs = mutableListOf<DataPair>()
 
-        var dataPair1 = DataPair(this)
-        dataPair1.key.text = "Data Key 1"
-        dataPair1.value.text = "Value 1"
-        dataPair1.drawableValue.visibility = View.GONE
-        dataPairs.add(dataPair1)
+        var adherenceScore = DataPair(this)
+        adherenceScore.key.text = "Adherence Score"
+        adherenceScore.value.text = calculateAdherenceScore(medication)
+        adherenceScore.drawableValue.visibility = View.GONE
+        dataPairs.add(adherenceScore)
 
-        var dataPair2 = DataPair(this)
-        dataPair2.key.text = "Data Key 2"
-        dataPair2.value.text = "Value 2"
-        dataPairs.add(dataPair2)
+        var recentMood = DataPair(this)
+        recentMood.key.text = "Recent Mood"
+        recentMood.value.text = ""
+        recentMood.drawableValue.setImageResource(calculateRecentMoodScore(medication))
+        dataPairs.add(recentMood)
 
         return dataPairs
     }
@@ -121,5 +129,43 @@ class MedicationScoresActivity : AppCompatActivity() {
             putBoolean(getString(R.string.schedule_preview_collapsed_prefix) + medication.uid, !previouslyCollapsed)
             commit()
         }
+    }
+
+    private fun calculateAdherenceScore(medication: Medications):String {
+        var timeCounts = StatsHelper.averageLogsAcrossSchedules(medication,realm,"Days")
+
+        timeCounts = timeCounts.filter{it.time > DateHelper.addUnitToDate(DateHelper.today(),-30,Calendar.DATE) && it.time < DateHelper.today()}
+
+        var sum = 0f
+        timeCounts.forEach{
+            sum += it.offset
+        }
+
+        val avg = sum/timeCounts.count()
+
+        return StatsHelper.getGradeStringFromTimeDifference(avg / 1000 / 60 )
+    }
+
+    private fun calculateRecentMoodScore(medication: Medications):Int {
+        val allMoodLogs = DatabaseHelper.readAllData(MoodLogs::class.java) as RealmResults<out MoodLogs>
+
+        val relevantMoodLogs = allMoodLogs.filter{ DatabaseHelper.moodLogIsRelatedToMedication(it,medication) }
+
+        Log.i("test",medication.name + " - " + relevantMoodLogs.toString())
+
+        var sum = 0f
+        var count = 0f
+        relevantMoodLogs.forEach{
+            if (it.rating != null) {
+                sum += it.rating!!
+                count += 1f
+            }
+        }
+
+        var avg = sum/count
+
+        Log.i("test",medication.name + " : " + avg + " : " + count)
+
+        return DatabaseHelper.getDrawableMoodIconById(this,avg.roundToInt())
     }
 }

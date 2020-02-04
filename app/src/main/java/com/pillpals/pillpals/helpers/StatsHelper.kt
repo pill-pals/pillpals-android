@@ -51,19 +51,23 @@ class StatsHelper {
             }
         }
 
+        fun getGradeStringFromTimeDifference (minuteDifference: Float):String {
+            return when {
+                minuteDifference > 1200f -> "D"
+                minuteDifference > 600f -> "C"
+                minuteDifference > 120f -> "B"
+                minuteDifference > 60f -> "B+"
+                minuteDifference > 20f -> "A"
+                minuteDifference > 10f -> "A+"
+                minuteDifference == -1f -> ""
+                else -> "F"
+            }
+        }
+
         fun averageLogsAcrossSchedules(medication: Medications, realm: Realm, timeSpanFilter: String): List<TimeCount> {
             val schedules = medication.schedules
 
             var allLogs = schedules.fold(listOf<Logs>()) { acc, it -> acc.plus(it.logs) }
-
-            /*allLogs.forEach{
-                var cal = Calendar.getInstance()
-                cal.time = it.due
-                //Log.i("test",cal.get(Calendar.DAY_OF_YEAR).toString())
-                if(cal.get(Calendar.DAY_OF_YEAR) == 31) {
-                    Log.i("test",it.toString())
-                }
-            }*/
 
             var allMissingLogs = schedules.fold(listOf<MissingLogs>()) { acc, it ->
                 var missingLogs = if (it.deleted) {
@@ -75,8 +79,6 @@ class StatsHelper {
 
                 acc.plus(missingLogs)
             }
-
-            //Log.i("test",allMissingLogs.toString())
 
             var dataLogs = listOf<DataLogs>()
             for (log in allLogs) {
@@ -90,15 +92,6 @@ class StatsHelper {
 
             dataLogs = dataLogs.sortedBy { it.due }
 
-            //Log.i("test",dataLogs.toString())
-            dataLogs.forEach{
-                var cal = Calendar.getInstance()
-                cal.time = it.due
-                //Log.i("test",cal.get(Calendar.DAY_OF_YEAR).toString())
-                if(cal.get(Calendar.DAY_OF_YEAR) == 31) {
-                    Log.i("test",it.toString())
-                }
-            }
             return dataLogs.fold(mutableListOf<TimeCount>()) { acc, it ->
                 val logDate = Calendar.getInstance()
                 logDate.time = it.due!!

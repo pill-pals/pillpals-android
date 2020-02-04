@@ -12,6 +12,8 @@ import io.realm.RealmObject
 import io.realm.RealmResults
 import kotlin.random.Random
 import java.io.ByteArrayOutputStream
+import java.util.*
+import android.util.Log
 
 class DatabaseHelper {
     companion object{
@@ -83,6 +85,11 @@ class DatabaseHelper {
             return context.getResources()
                 .getIdentifier("drawable/$icon", null, context.packageName)
         }
+        fun getDrawableMoodIconById(context: Context, id: Int): Int {
+            val icon = getMoodIconByID(id)
+            return context.getResources()
+                .getIdentifier("drawable/$icon", null, context.packageName)
+        }
         fun convertBitmapToByteArray(icon: Bitmap): ByteArray{
             val base = ByteArrayOutputStream()
             icon.compress(Bitmap.CompressFormat.PNG, 100, base)
@@ -100,6 +107,24 @@ class DatabaseHelper {
             }else{
                 return ContextCompat.getDrawable(context, getDrawableIconById(context, medication.icon_id))!!
             }
+        }
+        fun moodLogIsRelatedToMedication(moodLog: MoodLogs, medication: Medications):Boolean {
+            var moodCal = Calendar.getInstance()
+            moodCal.time = moodLog.date
+
+            val unitList = listOf(Calendar.DAY_OF_YEAR, Calendar.YEAR)
+            var logCal = Calendar.getInstance()
+            val schedules = medication.schedules
+            var allLogsForMedication = schedules.fold(listOf<Logs>()) { acc, it -> acc.plus(it.logs) }
+
+            allLogsForMedication = allLogsForMedication.filter{
+                logCal.time = it.occurrence
+
+                moodCal.get(Calendar.DAY_OF_YEAR) == logCal.get(Calendar.DAY_OF_YEAR) && moodCal.get(Calendar.YEAR) == logCal.get(Calendar.YEAR)
+            }
+            Log.i("test",medication.name + " " + allLogsForMedication.isNotEmpty() + " " + allLogsForMedication.count())
+
+            return allLogsForMedication.isNotEmpty()
         }
     }
 }
