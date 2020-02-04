@@ -139,12 +139,12 @@ class StatisticsFragment : Fragment() {
 
         var dataLogs = listOf<DataLogs>()
         for (log in allLogs) {
-            dataLogs = dataLogs.plus(DataLogs(log.occurrence!!,log.due!!))
+            dataLogs = dataLogs.plus(DataLogs(log.occurrence!!, log.due!!))
         }
 
         //currently gives an offset of 1 whole day for a missed medication
         for (missingLog in allMissingLogs) {
-            dataLogs = dataLogs.plus(DataLogs(DateHelper.addUnitToDate(missingLog.due,1,Calendar.DATE),missingLog.due))
+            dataLogs = dataLogs.plus(DataLogs(DateHelper.addUnitToDate(missingLog.due,1,Calendar.DATE), missingLog.due))
         }
 
         dataLogs = dataLogs.sortedBy { it.due }
