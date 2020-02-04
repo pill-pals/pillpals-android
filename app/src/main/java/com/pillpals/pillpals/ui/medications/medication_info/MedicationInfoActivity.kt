@@ -217,4 +217,13 @@ class MedicationInfoActivity : AppCompatActivity() {
         }
         return true
     }
+
+    override fun onActivityResult(requestCode:Int, resultCode:Int, data:Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if(userTakesDrug()) {
+            addButton.setTextColor(resources.getColor(R.color.colorLightGrey))
+            addButton.backgroundTintList = ColorStateList.valueOf(ResourcesCompat.getColor(resources, R.color.colorDarkishGrey, null))
+            alreadyAdded.visibility = View.VISIBLE
+        }
+    }
 }

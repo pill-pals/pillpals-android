@@ -9,6 +9,7 @@
         android:required="false" />
 
     <application
+        android:hardwareAccelerated="true"
         android:name="com.pillpals.pillpals.PillPalsApplication"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
