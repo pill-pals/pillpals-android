@@ -135,7 +135,7 @@ class StatsHelper {
             }
         }
 
-        private fun equalTimeUnit(timeCount: TimeCount, cal: Calendar, unitList: List<Int>):Boolean {
+        fun equalTimeUnit(timeCount: TimeCount, cal: Calendar, unitList: List<Int>):Boolean {
             val calData = Calendar.getInstance()
             calData.time = timeCount.time
             var equalFlag = true

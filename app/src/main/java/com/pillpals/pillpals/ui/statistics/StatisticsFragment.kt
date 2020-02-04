@@ -196,7 +196,7 @@ class StatisticsFragment : Fragment() {
                 for (i in 1..24) {
                     calIterator.set(Calendar.HOUR_OF_DAY, i)
 
-                    var existingTimeCount = timeCounts.filter {equalTimeUnit(it,calIterator,listOf(Calendar.HOUR_OF_DAY,Calendar.DAY_OF_YEAR,Calendar.YEAR))}.firstOrNull()
+                    var existingTimeCount = timeCounts.filter {StatsHelper.equalTimeUnit(it,calIterator,listOf(Calendar.HOUR_OF_DAY,Calendar.DAY_OF_YEAR,Calendar.YEAR))}.firstOrNull()
                     rangedTimeCounts.add(DataPoint(calIterator.time, getConditionalValueFromTimeCount(existingTimeCount)))
                 }
             }
@@ -208,7 +208,7 @@ class StatisticsFragment : Fragment() {
                 for (i in 1..7) {
                     calIterator.set(Calendar.DAY_OF_WEEK, i)
 
-                    var existingTimeCount = timeCounts.filter {equalTimeUnit(it,calIterator,listOf(Calendar.DAY_OF_WEEK,Calendar.DAY_OF_YEAR,Calendar.YEAR))}.firstOrNull()
+                    var existingTimeCount = timeCounts.filter {StatsHelper.equalTimeUnit(it,calIterator,listOf(Calendar.DAY_OF_WEEK,Calendar.DAY_OF_YEAR,Calendar.YEAR))}.firstOrNull()
                     rangedTimeCounts.add(DataPoint(calIterator.time, getConditionalValueFromTimeCount(existingTimeCount)))
                 }
             }
@@ -220,7 +220,7 @@ class StatisticsFragment : Fragment() {
 
                 for (i in 1..cal.getActualMaximum(Calendar.DAY_OF_MONTH)) {
 
-                    var existingTimeCount = timeCounts.filter {equalTimeUnit(it,calIterator,listOf(Calendar.DAY_OF_MONTH,Calendar.DAY_OF_YEAR,Calendar.YEAR))}.firstOrNull()
+                    var existingTimeCount = timeCounts.filter {StatsHelper.equalTimeUnit(it,calIterator,listOf(Calendar.DAY_OF_MONTH,Calendar.DAY_OF_YEAR,Calendar.YEAR))}.firstOrNull()
                     rangedTimeCounts.add(DataPoint(calIterator.time, getConditionalValueFromTimeCount(existingTimeCount)))
 
                     calIterator.time = DateHelper.addUnitToDate(calIterator.time,1,Calendar.DATE)
@@ -233,7 +233,7 @@ class StatisticsFragment : Fragment() {
 
                 for (i in 0..11) {
 
-                    var existingTimeCount = timeCounts.filter {equalTimeUnit(it,calIterator,listOf(Calendar.MONTH,Calendar.YEAR))}.firstOrNull()
+                    var existingTimeCount = timeCounts.filter {StatsHelper.equalTimeUnit(it,calIterator,listOf(Calendar.MONTH,Calendar.YEAR))}.firstOrNull()
                     rangedTimeCounts.add(DataPoint(calIterator.time, getConditionalValueFromTimeCount(existingTimeCount)))
 
                     calIterator.time = DateHelper.addUnitToDate(calIterator.time,1,Calendar.MONTH)
@@ -264,7 +264,7 @@ class StatisticsFragment : Fragment() {
                 for (i in 1..24) {
                     calIterator.set(Calendar.HOUR_OF_DAY, i)
 
-                    var relevantTimeCounts = timeCounts.filter {equalTimeUnit(it,calIterator,listOf(Calendar.HOUR_OF_DAY))}
+                    var relevantTimeCounts = timeCounts.filter {StatsHelper.equalTimeUnit(it,calIterator,listOf(Calendar.HOUR_OF_DAY))}
                     averagedData.add(DataPoint(calIterator.time,averageRelevantTimeCounts(relevantTimeCounts)))
                 }
             }
@@ -272,7 +272,7 @@ class StatisticsFragment : Fragment() {
                 for (i in 1..7) {
                     calIterator.set(Calendar.DAY_OF_WEEK, i)
 
-                    var relevantTimeCounts = timeCounts.filter {equalTimeUnit(it,calIterator,listOf(Calendar.DAY_OF_WEEK))}
+                    var relevantTimeCounts = timeCounts.filter {StatsHelper.equalTimeUnit(it,calIterator,listOf(Calendar.DAY_OF_WEEK))}
                     averagedData.add(DataPoint(calIterator.time,averageRelevantTimeCounts(relevantTimeCounts)))
 
                 }
@@ -280,7 +280,7 @@ class StatisticsFragment : Fragment() {
             "Month" -> {
                 for (i in 1..31) {
 
-                    var relevantTimeCounts = timeCounts.filter {equalTimeUnit(it,calIterator,listOf(Calendar.DAY_OF_MONTH))}
+                    var relevantTimeCounts = timeCounts.filter {StatsHelper.equalTimeUnit(it,calIterator,listOf(Calendar.DAY_OF_MONTH))}
                     averagedData.add(DataPoint(calIterator.time,averageRelevantTimeCounts(relevantTimeCounts)))
 
                     calIterator.time = DateHelper.addUnitToDate(calIterator.time,1,Calendar.DATE)
@@ -288,7 +288,7 @@ class StatisticsFragment : Fragment() {
             }
             "Year" -> {
                 for (i in 0..11) {
-                    var relevantTimeCounts = timeCounts.filter {equalTimeUnit(it,calIterator,listOf(Calendar.MONTH))}
+                    var relevantTimeCounts = timeCounts.filter {StatsHelper.equalTimeUnit(it,calIterator,listOf(Calendar.MONTH))}
                     averagedData.add(DataPoint(calIterator.time,averageRelevantTimeCounts(relevantTimeCounts)))
 
                     calIterator.time = DateHelper.addUnitToDate(calIterator.time,1,Calendar.MONTH)
@@ -471,18 +471,6 @@ class StatisticsFragment : Fragment() {
             }
         }
         styleFilter(filter)
-    }
-
-    private fun equalTimeUnit(timeCount: TimeCount, cal: Calendar, unitList: List<Int>):Boolean {
-        val calData = Calendar.getInstance()
-        calData.time = timeCount.time
-        var equalFlag = true
-        unitList.forEach{
-            if (calData.get(it) != cal.get(it)) {
-                equalFlag = false
-            }
-        }
-        return equalFlag
     }
 
     private fun timeButtonClick(direction: Int){
