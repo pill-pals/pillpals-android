@@ -50,7 +50,7 @@
         </receiver>
 
         <activity android:name="com.pillpals.pillpals.ui.AddDrugActivity"></activity>
-        <activity android:name="com.pillpals.pillpals.ui.MedicationScoresActivity"></activity>
+        <activity android:name="com.pillpals.pillpals.ui.statistics.MedicationScoresActivity"></activity>
         <activity android:name="com.pillpals.pillpals.ui.EditMedicationIcon"></activity>
         <activity android:name="com.pillpals.pillpals.ui.DrugGallery"></activity>
         <activity android:name="com.pillpals.pillpals.ui.SettingsActivity"

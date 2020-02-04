@@ -1,41 +1,24 @@
-package com.pillpals.pillpals.ui
+package com.pillpals.pillpals.ui.statistics
 
 import android.animation.LayoutTransition
 import android.content.Context
-import android.content.Intent
 import android.content.SharedPreferences
-import android.content.res.ColorStateList
-import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.drawable.AnimatedVectorDrawable
-import android.graphics.drawable.BitmapDrawable
 import android.os.Bundle
-import android.text.SpannableString
-import android.text.Spanned
-import android.text.style.ForegroundColorSpan
 import android.util.Log
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import android.widget.*
-import androidx.appcompat.app.AlertDialog
-import android.widget.EditText
 import android.widget.LinearLayout
-import android.widget.Toast
-import java.util.Calendar
 
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.res.ResourcesCompat
 import com.pillpals.pillpals.R
 import com.pillpals.pillpals.data.model.Medications
-import com.pillpals.pillpals.helpers.DatabaseHelper.Companion.getMedicationByUid
 
-import java.util.*
 import com.pillpals.pillpals.helpers.DatabaseHelper
 import com.pillpals.pillpals.helpers.DatabaseHelper.Companion.getColorStringByID
-import com.pillpals.pillpals.ui.medications.medication_info.MedicationInfoActivity
-import io.realm.RealmObject.deleteFromRealm
-import kotlinx.android.synthetic.main.delete_prompt.view.*
+import com.pillpals.pillpals.ui.DataPair
+import com.pillpals.pillpals.ui.DrugCard
 import kotlinx.android.synthetic.main.drug_card.view.*
 import io.realm.Realm
 
@@ -81,19 +64,7 @@ class MedicationScoresActivity : AppCompatActivity() {
                 medication
             )
         )
-
-        newCard.setOnClickListener {
-            val dpdObject = medication.dpd_object?.firstOrNull() ?: return@setOnClickListener
-
-            val intent = Intent(this, MedicationInfoActivity::class.java)
-            intent.putExtra("drug-code", dpdObject.dpd_id)
-            intent.putExtra("icon-color", getColorStringByID(medication.color_id))
-            intent.putStringArrayListExtra("administration-routes", ArrayList(dpdObject.administrationRoutes))
-            intent.putStringArrayListExtra("active-ingredients",  ArrayList(dpdObject.activeIngredients))
-            intent.putExtra("dosage-string", dpdObject.dosageString)
-            intent.putExtra("name-text", dpdObject.name)
-            startActivityForResult(intent, 2)
-        }
+        newCard.overflowMenu.visibility = View.GONE
 
         newCard.drugCardLayout.layoutTransition.enableTransitionType(LayoutTransition.CHANGING)
 
@@ -107,7 +78,30 @@ class MedicationScoresActivity : AppCompatActivity() {
             toggleCollapse(newCard.scheduleStack, newCard.collapseButton, medication)
         }
 
+        var dataPairs = calculateDataPairs(medication)
+        dataPairs.forEach { dataPair ->
+            newCard.scheduleStack.addView(dataPair)
+
+        }
+
         stack.addView(newCard)
+    }
+
+    private fun calculateDataPairs(medication: Medications):MutableList<DataPair> {
+        var dataPairs = mutableListOf<DataPair>()
+
+        var dataPair1 = DataPair(this)
+        dataPair1.key.text = "Data Key 1"
+        dataPair1.value.text = "Value 1"
+        dataPair1.drawableValue.visibility = View.GONE
+        dataPairs.add(dataPair1)
+
+        var dataPair2 = DataPair(this)
+        dataPair2.key.text = "Data Key 2"
+        dataPair2.value.text = "Value 2"
+        dataPairs.add(dataPair2)
+
+        return dataPairs
     }
 
     private fun toggleCollapse(stack: LinearLayout, button: ImageButton, medication: Medications) {
@@ -124,11 +118,8 @@ class MedicationScoresActivity : AppCompatActivity() {
         }
 
         with (prefs.edit()) {
-            putBoolean(getString(com.pillpals.pillpals.R.string.schedule_preview_collapsed_prefix) + medication.uid, !previouslyCollapsed)
+            putBoolean(getString(R.string.schedule_preview_collapsed_prefix) + medication.uid, !previouslyCollapsed)
             commit()
         }
-
-        //TODO: Use preferences to save collapsed state of each stack, similar to dashboard
     }
-
 }

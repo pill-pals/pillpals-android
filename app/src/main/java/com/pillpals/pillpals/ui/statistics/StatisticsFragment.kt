@@ -35,7 +35,8 @@ import com.pillpals.pillpals.data.model.Schedules
 import java.util.Calendar
 import android.util.Log
 import android.widget.*
-import com.pillpals.pillpals.ui.MedicationScoresActivity
+import com.pillpals.pillpals.helpers.StatsHelper
+
 
 class StatisticsFragment : Fragment() {
 
@@ -102,93 +103,6 @@ class StatisticsFragment : Fragment() {
         return view
     }
 
-    private fun getMissingLogsForSchedule(schedule: Schedules, endDate: Date = DateHelper.today()): List<MissingLogs> {
-        val counterSchedule = realm.copyFromRealm(schedule)
-
-        val n = schedule.repetitionCount!!
-        val u = DateHelper.getUnitByIndex(schedule.repetitionUnit!!)
-
-        var missingLogs = listOf<MissingLogs>()
-        counterSchedule.occurrence = schedule.startDate
-
-        while (counterSchedule.occurrence!! < endDate) {
-            val missing = schedule.logs.filter { it.due!! == counterSchedule.occurrence }.none()
-            if(missing) {
-                // There's no log at counterSchedule.occurrence.
-                // Could create some new log, or add missing logs to a data class that's checked in averageLogsAcrossSchedules
-                // MissingLog is an example of a somewhat useful data class, just a placeholder though
-                // Log.i("test","Missing Log: " + counterSchedule.occurrence)
-                missingLogs = missingLogs.plus(MissingLogs(schedule, counterSchedule.occurrence!!))
-            }
-
-            counterSchedule.occurrence = DateHelper.addUnitToDate(counterSchedule.occurrence!!, n, u)
-        }
-
-        return missingLogs
-    }
-
-    private fun averageLogsAcrossSchedules(medication: Medications): List<TimeCount> {
-        val schedules = medication.schedules
-
-        var allLogs = schedules.fold(listOf<Logs>()) { acc, it -> acc.plus(it.logs) }
-
-        var allMissingLogs = schedules.fold(listOf<MissingLogs>()) { acc, it ->
-            var missingLogs = if (it.deleted) {
-                getMissingLogsForSchedule(it,it.deletedDate!!)
-            } else
-            {
-                getMissingLogsForSchedule(it)
-            }
-
-            acc.plus(missingLogs)
-        }
-
-        var dataLogs = listOf<DataLogs>()
-        for (log in allLogs) {
-            dataLogs = dataLogs.plus(DataLogs(log.occurrence!!, log.due!!))
-        }
-
-        //currently gives an offset of 1 whole day for a missed medication
-        for (missingLog in allMissingLogs) {
-            dataLogs = dataLogs.plus(DataLogs(DateHelper.addUnitToDate(missingLog.due,1,Calendar.DATE), missingLog.due))
-        }
-
-        dataLogs = dataLogs.sortedBy { it.due }
-
-        return dataLogs.fold(mutableListOf<TimeCount>()) { acc, it ->
-            val logDate = Calendar.getInstance()
-            logDate.time = it.due!!
-            logDate.set(Calendar.MILLISECOND, 0)
-            logDate.set(Calendar.SECOND, 0)
-            logDate.set(Calendar.MINUTE, 0)
-            when (timeSpanFilter.selectedValue) {
-                "Day" -> null // Avg in hours
-                "Week" -> logDate.set(Calendar.HOUR_OF_DAY, 0) // Avg in days
-                "Month" -> logDate.set(Calendar.HOUR_OF_DAY, 0) // Avg in days
-                "Year" -> { // Avg in Months
-                    logDate.set(Calendar.HOUR_OF_DAY, 0)
-                    logDate.set(Calendar.DAY_OF_MONTH, 1)
-                }
-            }
-            val existingTimeCount = getTimeCount(logDate.time, acc)
-
-            if(existingTimeCount != null) {
-                val logsList = existingTimeCount.logs.plus(it)
-                val average = logsList.fold(0f) { sum, log ->
-                    val logOffset = abs(it.occurrence!!.time - it.due!!.time).toFloat() // Calculate y value of bar here
-                    sum + logOffset
-                } / logsList.count()
-                acc[acc.indexOf(existingTimeCount)] = TimeCount(logDate.time, existingTimeCount.count + 1, average, logsList)
-            }
-            else {
-                val logOffset = (it.occurrence!!.time - it.due!!.time).toFloat()
-                acc.add(TimeCount(logDate.time, 1, logOffset, listOf(it)))
-            }
-
-            acc
-        }
-    }
-
     private fun populateLegendStack() {
         medications.forEach {
             val legendItem = CheckBox(this.context!!)
@@ -208,8 +122,8 @@ class StatisticsFragment : Fragment() {
         medications.forEach {
             if (filteredMedications[it.name] != false) {
                 // Average logs on time across schedules
-                val timeCounts = averageLogsAcrossSchedules(it)
-                //Log.i("test", timeCounts.toString())
+                val timeCounts = StatsHelper.averageLogsAcrossSchedules(it, realm, timeSpanFilter.selectedValue)
+                Log.i("test", timeCounts.toString())
                 // Get timeCounts for data in time range only
                 val dataPoints = if(viewModeFilter.selectedValue=="Timeline") {getTimeCountsInRange(timeCounts)} else {averageTimeCounts(timeCounts)}
 
@@ -222,9 +136,9 @@ class StatisticsFragment : Fragment() {
                 axisStringList = ArrayList<String>()
 
                 for ((index, dataPoints) in dataPoints.withIndex()) {
-                    val timeDifference = dataPoints.value / 1000 / 60 // Minutes
-                    var grade = bucketTimeDifference(timeDifference)
-                    if (dataPoints.value == -1f) grade = 0f
+                    var timeDifference = dataPoints.value / 1000 / 60 // Minutes
+                    if (dataPoints.value == -1f) timeDifference = -1f
+                    var grade = StatsHelper.getGradeFromTimeDifference(timeDifference)
                     val dateString = getAxisString(dataPoints)
                     axisStringList.add(dateString)
                     val currentEntry = BarEntry(index.toFloat(), grade)
@@ -236,18 +150,6 @@ class StatisticsFragment : Fragment() {
 
                 medicationSets.add(set)
             }
-        }
-    }
-
-    private fun bucketTimeDifference (minuteDifference: Float):Float {
-        return when {
-            minuteDifference > 1200f -> 1f
-            minuteDifference > 600f -> 2f
-            minuteDifference > 120f -> 3f
-            minuteDifference > 60f -> 4f
-            minuteDifference > 20f -> 5f
-            minuteDifference > 10f -> 6f
-            else -> 7f
         }
     }
 
@@ -538,10 +440,6 @@ class StatisticsFragment : Fragment() {
     private fun updateFilteredMedications(name: String, isChecked: Boolean) {
         filteredMedications[name] = isChecked
         renderBarChart()
-    }
-
-    private fun getTimeCount(time: Date, timeCountList: List<TimeCount>): TimeCount? {
-        return timeCountList.filter { it.time == time }.firstOrNull()
     }
 
     private fun styleFilter(filter: Filter) {
