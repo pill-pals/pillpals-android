@@ -56,6 +56,15 @@ class StatsHelper {
 
             var allLogs = schedules.fold(listOf<Logs>()) { acc, it -> acc.plus(it.logs) }
 
+            /*allLogs.forEach{
+                var cal = Calendar.getInstance()
+                cal.time = it.due
+                //Log.i("test",cal.get(Calendar.DAY_OF_YEAR).toString())
+                if(cal.get(Calendar.DAY_OF_YEAR) == 31) {
+                    Log.i("test",it.toString())
+                }
+            }*/
+
             var allMissingLogs = schedules.fold(listOf<MissingLogs>()) { acc, it ->
                 var missingLogs = if (it.deleted) {
                     getMissingLogsForSchedule(it,realm,it.deletedDate!!)
@@ -67,7 +76,7 @@ class StatsHelper {
                 acc.plus(missingLogs)
             }
 
-            Log.i("test",allMissingLogs.toString())
+            //Log.i("test",allMissingLogs.toString())
 
             var dataLogs = listOf<DataLogs>()
             for (log in allLogs) {
@@ -81,31 +90,28 @@ class StatsHelper {
 
             dataLogs = dataLogs.sortedBy { it.due }
 
-            Log.i("test",dataLogs.toString())
-
+            //Log.i("test",dataLogs.toString())
+            dataLogs.forEach{
+                var cal = Calendar.getInstance()
+                cal.time = it.due
+                //Log.i("test",cal.get(Calendar.DAY_OF_YEAR).toString())
+                if(cal.get(Calendar.DAY_OF_YEAR) == 31) {
+                    Log.i("test",it.toString())
+                }
+            }
             return dataLogs.fold(mutableListOf<TimeCount>()) { acc, it ->
                 val logDate = Calendar.getInstance()
                 logDate.time = it.due!!
-                logDate.set(Calendar.MILLISECOND, 0)
-                logDate.set(Calendar.SECOND, 0)
-                logDate.set(Calendar.MINUTE, 0)
-                when (timeSpanFilter) {
-                    "Day" -> null // Avg in hours
-                    "Week" -> logDate.set(Calendar.HOUR_OF_DAY, 0) // Avg in days
-                    "Month" -> logDate.set(Calendar.HOUR_OF_DAY, 0) // Avg in days
-                    "Year" -> { // Avg in Months
-                        logDate.set(Calendar.HOUR_OF_DAY, 0)
-                        logDate.set(Calendar.DAY_OF_MONTH, 1)
-                    }
-                }
-                val existingTimeCount = getTimeCount(logDate.time, acc)
+
+                val existingTimeCount = getTimeCount(logDate.time, timeSpanFilter, acc)
 
                 if(existingTimeCount != null) {
                     val logsList = existingTimeCount.logs.plus(it)
-                    val average = logsList.fold(0f) { sum, log ->
-                        val logOffset = abs(it.occurrence!!.time - it.due!!.time).toFloat() // Calculate y value of bar here
-                        sum + logOffset
-                    } / logsList.count()
+                    var sum = 0f
+                    logsList.forEach{
+                        sum += abs(it.occurrence!!.time - it.due!!.time).toFloat()
+                    }
+                    var average = sum/(existingTimeCount.count + 1)
                     acc[acc.indexOf(existingTimeCount)] = TimeCount(logDate.time, existingTimeCount.count + 1, average, logsList)
                 }
                 else {
@@ -117,8 +123,28 @@ class StatsHelper {
             }
         }
 
-        private fun getTimeCount(time: Date, timeCountList: List<TimeCount>): TimeCount? {
-            return timeCountList.filter { it.time == time }.firstOrNull()
+        private fun getTimeCount(time: Date, timeSpanFilter: String, timeCountList: List<TimeCount>): TimeCount? {
+            val cal = Calendar.getInstance()
+            cal.time = time
+            return when (timeSpanFilter) {
+                "Day" -> timeCountList.filter { equalTimeUnit(it,cal,listOf(Calendar.HOUR_OF_DAY,Calendar.DAY_OF_YEAR,Calendar.YEAR)) }.firstOrNull()
+                "Week" -> timeCountList.filter { equalTimeUnit(it,cal,listOf(Calendar.DAY_OF_YEAR,Calendar.YEAR)) }.firstOrNull()
+                "Month" -> timeCountList.filter { equalTimeUnit(it,cal,listOf(Calendar.DAY_OF_YEAR,Calendar.YEAR)) }.firstOrNull()
+                "Year" -> timeCountList.filter { equalTimeUnit(it,cal,listOf(Calendar.MONTH,Calendar.YEAR)) }.firstOrNull()
+                else -> timeCountList.filter { equalTimeUnit(it,cal,listOf(Calendar.HOUR_OF_DAY,Calendar.DAY_OF_YEAR,Calendar.YEAR)) }.firstOrNull()
+            }
+        }
+
+        private fun equalTimeUnit(timeCount: TimeCount, cal: Calendar, unitList: List<Int>):Boolean {
+            val calData = Calendar.getInstance()
+            calData.time = timeCount.time
+            var equalFlag = true
+            unitList.forEach{
+                if (calData.get(it) != cal.get(it)) {
+                    equalFlag = false
+                }
+            }
+            return equalFlag
         }
     }
 }

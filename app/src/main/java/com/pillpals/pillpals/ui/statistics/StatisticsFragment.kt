@@ -123,11 +123,20 @@ class StatisticsFragment : Fragment() {
             if (filteredMedications[it.name] != false) {
                 // Average logs on time across schedules
                 val timeCounts = StatsHelper.averageLogsAcrossSchedules(it, realm, timeSpanFilter.selectedValue)
-                Log.i("test", timeCounts.toString())
+                //Log.i("test", timeCounts.toString())
+
+                timeCounts.forEach{
+                    var cal = Calendar.getInstance()
+                    cal.time = it.time
+                    //Log.i("test",cal.get(Calendar.DAY_OF_YEAR).toString())
+                    if(cal.get(Calendar.DAY_OF_YEAR) == 31) {
+                        Log.i("test",it.toString())
+                    }
+                }
                 // Get timeCounts for data in time range only
                 val dataPoints = if(viewModeFilter.selectedValue=="Timeline") {getTimeCountsInRange(timeCounts)} else {averageTimeCounts(timeCounts)}
 
-                Log.i("test",dataPoints.toString())
+                //Log.i("test",dataPoints.toString())
 
                 //val schedule = it.schedules.first()!!
                 //val logs = schedule.logs!!
