@@ -390,9 +390,11 @@ class AddDrugActivity : AppCompatActivity() {
     private fun updateScheduleList() {
         scheduleStack.removeAllViews()
         if (intent.hasExtra("medication-uid")) {
-            calculateScheduleRecords(getMedicationByUid(intent.getStringExtra("medication-uid"))!!.schedules, this, scheduleRecordsSetToDelete)
+            addScheduleRecords(calculateScheduleRecords(getMedicationByUid(intent.getStringExtra("medication-uid"))!!.schedules, this, scheduleRecordsSetToDelete))
         }
-        calculateScheduleRecords(toBeAdded, this, scheduleRecordsSetToDelete)
+        else {
+            addScheduleRecords(calculateScheduleRecords(toBeAdded, this, scheduleRecordsSetToDelete))
+        }
     }
 
     override fun onActivityResult(requestCode:Int, resultCode:Int, data:Intent?) {
