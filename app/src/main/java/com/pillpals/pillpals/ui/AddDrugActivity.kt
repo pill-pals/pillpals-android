@@ -392,9 +392,7 @@ class AddDrugActivity : AppCompatActivity() {
         if (intent.hasExtra("medication-uid")) {
             addScheduleRecords(calculateScheduleRecords(getMedicationByUid(intent.getStringExtra("medication-uid"))!!.schedules, this, scheduleRecordsSetToDelete))
         }
-        else {
-            addScheduleRecords(calculateScheduleRecords(toBeAdded, this, scheduleRecordsSetToDelete))
-        }
+        addScheduleRecords(calculateScheduleRecords(toBeAdded, this, scheduleRecordsSetToDelete))
     }
 
     override fun onActivityResult(requestCode:Int, resultCode:Int, data:Intent?) {
