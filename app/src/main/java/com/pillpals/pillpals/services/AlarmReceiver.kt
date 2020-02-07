@@ -60,6 +60,8 @@ public class AlarmReceiver: BroadcastReceiver() {
             .setContentIntent(pendingIntent)
             .setLargeIcon(iconBitmap)
             .setAutoCancel(true)
+            .setTicker("It's time to take your medication!")
+            .setVisibility(NotificationCompat.VISIBILITY_PRIVATE)
 
         if(medication.notes.isNotEmpty()) {
             mBuilder.setContentText("Notes:...")
