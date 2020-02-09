@@ -53,14 +53,14 @@ class StatsHelper {
 
         fun getGradeStringFromTimeDifference (minuteDifference: Float):String {
             return when {
-                minuteDifference > 1200f -> "D"
-                minuteDifference > 600f -> "C"
-                minuteDifference > 120f -> "B"
-                minuteDifference > 60f -> "B+"
-                minuteDifference > 20f -> "A"
-                minuteDifference > 10f -> "A+"
+                minuteDifference > 1200f -> "F"
+                minuteDifference > 600f -> "D"
+                minuteDifference > 120f -> "C"
+                minuteDifference > 60f -> "B"
+                minuteDifference > 20f -> "B+"
+                minuteDifference > 10f -> "A"
                 minuteDifference == -1f -> ""
-                else -> "F"
+                else -> "A+"
             }
         }
 
@@ -108,7 +108,7 @@ class StatsHelper {
                     acc[acc.indexOf(existingTimeCount)] = TimeCount(logDate.time, existingTimeCount.count + 1, average, logsList)
                 }
                 else {
-                    val logOffset = (it.occurrence!!.time - it.due!!.time).toFloat()
+                    val logOffset = abs(it.occurrence!!.time - it.due!!.time).toFloat()
                     acc.add(TimeCount(logDate.time, 1, logOffset, listOf(it)))
                 }
 

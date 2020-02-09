@@ -103,11 +103,20 @@ class MedicationScoresActivity : AppCompatActivity() {
         adherenceScore.drawableValue.visibility = View.GONE
         dataPairs.add(adherenceScore)
 
-        var recentMood = DataPair(this)
-        recentMood.key.text = "Recent Mood"
-        recentMood.value.text = ""
-        recentMood.drawableValue.setImageResource(calculateRecentMoodScore(medication))
-        dataPairs.add(recentMood)
+        val allMoodLogs = DatabaseHelper.readAllData(MoodLogs::class.java) as RealmResults<out MoodLogs>
+        val relevantMoodLogs = allMoodLogs.filter{ DatabaseHelper.moodLogIsRelatedToMedication(it,medication) }
+        val avgMood = calculateRecentMoodScore(relevantMoodLogs)
+
+        var avgMoodScore = DataPair(this)
+        avgMoodScore.key.text = "Average Mood"
+        if (avgMood == -1f) {
+            avgMoodScore.value.text = "No Logs"
+            avgMoodScore.drawableValue.visibility = View.GONE
+        } else {
+            avgMoodScore.value.text = ""
+            avgMoodScore.drawableValue.setImageResource(DatabaseHelper.getDrawableMoodIconById(this,avgMood.roundToInt()))
+        }
+        dataPairs.add(avgMoodScore)
 
         return dataPairs
     }
@@ -146,13 +155,8 @@ class MedicationScoresActivity : AppCompatActivity() {
         return StatsHelper.getGradeStringFromTimeDifference(avg / 1000 / 60 )
     }
 
-    private fun calculateRecentMoodScore(medication: Medications):Int {
-        val allMoodLogs = DatabaseHelper.readAllData(MoodLogs::class.java) as RealmResults<out MoodLogs>
-
-        val relevantMoodLogs = allMoodLogs.filter{ DatabaseHelper.moodLogIsRelatedToMedication(it,medication) }
-
-        Log.i("test",medication.name + " - " + relevantMoodLogs.toString())
-
+    private fun calculateRecentMoodScore(relevantMoodLogs: List<MoodLogs>):Float {
+        //Log.i("test",medication.name + " - " + relevantMoodLogs.toString())
         var sum = 0f
         var count = 0f
         relevantMoodLogs.forEach{
@@ -162,10 +166,12 @@ class MedicationScoresActivity : AppCompatActivity() {
             }
         }
 
-        var avg = sum/count
+        //Log.i("test",medication.name + " : " + avg + " : " + count)
 
-        Log.i("test",medication.name + " : " + avg + " : " + count)
-
-        return DatabaseHelper.getDrawableMoodIconById(this,avg.roundToInt())
+        return if (count == 0f) {
+            -1f
+        } else {
+            sum/count
+        }
     }
 }

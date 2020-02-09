@@ -129,7 +129,7 @@ class StatisticsFragment : Fragment() {
                     var cal = Calendar.getInstance()
                     cal.time = it.time
                     //Log.i("test",cal.get(Calendar.DAY_OF_YEAR).toString())
-                    if(cal.get(Calendar.DAY_OF_YEAR) == 31) {
+                    if(cal.get(Calendar.DAY_OF_YEAR) == 40) {
                         Log.i("test",it.toString())
                     }
                 }
