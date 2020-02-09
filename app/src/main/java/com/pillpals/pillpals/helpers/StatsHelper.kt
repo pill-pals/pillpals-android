@@ -59,7 +59,7 @@ class StatsHelper {
                 minuteDifference > 60f -> "B"
                 minuteDifference > 20f -> "B+"
                 minuteDifference > 10f -> "A"
-                minuteDifference == -1f -> ""
+                minuteDifference == -1f -> "No Logs"
                 else -> "A+"
             }
         }

@@ -46,6 +46,8 @@ class MedicationScoresActivity : AppCompatActivity() {
 
         setContentView(R.layout.activity_medication_scores)
 
+        supportActionBar!!.setDisplayHomeAsUpEnabled(true)
+
         stack = this!!.findViewById(R.id.stack)
         stack.layoutTransition.enableTransitionType(LayoutTransition.CHANGING) //Makes collapsing smooth
 
@@ -97,18 +99,20 @@ class MedicationScoresActivity : AppCompatActivity() {
     private fun calculateDataPairs(medication: Medications):MutableList<DataPair> {
         var dataPairs = mutableListOf<DataPair>()
 
+        var timeCounts = StatsHelper.averageLogsAcrossSchedules(medication,realm,"Days")
+
+        val adherenceScoreValue = calculateAdherenceScore(timeCounts)
         var adherenceScore = DataPair(this)
-        adherenceScore.key.text = "Adherence Score"
-        adherenceScore.value.text = calculateAdherenceScore(medication)
+        adherenceScore.key.text = "Overall Score"
+        adherenceScore.value.text = StatsHelper.getGradeStringFromTimeDifference(adherenceScoreValue)
         adherenceScore.drawableValue.visibility = View.GONE
-        dataPairs.add(adherenceScore)
 
         val allMoodLogs = DatabaseHelper.readAllData(MoodLogs::class.java) as RealmResults<out MoodLogs>
-        val relevantMoodLogs = allMoodLogs.filter{ DatabaseHelper.moodLogIsRelatedToMedication(it,medication) }
+        var relevantMoodLogs = allMoodLogs.filter{ DatabaseHelper.moodLogIsRelatedToMedication(it,medication) }
         val avgMood = calculateRecentMoodScore(relevantMoodLogs)
 
         var avgMoodScore = DataPair(this)
-        avgMoodScore.key.text = "Average Mood"
+        avgMoodScore.key.text = "Overall Mood"
         if (avgMood == -1f) {
             avgMoodScore.value.text = "No Logs"
             avgMoodScore.drawableValue.visibility = View.GONE
@@ -116,6 +120,34 @@ class MedicationScoresActivity : AppCompatActivity() {
             avgMoodScore.value.text = ""
             avgMoodScore.drawableValue.setImageResource(DatabaseHelper.getDrawableMoodIconById(this,avgMood.roundToInt()))
         }
+
+        timeCounts = timeCounts.filter{it.time > DateHelper.addUnitToDate(DateHelper.today(),-3,Calendar.DATE) && it.time <= DateHelper.today()}
+
+        val recentAdherenceScoreValue = calculateAdherenceScore(timeCounts)
+        var recentAdherenceScore = DataPair(this)
+        recentAdherenceScore.key.text = "Recent Adherence"
+        recentAdherenceScore.value.text = StatsHelper.getGradeStringFromTimeDifference(recentAdherenceScoreValue)
+        recentAdherenceScore.drawableValue.visibility = View.GONE
+
+        relevantMoodLogs = relevantMoodLogs.filter{it.date!! > DateHelper.addUnitToDate(DateHelper.today(),-3,Calendar.DATE) && it.date!! <= DateHelper.today()}
+
+        val recentAvgMood = calculateRecentMoodScore(relevantMoodLogs)
+
+        var recentAvgMoodScore = DataPair(this)
+        recentAvgMoodScore.key.text = "Recent Mood"
+        if (recentAvgMood == -1f) {
+            recentAvgMoodScore.value.text = "No Logs"
+            recentAvgMoodScore.drawableValue.visibility = View.GONE
+        } else {
+            recentAvgMoodScore.value.text = ""
+            recentAvgMoodScore.drawableValue.setImageResource(DatabaseHelper.getDrawableMoodIconById(this,recentAvgMood.roundToInt()))
+        }
+
+
+
+        dataPairs.add(recentAdherenceScore)
+        dataPairs.add(recentAvgMoodScore)
+        dataPairs.add(adherenceScore)
         dataPairs.add(avgMoodScore)
 
         return dataPairs
@@ -140,19 +172,17 @@ class MedicationScoresActivity : AppCompatActivity() {
         }
     }
 
-    private fun calculateAdherenceScore(medication: Medications):String {
-        var timeCounts = StatsHelper.averageLogsAcrossSchedules(medication,realm,"Days")
-
-        timeCounts = timeCounts.filter{it.time > DateHelper.addUnitToDate(DateHelper.today(),-30,Calendar.DATE) && it.time < DateHelper.today()}
-
+    private fun calculateAdherenceScore(timeCounts: List<TimeCount>):Float {
         var sum = 0f
         timeCounts.forEach{
             sum += it.offset
         }
 
-        val avg = sum/timeCounts.count()
-
-        return StatsHelper.getGradeStringFromTimeDifference(avg / 1000 / 60 )
+        return if (timeCounts.count() == 0) {
+            -1f
+        } else {
+            sum / timeCounts.count() / 1000 / 60
+        }
     }
 
     private fun calculateRecentMoodScore(relevantMoodLogs: List<MoodLogs>):Float {
