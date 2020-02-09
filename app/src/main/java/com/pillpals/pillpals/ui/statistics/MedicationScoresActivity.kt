@@ -8,6 +8,7 @@ import android.graphics.drawable.AnimatedVectorDrawable
 import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.util.Log
+import android.view.MenuItem
 import android.view.View
 import android.widget.*
 import android.widget.LinearLayout
@@ -45,6 +46,8 @@ class MedicationScoresActivity : AppCompatActivity() {
         prefs = getPreferences(Context.MODE_PRIVATE)
 
         setContentView(R.layout.activity_medication_scores)
+
+        supportActionBar!!.setDisplayHomeAsUpEnabled(true)
 
         stack = this!!.findViewById(R.id.stack)
         stack.layoutTransition.enableTransitionType(LayoutTransition.CHANGING) //Makes collapsing smooth
@@ -97,17 +100,56 @@ class MedicationScoresActivity : AppCompatActivity() {
     private fun calculateDataPairs(medication: Medications):MutableList<DataPair> {
         var dataPairs = mutableListOf<DataPair>()
 
-        var adherenceScore = DataPair(this)
-        adherenceScore.key.text = "Adherence Score"
-        adherenceScore.value.text = calculateAdherenceScore(medication)
-        adherenceScore.drawableValue.visibility = View.GONE
-        dataPairs.add(adherenceScore)
+        var timeCounts = StatsHelper.averageLogsAcrossSchedules(medication,realm,"Days")
 
-        var recentMood = DataPair(this)
-        recentMood.key.text = "Recent Mood"
-        recentMood.value.text = ""
-        recentMood.drawableValue.setImageResource(calculateRecentMoodScore(medication))
-        dataPairs.add(recentMood)
+        val adherenceScoreValue = calculateAdherenceScore(timeCounts)
+        var adherenceScore = DataPair(this)
+        adherenceScore.key.text = "Overall Score"
+        adherenceScore.value.text = StatsHelper.getGradeStringFromTimeDifference(adherenceScoreValue)
+        adherenceScore.drawableValue.visibility = View.GONE
+
+        val allMoodLogs = DatabaseHelper.readAllData(MoodLogs::class.java) as RealmResults<out MoodLogs>
+        var relevantMoodLogs = allMoodLogs.filter{ DatabaseHelper.moodLogIsRelatedToMedication(it,medication) }
+        val avgMood = calculateRecentMoodScore(relevantMoodLogs)
+
+        var avgMoodScore = DataPair(this)
+        avgMoodScore.key.text = "Overall Mood"
+        if (avgMood == -1f) {
+            avgMoodScore.value.text = "No Logs"
+            avgMoodScore.drawableValue.visibility = View.GONE
+        } else {
+            avgMoodScore.value.text = ""
+            avgMoodScore.drawableValue.setImageResource(DatabaseHelper.getDrawableMoodIconById(this,avgMood.roundToInt()))
+        }
+
+        timeCounts = timeCounts.filter{it.time > DateHelper.addUnitToDate(DateHelper.today(),-7,Calendar.DATE) && it.time <= DateHelper.today()}
+
+        val recentAdherenceScoreValue = calculateAdherenceScore(timeCounts)
+        var recentAdherenceScore = DataPair(this)
+        recentAdherenceScore.key.text = "Recent Adherence"
+        recentAdherenceScore.value.text = StatsHelper.getGradeStringFromTimeDifference(recentAdherenceScoreValue)
+        recentAdherenceScore.drawableValue.visibility = View.GONE
+
+        relevantMoodLogs = relevantMoodLogs.filter{it.date!! > DateHelper.addUnitToDate(DateHelper.today(),-7,Calendar.DATE) && it.date!! <= DateHelper.today()}
+
+        val recentAvgMood = calculateRecentMoodScore(relevantMoodLogs)
+
+        var recentAvgMoodScore = DataPair(this)
+        recentAvgMoodScore.key.text = "Recent Mood"
+        if (recentAvgMood == -1f) {
+            recentAvgMoodScore.value.text = "No Logs"
+            recentAvgMoodScore.drawableValue.visibility = View.GONE
+        } else {
+            recentAvgMoodScore.value.text = ""
+            recentAvgMoodScore.drawableValue.setImageResource(DatabaseHelper.getDrawableMoodIconById(this,recentAvgMood.roundToInt()))
+        }
+
+
+
+        dataPairs.add(recentAdherenceScore)
+        dataPairs.add(recentAvgMoodScore)
+        dataPairs.add(adherenceScore)
+        dataPairs.add(avgMoodScore)
 
         return dataPairs
     }
@@ -131,28 +173,21 @@ class MedicationScoresActivity : AppCompatActivity() {
         }
     }
 
-    private fun calculateAdherenceScore(medication: Medications):String {
-        var timeCounts = StatsHelper.averageLogsAcrossSchedules(medication,realm,"Days")
-
-        timeCounts = timeCounts.filter{it.time > DateHelper.addUnitToDate(DateHelper.today(),-30,Calendar.DATE) && it.time < DateHelper.today()}
-
+    private fun calculateAdherenceScore(timeCounts: List<TimeCount>):Float {
         var sum = 0f
         timeCounts.forEach{
             sum += it.offset
         }
 
-        val avg = sum/timeCounts.count()
-
-        return StatsHelper.getGradeStringFromTimeDifference(avg / 1000 / 60 )
+        return if (timeCounts.count() == 0) {
+            -1f
+        } else {
+            sum / timeCounts.count() / 1000 / 60
+        }
     }
 
-    private fun calculateRecentMoodScore(medication: Medications):Int {
-        val allMoodLogs = DatabaseHelper.readAllData(MoodLogs::class.java) as RealmResults<out MoodLogs>
-
-        val relevantMoodLogs = allMoodLogs.filter{ DatabaseHelper.moodLogIsRelatedToMedication(it,medication) }
-
-        Log.i("test",medication.name + " - " + relevantMoodLogs.toString())
-
+    private fun calculateRecentMoodScore(relevantMoodLogs: List<MoodLogs>):Float {
+        //Log.i("test",medication.name + " - " + relevantMoodLogs.toString())
         var sum = 0f
         var count = 0f
         relevantMoodLogs.forEach{
@@ -162,10 +197,20 @@ class MedicationScoresActivity : AppCompatActivity() {
             }
         }
 
-        var avg = sum/count
+        //Log.i("test",medication.name + " : " + avg + " : " + count)
 
-        Log.i("test",medication.name + " : " + avg + " : " + count)
+        return if (count == 0f) {
+            -1f
+        } else {
+            sum/count
+        }
+    }
 
-        return DatabaseHelper.getDrawableMoodIconById(this,avg.roundToInt())
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when (item.itemId) {
+            android.R.id.home -> finish()
+            else -> return super.onOptionsItemSelected(item)
+        }
+        return true
     }
 }
