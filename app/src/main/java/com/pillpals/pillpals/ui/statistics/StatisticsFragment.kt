@@ -347,6 +347,7 @@ class StatisticsFragment : Fragment() {
         barChart.axisLeft.axisMinimum = 0.5f
         barChart.axisLeft.axisMaximum = 7.5f
         barChart.axisLeft.valueFormatter = IndexAxisValueFormatter(gradeStringList)
+        barChart.axisLeft.setDrawLabels(false)
 
         barChart.description.isEnabled = false
         barChart.axisRight.isEnabled = false
@@ -362,6 +363,9 @@ class StatisticsFragment : Fragment() {
         barChart.setDrawBorders(true)
 
         barChart.extraBottomOffset = 10f
+        barChart.extraLeftOffset = 0f
+        barChart.extraRightOffset = 0f
+
 
         val groupWidth = 0.7f
         val barWidthRatio = 0.875f
