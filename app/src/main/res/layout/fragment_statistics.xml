@@ -174,6 +174,7 @@
                         </androidx.constraintlayout.widget.ConstraintLayout>
 
                         <LinearLayout
+                            android:id="@+id/graphStack"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:layout_marginStart="16dp"
@@ -377,6 +378,12 @@
                                             app:layout_constraintTop_toTopOf="parent" />
                                     </androidx.constraintlayout.widget.ConstraintLayout>
                                 </androidx.cardview.widget.CardView>
+
+                                <ImageView
+                                    android:id="@+id/imageView2"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    app:srcCompat="@drawable/ic_info" />
 
                             </LinearLayout>
 

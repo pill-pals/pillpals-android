@@ -4,6 +4,9 @@ import android.content.Intent
 import android.content.res.ColorStateList
 import android.graphics.Color
 import android.os.Bundle
+import android.text.SpannableString
+import android.text.Spanned
+import android.text.style.ForegroundColorSpan
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -35,7 +38,9 @@ import com.pillpals.pillpals.data.model.Schedules
 import java.util.Calendar
 import android.util.Log
 import android.widget.*
+import androidx.appcompat.app.AlertDialog
 import com.pillpals.pillpals.helpers.StatsHelper
+import kotlinx.android.synthetic.main.time_prompt.view.*
 
 
 class StatisticsFragment : Fragment() {
@@ -57,6 +62,8 @@ class StatisticsFragment : Fragment() {
     public lateinit var graphHeader: TextView
     public var currentDate = DateHelper.today()
     public lateinit var medicationScoresButton: Button
+    public lateinit var graphStack: LinearLayout
+
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -83,6 +90,9 @@ class StatisticsFragment : Fragment() {
             val intent = Intent(context, MedicationScoresActivity::class.java)
             startActivityForResult(intent, 1)
         }
+
+        graphStack = view.findViewById(R.id.graphStack)
+        graphStack.setOnClickListener{openGradeInfoDialog()}
 
         leftTimeButton.setOnClickListener{timeButtonClick(-1)}
         rightTimeButton.setOnClickListener{timeButtonClick(1)}
@@ -491,6 +501,27 @@ class StatisticsFragment : Fragment() {
 
     private fun resetCurrentDate(){
         currentDate = Date()
+    }
+
+    private fun openGradeInfoDialog(){
+        val gradeInfoDialog = LayoutInflater.from(this.context).inflate(R.layout.grade_information_prompt, null)
+
+        val title = SpannableString("Adherence Grade Information")
+        title.setSpan(
+            ForegroundColorSpan(this.context!!.resources.getColor(R.color.colorLightGrey)),
+            0,
+            title.length,
+            Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+        )
+        val dialogBuilder = AlertDialog.Builder(this.context!!)
+            .setView(gradeInfoDialog)
+            .setTitle(title)
+
+        val timeAlertDialog = dialogBuilder.show()
+
+        gradeInfoDialog.dialogCancelBtn.setOnClickListener {
+            timeAlertDialog.dismiss()
+        }
     }
 }
 
