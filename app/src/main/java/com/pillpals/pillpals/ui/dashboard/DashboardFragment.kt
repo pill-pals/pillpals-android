@@ -597,6 +597,10 @@ class DashboardFragment : Fragment() {
     fun update() {
         upcomingStack.layoutTransition.disableTransitionType(LayoutTransition.DISAPPEARING)
         completedStack.layoutTransition.disableTransitionType(LayoutTransition.DISAPPEARING)
+        upcomingStack.layoutTransition.disableTransitionType(LayoutTransition.APPEARING)
+        completedStack.layoutTransition.disableTransitionType(LayoutTransition.APPEARING)
+        upcomingStack.layoutTransition.disableTransitionType(LayoutTransition.CHANGING)
+        completedStack.layoutTransition.disableTransitionType(LayoutTransition.CHANGING)
         currentStack.removeViews(1, currentStack.childCount - 1)
         upcomingStack.removeViews(1, upcomingStack.childCount - 1)
         completedStack.removeViews(1, completedStack.childCount - 1)
