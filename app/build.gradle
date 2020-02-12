@@ -47,4 +47,5 @@ dependencies {
     implementation 'me.grantland:autofittextview:0.2.+'
     implementation "androidx.legacy:legacy-preference-v14:1.0.0"
     implementation 'androidx.preference:preference:1.0.0'
+    implementation 'com.shopify.promises:promises:0.0.8'
 }

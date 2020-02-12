@@ -126,7 +126,15 @@ class AddDrugActivity : AppCompatActivity() {
                            "${it.timeText.text} ${it.recurrenceText.text} ${it.dateText.text}"
                         }
 
-                        deleteSchedules.text = scheduleTexts.joinToString(separator = "\n")
+                        val whiteScheduleTexts = SpannableString(scheduleTexts.joinToString(separator = "\n"))
+                        whiteScheduleTexts.setSpan(
+                            ForegroundColorSpan(ResourcesCompat.getColor(getResources(), R.color.colorLightGrey, null)),
+                            0,
+                            whiteScheduleTexts.length,
+                            Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+                        )
+
+                        deleteSchedules.text = whiteScheduleTexts
 
                         val deleteAlertDialog = dialogBuilder.show()
                         deleteDialog.dialogConfirmBtn.setOnClickListener {
