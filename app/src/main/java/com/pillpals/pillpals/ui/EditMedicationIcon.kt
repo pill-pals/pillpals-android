@@ -234,9 +234,14 @@ class EditMedicationIcon : AppCompatActivity() {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == 1 && resultCode == RESULT_OK) {
             val imageBitmap = data!!.extras!!.get("data") as Bitmap
+            val croppedImageBitmap = if(imageBitmap.height > imageBitmap.width){
+                Bitmap.createBitmap(imageBitmap, 0, (imageBitmap.height - imageBitmap.width)/2, imageBitmap.width, imageBitmap.width)
+            }else{
+                Bitmap.createBitmap(imageBitmap, (imageBitmap.width - imageBitmap.height)/2, 0, imageBitmap.height, imageBitmap.height)
+            }
             Realm.getDefaultInstance().executeTransaction{
                 var newPhoto = it.createObject(Photos::class.java, UUID.randomUUID().toString())
-                newPhoto.icon = DatabaseHelper.convertBitmapToByteArray(imageBitmap)
+                newPhoto.icon = DatabaseHelper.convertBitmapToByteArray(croppedImageBitmap)
             }
 
             photoList.removeAllViews()

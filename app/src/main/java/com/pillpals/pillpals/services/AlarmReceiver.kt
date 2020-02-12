@@ -52,11 +52,18 @@ public class AlarmReceiver: BroadcastReceiver() {
         drawable.setBounds((drawable.intrinsicWidth * 0.1).toInt(), (drawable.intrinsicWidth * 0.1).toInt(), iconCanvas.width - (drawable.intrinsicWidth * 0.1).toInt(), iconCanvas.height - (drawable.intrinsicWidth * 0.1).toInt())
         drawable.draw(iconCanvas)
 
-        // Set the notification content
+        val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
+        val priorityValue = if(sharedPreferences.getBoolean("notifications_silent", false) == false) {
+            NotificationCompat.PRIORITY_MAX
+        }else{
+            NotificationCompat.PRIORITY_LOW
+        }
+
+            // Set the notification content
         val mBuilder = NotificationCompat.Builder(context, context.getString(R.string.channel_id))
             .setSmallIcon(R.drawable.ic_pill_v5)
             .setContentTitle(title)
-            .setPriority(NotificationCompat.PRIORITY_MAX)
+            .setPriority(priorityValue)
             .setContentIntent(pendingIntent)
             .setLargeIcon(iconBitmap)
             .setAutoCancel(true)
@@ -69,7 +76,6 @@ public class AlarmReceiver: BroadcastReceiver() {
 
         val notificationManager = NotificationManagerCompat.from(context)
         // notificationId is a unique int for each notification that you must define
-        val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
         if(sharedPreferences.getBoolean("notifications", false) == false) {
             notificationManager.notify(schedule.uid!!.hashCode(), mBuilder.build())
         }
