@@ -9,6 +9,10 @@
             android:key="notifications"
             android:title="Disable schedule notifications"/>
 
+        <SwitchPreferenceCompat
+            android:key="notifications_silent"
+            android:title="Silence schedule notifications"/>
+
     </PreferenceCategory>
 
     <PreferenceCategory
