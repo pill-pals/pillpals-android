@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/QuizCard"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+
+        android:layout_gravity="bottom"
+        android:layout_marginBottom="8dp"
+        android:animateLayoutChanges="true"
+        app:cardBackgroundColor="@color/colorWhite"
+        app:cardCornerRadius="8dp"
+        app:cardElevation="0dp"
+        app:cardUseCompatPadding="false">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/quizCardLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:animateLayoutChanges="true">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/cardBodyLayout"
+                android:layout_width="match_parent"
+                android:layout_height="64dp"
+                android:animateLayoutChanges="false"
+                android:background="@color/colorWhite"
+                app:layout_constraintTop_toTopOf="parent">
+
+                <androidx.cardview.widget.CardView
+                    android:id="@+id/scoreBackground"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginBottom="8dp"
+                    app:cardBackgroundColor="#C1DCFF"
+                    app:cardCornerRadius="8dp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintDimensionRatio="1:1"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent">
+
+                    <androidx.constraintlayout.widget.ConstraintLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent">
+
+                        <TextView
+                            android:id="@+id/scoreText"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="10"
+                            android:textAlignment="center"
+                            android:textSize="32dp"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toTopOf="parent" />
+                    </androidx.constraintlayout.widget.ConstraintLayout>
+
+                </androidx.cardview.widget.CardView>
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/constraintLayout"
+                    android:layout_width="wrap_content"
+                    android:layout_height="56dp"
+                    android:layout_marginBottom="8dp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toEndOf="@+id/scoreBackground">
+
+                    <me.grantland.widget.AutofitTextView
+                        android:id="@+id/timeText"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        android:maxWidth="160dp"
+                        android:singleLine="true"
+                        android:text="Jan 2, 2020"
+                        android:textColor="@color/colorDarkGrey"
+                        app:autoSizeTextType="uniform"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent" />
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+                <me.grantland.widget.AutofitTextView
+                    android:id="@+id/nameText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginTop="8dp"
+                    android:maxWidth="160dp"
+                    android:singleLine="true"
+                    android:text="Quiz 1"
+                    android:textAppearance="@style/TextAppearance.baseText"
+                    app:layout_constraintStart_toEndOf="@+id/scoreBackground"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <Button
+                    android:id="@+id/button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="48dp"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginEnd="8dp"
+                    android:layout_marginBottom="8dp"
+                    android:gravity="center"
+                    android:text="Play"
+                    android:textColor="@color/colorWhite"
+                    android:textSize="18dp"
+                    app:backgroundTint="@color/colorGreen"
+                    app:cornerRadius="8dp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </androidx.cardview.widget.CardView>
+</merge>

@@ -14,6 +14,7 @@ import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import com.pillpals.pillpals.R
+import com.pillpals.pillpals.ui.quiz.QuizActivity
 import io.realm.Realm
 
 class MainActivity : AppCompatActivity() {
@@ -61,6 +62,8 @@ class MainActivity : AppCompatActivity() {
         }
 
         R.id.action_stars -> {
+            val addIntent = Intent(this, QuizActivity::class.java)
+            startActivity(addIntent)
             true
         }
 
