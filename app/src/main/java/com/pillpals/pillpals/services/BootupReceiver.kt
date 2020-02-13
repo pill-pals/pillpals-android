@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import com.pillpals.pillpals.data.model.Schedules
 import com.pillpals.pillpals.helpers.DatabaseHelper
+import com.pillpals.pillpals.helpers.NotificationUtils
 import com.pillpals.pillpals.ui.dashboard.DashboardFragment
 import io.realm.RealmResults
 
@@ -14,5 +15,6 @@ public class BootupReceiver: BroadcastReceiver() {
             Schedules::class.java
         ) as RealmResults<out Schedules>
         DashboardFragment().setUpScheduleCards(schedules)
+        NotificationUtils.updateAlarms(context)
     }
 }

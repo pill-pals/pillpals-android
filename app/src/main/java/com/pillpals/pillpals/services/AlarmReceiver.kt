@@ -1,5 +1,6 @@
 package com.pillpals.pillpals.services
 
+import android.app.AlarmManager
 import android.app.PendingIntent
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -19,61 +20,86 @@ import java.time.ZoneId
 import androidx.preference.PreferenceManager
 import com.pillpals.pillpals.helpers.DatabaseHelper.Companion.getColorStringByID
 import com.pillpals.pillpals.helpers.DatabaseHelper.Companion.getCorrectIconDrawable
+import com.pillpals.pillpals.helpers.NotificationUtils
+import java.util.concurrent.TimeUnit
 
 
 public class AlarmReceiver: BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
+        val notificationManager = NotificationManagerCompat.from(context)
+
         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         val schedule = DatabaseHelper.getScheduleByUid(
             intent.getStringExtra("schedule-uid")
         ) as Schedules
-        val medication = schedule.medication!!.first() as Medications
-        val occurrenceLocal = LocalDateTime.parse(intent.getStringExtra("schedule-occurrence"))
-        val occurrence = Date.from(occurrenceLocal.atZone(ZoneId.systemDefault()).toInstant())
 
-        val title = medication.name + " due at " + DateHelper.dateToString(
-            occurrence
-        )
+        if (intent.getBooleanExtra("cancel", false)) {
+            notificationManager.cancel(schedule.uid!!.hashCode())
+        } else {
+            val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
+            if(!sharedPreferences.getBoolean("notifications", false)) {
+                val medication = schedule.medication!!.first() as Medications
+                val occurrenceLocal = LocalDateTime.parse(intent.getStringExtra("schedule-occurrence"))
+                val occurrence = Date.from(occurrenceLocal.atZone(ZoneId.systemDefault()).toInstant())
 
-        val mainIntent = Intent(context, MainActivity::class.java)
+                val title = medication.name + " due at " + DateHelper.dateToString(
+                    occurrence
+                )
 
-        val pendingIntent = PendingIntent.getActivity(context, schedule.uid!!.hashCode(), mainIntent, PendingIntent.FLAG_UPDATE_CURRENT)
+                val mainIntent = Intent(context, MainActivity::class.java)
 
-        val drawable = getCorrectIconDrawable(context, medication)
+                val pendingIntent = PendingIntent.getActivity(context, schedule.uid!!.hashCode(), mainIntent, PendingIntent.FLAG_UPDATE_CURRENT)
 
-        val iconBitmap = Bitmap.createBitmap((drawable.intrinsicWidth * 1.1).toInt(), (drawable.intrinsicHeight * 1.1).toInt(), Bitmap.Config.ARGB_8888)
+                val drawable = getCorrectIconDrawable(context, medication)
 
-        val iconCanvas = Canvas(iconBitmap)
-        val paint = Paint()
-        paint.style = Paint.Style.FILL
-        paint.color = Color.parseColor(getColorStringByID(medication.color_id))
-        paint.isAntiAlias = true
-        iconCanvas.drawRoundRect(RectF(0f, 0f, iconCanvas.width.toFloat(), iconCanvas.height.toFloat()), (drawable.intrinsicWidth * 0.2).toFloat(), (drawable.intrinsicWidth * 0.2).toFloat(), paint)
-        drawable.setBounds((drawable.intrinsicWidth * 0.1).toInt(), (drawable.intrinsicWidth * 0.1).toInt(), iconCanvas.width - (drawable.intrinsicWidth * 0.1).toInt(), iconCanvas.height - (drawable.intrinsicWidth * 0.1).toInt())
-        drawable.draw(iconCanvas)
+                val iconBitmap = Bitmap.createBitmap((drawable.intrinsicWidth * 1.1).toInt(), (drawable.intrinsicHeight * 1.1).toInt(), Bitmap.Config.ARGB_8888)
 
-        // Set the notification content
-        val mBuilder = NotificationCompat.Builder(context, context.getString(R.string.channel_id))
-            .setSmallIcon(R.drawable.ic_pill_v5)
-            .setContentTitle(title)
-            .setPriority(NotificationCompat.PRIORITY_MAX)
-            .setContentIntent(pendingIntent)
-            .setLargeIcon(iconBitmap)
-            .setAutoCancel(true)
-            .setTicker("It's time to take your medication!")
-            .setVisibility(NotificationCompat.VISIBILITY_PRIVATE)
+                val iconCanvas = Canvas(iconBitmap)
+                val paint = Paint()
+                paint.style = Paint.Style.FILL
+                paint.color = Color.parseColor(getColorStringByID(medication.color_id))
+                paint.isAntiAlias = true
+                iconCanvas.drawRoundRect(RectF(0f, 0f, iconCanvas.width.toFloat(), iconCanvas.height.toFloat()), (drawable.intrinsicWidth * 0.2).toFloat(), (drawable.intrinsicWidth * 0.2).toFloat(), paint)
+                drawable.setBounds((drawable.intrinsicWidth * 0.1).toInt(), (drawable.intrinsicWidth * 0.1).toInt(), iconCanvas.width - (drawable.intrinsicWidth * 0.1).toInt(), iconCanvas.height - (drawable.intrinsicWidth * 0.1).toInt())
+                drawable.draw(iconCanvas)
 
-        if(medication.notes.isNotEmpty()) {
-            mBuilder.setContentText("Notes:...")
-                .setStyle(NotificationCompat.BigTextStyle()
-                    .bigText("Notes: " + medication.notes))
-        }
+                // Set the notification content
+                val mBuilder = NotificationCompat.Builder(context, context.getString(R.string.channel_id))
+                    .setSmallIcon(R.drawable.ic_pill_v5)
+                    .setContentTitle(title)
+                    .setPriority(NotificationCompat.PRIORITY_MAX)
+                    .setContentIntent(pendingIntent)
+                    .setLargeIcon(iconBitmap)
+                    .setOngoing(true)
+                    .setTicker("It's time to take your medication!")
+                    .setVisibility(NotificationCompat.VISIBILITY_PRIVATE)
 
-        val notificationManager = NotificationManagerCompat.from(context)
-        // notificationId is a unique int for each notification that you must define
-        val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
-        if(sharedPreferences.getBoolean("notifications", false) == false) {
-            notificationManager.notify(schedule.uid!!.hashCode(), mBuilder.build())
+                if(medication.notes.isNotEmpty()) {
+                    mBuilder.setContentText("Notes:...")
+                        .setStyle(NotificationCompat.BigTextStyle()
+                            .bigText("Notes: " + medication.notes))
+                }
+
+                // notificationId is a unique int for each notification that you must define
+                notificationManager.notify(schedule.uid!!.hashCode(), mBuilder.build())
+
+                //Set up auto-cancel
+                val am = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+                val cancelIntent = Intent(intent)
+                cancelIntent.putExtra("cancel", true)
+
+                val cancelAlarmSender = PendingIntent.getBroadcast(
+                    context,
+                    schedule.uid!!.hashCode(),
+                    cancelIntent,
+                    0
+                )
+
+                val now = Calendar.getInstance()
+                val cancelDate = DateHelper.addUnitToDate(now.time, 10, Calendar.MINUTE) //TODO: Refine this end time
+
+                am.setExact(AlarmManager.RTC, cancelDate.time, cancelAlarmSender)
+            }
         }
     }
 }

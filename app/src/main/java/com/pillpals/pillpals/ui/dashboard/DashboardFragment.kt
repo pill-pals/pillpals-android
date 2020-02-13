@@ -534,8 +534,6 @@ class DashboardFragment : Fragment() {
                 popoverMenuCurrent(newCard, medication, schedule)
             }
             currentStack.addView(newCard)
-            // Send notification
-            NotificationUtils.startAlarm(this.context!!, schedule)
         } else {
             // Upcoming
             newCard.countdownLabel.visibility = LinearLayout.VISIBLE
