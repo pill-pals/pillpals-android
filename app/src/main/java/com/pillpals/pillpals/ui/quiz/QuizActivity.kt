@@ -4,6 +4,7 @@ import android.animation.LayoutTransition
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
+import android.graphics.Color
 import android.graphics.drawable.AnimatedVectorDrawable
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
@@ -17,7 +18,10 @@ import com.pillpals.pillpals.data.model.Medications
 import com.pillpals.pillpals.data.model.Questions
 import com.pillpals.pillpals.data.model.Quizzes
 import com.pillpals.pillpals.data.model.Schedules
+import com.pillpals.pillpals.helpers.DatabaseHelper
 import com.pillpals.pillpals.helpers.DateHelper
+import com.pillpals.pillpals.helpers.QuizHelper
+import com.pillpals.pillpals.ui.QuizCard
 import io.realm.Realm
 import io.realm.RealmList
 import io.realm.RealmObject
@@ -54,17 +58,56 @@ class QuizActivity: AppCompatActivity() {
 
         createTestData()
 
-        setUpQuizCards()
+        setUpQuizCards((readAllData(Quizzes::class.java) as RealmResults<out Quizzes>).sort("date"))
         
         setUpCollapsing()
 
         hideEmptyStacks()
     }
 
-    private fun setUpQuizCards() {
-        
+    private fun setUpQuizCards(quizzes: RealmResults<out Quizzes>) {
+        for (quiz in quizzes) {
+            addQuizCard(quiz)
+        }
     }
-    
+
+    private fun addQuizCard(quiz: Quizzes){
+        var newCard = QuizCard(this)
+        newCard.nameText.text = quiz.name
+        newCard.scoreText.text = "?"
+        val cal = Calendar.getInstance()
+        cal.time = quiz.date
+        newCard.timeText.text = cal.getDisplayName(
+            Calendar.MONTH,
+            Calendar.SHORT,
+            Locale.US
+        ) + " " + cal.get(Calendar.DAY_OF_MONTH).toString() + ", " + cal.get(Calendar.YEAR).toString()
+        //newCard.scoreBackground.setCardBackgroundColor()
+        //newCard.quizCard.setCardBackgroundColor(this.resources.getColor(R.color.colorGrey))
+        //newCard.button.text = "View"
+        if (QuizHelper.getQuestionsAnswered(quiz) == 0){
+            //new stack
+            newStack.addView(newCard)
+        }
+        else if (QuizHelper.getQuestionsAnswered(quiz) == 10){
+            //completed stack
+            if (prefs.getBoolean(getString(R.string.quiz_completed_stack_collapsed), false)) {
+                newCard.visibility = View.GONE
+            }
+
+            completedStack.addView(newCard)
+        }
+        else {
+            //paused stack
+            if (prefs.getBoolean(getString(R.string.quiz_paused_stack_collapsed), false)) {
+                newCard.visibility = View.GONE
+            }
+
+            pausedStack.addView(newCard)
+        }
+
+    }
+
     private fun setUpCollapsing() {
         pausedCollapseBtn.setOnClickListener {
             toggleCollapse(pausedStack, pausedCollapseBtn)
@@ -134,8 +177,8 @@ class QuizActivity: AppCompatActivity() {
         newStack.removeViews(1, newStack.childCount - 1)
         pausedStack.removeViews(1, pausedStack.childCount - 1)
         completedStack.removeViews(1, completedStack.childCount - 1)
-        
-        setUpQuizCards()
+
+        setUpQuizCards((readAllData(Quizzes::class.java) as RealmResults<out Quizzes>).sort("date"))
 
         setUpCollapsing()
 
@@ -214,8 +257,9 @@ class QuizActivity: AppCompatActivity() {
                 question.answers = answerList
                 question.correctAnswer = 1
                 question.userAnswer = userAnswerList[i]
-                question.medication = Realm.getDefaultInstance().where(Medications::class.java).findAll().random() as RealmResults<Medications>
-                question.quiz = quiz as RealmResults<Quizzes>
+                question.medication = Realm.getDefaultInstance().where(Medications::class.java).findAll().random()
+
+                quiz.questions.add(question)
             }
         }
     }

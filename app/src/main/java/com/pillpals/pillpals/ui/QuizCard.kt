@@ -40,7 +40,7 @@ class QuizCard : LinearLayout {
         //Inflate xml resource, pass "this" as the parent, we use <merge> tag in xml to avoid
         //redundant parent, otherwise a LinearLayout will be added to this LinearLayout ending up
         //with two view groups
-        inflate(this.context, R.layout.drug_card,this)
+        inflate(this.context, R.layout.quiz_card,this)
 
         //Get references to elements
         quizCard = findViewById(R.id.QuizCard)
@@ -48,6 +48,6 @@ class QuizCard : LinearLayout {
         scoreText  = findViewById(R.id.scoreText)
         nameText  = findViewById(R.id.nameText)
         button  = findViewById(R.id.button)
-        scoreBackground = findViewById(R.id.iconBackground)
+        scoreBackground = findViewById(R.id.scoreBackground)
     }
 }
