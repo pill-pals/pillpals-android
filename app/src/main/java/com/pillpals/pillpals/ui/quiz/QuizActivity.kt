@@ -2,6 +2,7 @@ package com.pillpals.pillpals.ui.quiz
 
 import android.animation.LayoutTransition
 import android.content.Context
+import android.content.Intent
 import android.content.SharedPreferences
 import android.graphics.drawable.AnimatedVectorDrawable
 import android.os.Bundle
@@ -12,6 +13,8 @@ import android.view.View
 import android.widget.ImageButton
 import android.widget.LinearLayout
 import androidx.core.view.children
+import com.pillpals.pillpals.data.model.Schedules
+import io.realm.RealmResults
 
 class QuizActivity: AppCompatActivity() {
 
@@ -37,9 +40,17 @@ class QuizActivity: AppCompatActivity() {
         pausedCollapseBtn = findViewById(R.id.pausedCollapseBtn)
         completedCollapseBtn = findViewById(R.id.completedCollapseBtn)
 
+        setUpQuizCards()
+        
         setUpCollapsing()
+
+        hideEmptyStacks()
     }
 
+    private fun setUpQuizCards() {
+        
+    }
+    
     private fun setUpCollapsing() {
         pausedCollapseBtn.setOnClickListener {
             toggleCollapse(pausedStack, pausedCollapseBtn)
@@ -98,6 +109,38 @@ class QuizActivity: AppCompatActivity() {
             commit()
         }
     }
+
+    fun update() {
+        pausedStack.layoutTransition.disableTransitionType(LayoutTransition.DISAPPEARING)
+        completedStack.layoutTransition.disableTransitionType(LayoutTransition.DISAPPEARING)
+        pausedStack.layoutTransition.disableTransitionType(LayoutTransition.APPEARING)
+        completedStack.layoutTransition.disableTransitionType(LayoutTransition.APPEARING)
+        pausedStack.layoutTransition.disableTransitionType(LayoutTransition.CHANGING)
+        completedStack.layoutTransition.disableTransitionType(LayoutTransition.CHANGING)
+        newStack.removeViews(1, newStack.childCount - 1)
+        pausedStack.removeViews(1, pausedStack.childCount - 1)
+        completedStack.removeViews(1, completedStack.childCount - 1)
+        
+        setUpQuizCards()
+
+        setUpCollapsing()
+
+        hideEmptyStacks()
+    }
+
+    private fun hideEmptyStacks() {
+        hideStackIfEmpty(newStack)
+        hideStackIfEmpty(pausedStack)
+        hideStackIfEmpty(completedStack)
+    }
+
+    private fun hideStackIfEmpty(stack: LinearLayout) {
+        if (stack.childCount == 1) {
+            stack.visibility = View.GONE
+        } else {
+            stack.visibility = View.VISIBLE
+        }
+    }
     
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.getItemId()) {
@@ -107,6 +150,11 @@ class QuizActivity: AppCompatActivity() {
             }
         }
         return super.onOptionsItemSelected(item)
+    }
+
+    override fun onActivityResult(requestCode:Int, resultCode:Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        update()
     }
 
 }
