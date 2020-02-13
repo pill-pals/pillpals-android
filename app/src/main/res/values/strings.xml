@@ -12,5 +12,7 @@
     </string-array>
     <string name="upcoming_stack_collapsed">UPCOMING_STACK_COLLAPSED</string>
     <string name="completed_stack_collapsed">COMPLETED_STACK_COLLAPSED</string>
+    <string name="quiz_paused_stack_collapsed">QUIZ_PAUSED_STACK_COLLAPSED</string>
+    <string name="quiz_completed_stack_collapsed">QUIZ_COMPLETED_STACK_COLLAPSED</string>
     <string name="schedule_preview_collapsed_prefix">SCHEDULE_PREVIEW_COLLAPSED_</string>
 </resources>

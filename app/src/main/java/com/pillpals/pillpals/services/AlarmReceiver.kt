@@ -37,6 +37,11 @@ public class AlarmReceiver: BroadcastReceiver() {
             notificationManager.cancel(schedule.uid!!.hashCode())
         } else {
             val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
+            val priorityValue = if(sharedPreferences.getBoolean("notifications_silent", false) == false) {
+                NotificationCompat.PRIORITY_MAX
+            } else {
+                NotificationCompat.PRIORITY_LOW
+            }
             if(!sharedPreferences.getBoolean("notifications", false)) {
                 val medication = schedule.medication!!.first() as Medications
                 val occurrenceLocal = LocalDateTime.parse(intent.getStringExtra("schedule-occurrence"))
@@ -67,7 +72,7 @@ public class AlarmReceiver: BroadcastReceiver() {
                 val mBuilder = NotificationCompat.Builder(context, context.getString(R.string.channel_id))
                     .setSmallIcon(R.drawable.ic_pill_v5)
                     .setContentTitle(title)
-                    .setPriority(NotificationCompat.PRIORITY_MAX)
+                    .setPriority(priorityValue)
                     .setContentIntent(pendingIntent)
                     .setLargeIcon(iconBitmap)
                     .setOngoing(true)

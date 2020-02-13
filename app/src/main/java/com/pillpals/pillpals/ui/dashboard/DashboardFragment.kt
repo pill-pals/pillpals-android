@@ -34,15 +34,23 @@ import android.content.SharedPreferences
 import android.content.res.ColorStateList
 import android.graphics.*
 import android.graphics.drawable.AnimatedVectorDrawable
+import android.os.Looper
+import android.util.Log
 import androidx.cardview.widget.CardView
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.view.children
 import com.pillpals.pillpals.helpers.DatabaseHelper
 import com.pillpals.pillpals.helpers.DatabaseHelper.Companion.getCorrectIconDrawable
 import com.pillpals.pillpals.helpers.DatabaseHelper.Companion.obliterateSchedule
+import com.pillpals.pillpals.helpers.MedicationInfoRetriever
 import com.pillpals.pillpals.ui.AddDrugActivity
 import com.pillpals.pillpals.ui.medications.medication_info.MedicationInfoActivity
+import com.shopify.promises.Promise
+import com.shopify.promises.then
 import kotlinx.android.synthetic.main.time_prompt.view.*
+import okio.IOException
+import java.lang.RuntimeException
 
 
 class DashboardFragment : Fragment() {
@@ -53,6 +61,7 @@ class DashboardFragment : Fragment() {
     public lateinit var moodIconList: LinearLayout
     public lateinit var upcomingCollapseBtn: ImageButton
     public lateinit var completedCollapseBtn: ImageButton
+    public lateinit var dashboardParent: ConstraintLayout
     //public var selectedMoodImage: String? = null
 
     private lateinit var prefs: SharedPreferences
@@ -78,6 +87,7 @@ class DashboardFragment : Fragment() {
         moodIconList = view!!.findViewById(R.id.moodIconList)
         upcomingCollapseBtn = view!!.findViewById(R.id.upcomingCollapseBtn)
         completedCollapseBtn = view!!.findViewById(R.id.completedCollapseBtn)
+        dashboardParent = view.findViewById(R.id.dashboardParent)
 
         //region
         // Testing
@@ -171,6 +181,8 @@ class DashboardFragment : Fragment() {
             upcomingCollapseBtn.setImageResource(R.drawable.ic_circle_chevron_right_from_down)
         }
         upcomingStack.layoutTransition.enableTransitionType(LayoutTransition.CHANGING)
+        upcomingStack.layoutTransition.enableTransitionType(LayoutTransition.DISAPPEARING)
+        upcomingStack.layoutTransition.enableTransitionType(LayoutTransition.APPEARING)
 
         completedCollapseBtn.setOnClickListener {
             toggleCollapse(completedStack, completedCollapseBtn)
@@ -179,6 +191,8 @@ class DashboardFragment : Fragment() {
             completedCollapseBtn.setImageResource(R.drawable.ic_circle_chevron_right_from_down)
         }
         completedStack.layoutTransition.enableTransitionType(LayoutTransition.CHANGING)
+        completedStack.layoutTransition.enableTransitionType(LayoutTransition.DISAPPEARING)
+        completedStack.layoutTransition.enableTransitionType(LayoutTransition.APPEARING)
     }
 
     private fun toggleCollapse(stack: LinearLayout, button: ImageButton) {
@@ -586,10 +600,19 @@ class DashboardFragment : Fragment() {
     }
 
     fun update() {
+        upcomingStack.layoutTransition.disableTransitionType(LayoutTransition.DISAPPEARING)
+        completedStack.layoutTransition.disableTransitionType(LayoutTransition.DISAPPEARING)
+        upcomingStack.layoutTransition.disableTransitionType(LayoutTransition.APPEARING)
+        completedStack.layoutTransition.disableTransitionType(LayoutTransition.APPEARING)
+        upcomingStack.layoutTransition.disableTransitionType(LayoutTransition.CHANGING)
+        completedStack.layoutTransition.disableTransitionType(LayoutTransition.CHANGING)
         currentStack.removeViews(1, currentStack.childCount - 1)
         upcomingStack.removeViews(1, upcomingStack.childCount - 1)
         completedStack.removeViews(1, completedStack.childCount - 1)
         setUpScheduleCards((readAllData(Schedules::class.java) as RealmResults<out Schedules>).sort("occurrence"))
+
+        setUpCollapsing()
+
         hideEmptyStacks()
     }
 

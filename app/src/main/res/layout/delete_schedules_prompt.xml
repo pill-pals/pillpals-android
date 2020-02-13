@@ -13,9 +13,10 @@
         android:id="@+id/deletePrompt"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Are you sure you want to delete these schedules?"
         android:layout_gravity="center"
-        android:textAppearance="?android:attr/textAppearanceMedium" />
+        android:text="Are you sure you want to delete these schedules?"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:textColor="@color/colorWhite" />
 
     <TextView
         android:id="@+id/deleteSchedules"

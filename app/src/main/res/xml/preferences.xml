@@ -9,6 +9,10 @@
             android:key="notifications"
             android:title="Disable schedule notifications"/>
 
+        <SwitchPreferenceCompat
+            android:key="notifications_silent"
+            android:title="Silence schedule notifications"/>
+
     </PreferenceCategory>
 
     <PreferenceCategory
@@ -18,7 +22,15 @@
         <Preference
             android:key="feedback"
             android:summary="Report technical issues or suggest new features"
-            android:title="Send feedback"/>
+            android:title="Send Feedback">
+            <intent
+                android:action="android.intent.action.VIEW"
+                android:data="mailto:pillpals.feedback@gmail.com?subject=PillPals Feedback">
+                <extra
+                    android:name="android.intent.extra.TEXT"
+                    android:value="Description of issue with reproducible steps, or description of feature request"/>
+            </intent>
+        </Preference>
 
     </PreferenceCategory>
 
