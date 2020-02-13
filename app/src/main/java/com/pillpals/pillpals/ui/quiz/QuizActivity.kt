@@ -4,6 +4,7 @@ import android.animation.LayoutTransition
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
+import android.content.res.ColorStateList
 import android.graphics.Color
 import android.graphics.drawable.AnimatedVectorDrawable
 import android.os.Bundle
@@ -13,6 +14,7 @@ import android.view.MenuItem
 import android.view.View
 import android.widget.ImageButton
 import android.widget.LinearLayout
+import androidx.core.content.res.ResourcesCompat
 import androidx.core.view.children
 import com.pillpals.pillpals.data.model.Medications
 import com.pillpals.pillpals.data.model.Questions
@@ -21,6 +23,7 @@ import com.pillpals.pillpals.data.model.Schedules
 import com.pillpals.pillpals.helpers.DatabaseHelper
 import com.pillpals.pillpals.helpers.DateHelper
 import com.pillpals.pillpals.helpers.QuizHelper
+import com.pillpals.pillpals.ui.AddDrugActivity
 import com.pillpals.pillpals.ui.QuizCard
 import io.realm.Realm
 import io.realm.RealmList
@@ -74,7 +77,6 @@ class QuizActivity: AppCompatActivity() {
     private fun addQuizCard(quiz: Quizzes){
         var newCard = QuizCard(this)
         newCard.nameText.text = quiz.name
-        newCard.scoreText.text = "?"
         val cal = Calendar.getInstance()
         cal.time = quiz.date
         newCard.timeText.text = cal.getDisplayName(
@@ -82,15 +84,23 @@ class QuizActivity: AppCompatActivity() {
             Calendar.SHORT,
             Locale.US
         ) + " " + cal.get(Calendar.DAY_OF_MONTH).toString() + ", " + cal.get(Calendar.YEAR).toString()
-        //newCard.scoreBackground.setCardBackgroundColor()
-        //newCard.quizCard.setCardBackgroundColor(this.resources.getColor(R.color.colorGrey))
-        //newCard.button.text = "View"
+
         if (QuizHelper.getQuestionsAnswered(quiz) == 0){
             //new stack
+            newCard.scoreText.text = "?"
+            newCard.button.setOnClickListener {
+                val intent = Intent(this, QuizQuestionActivity::class.java)
+                intent.putExtra("quiz-uid", quiz.uid)
+                startActivityForResult(intent, 1)
+            }
             newStack.addView(newCard)
         }
         else if (QuizHelper.getQuestionsAnswered(quiz) == 10){
             //completed stack
+            newCard.scoreText.text = QuizHelper.getQuizScore(quiz).toString()
+            newCard.scoreBackground.setCardBackgroundColor(Color.parseColor(getColorStringByScore(QuizHelper.getQuizScore(quiz))))
+            newCard.button.text = "View"
+            newCard.button.backgroundTintList = ColorStateList.valueOf(ResourcesCompat.getColor(getResources(), R.color.colorDarkGrey, null))
             if (prefs.getBoolean(getString(R.string.quiz_completed_stack_collapsed), false)) {
                 newCard.visibility = View.GONE
             }
@@ -99,6 +109,12 @@ class QuizActivity: AppCompatActivity() {
         }
         else {
             //paused stack
+            newCard.scoreText.text = "Q" + QuizHelper.getQuestionsAnswered(quiz).toString()
+            newCard.button.setOnClickListener {
+                val intent = Intent(this, QuizQuestionActivity::class.java)
+                intent.putExtra("quiz-uid", quiz.uid)
+                startActivityForResult(intent, 1)
+            }
             if (prefs.getBoolean(getString(R.string.quiz_paused_stack_collapsed), false)) {
                 newCard.visibility = View.GONE
             }
@@ -106,6 +122,18 @@ class QuizActivity: AppCompatActivity() {
             pausedStack.addView(newCard)
         }
 
+    }
+
+    private fun getColorStringByScore(score: Int):String {
+        return when {
+            score > 8 -> "#43A047"
+            score > 7 -> "#7CB342"
+            score > 6 -> "#C0CA33"
+            score > 5 -> "#FDD835"
+            score > 4 -> "#FFB300"
+            score > 3 -> "#FB8C00"
+            else -> "#F4511E"
+        }
     }
 
     private fun setUpCollapsing() {
