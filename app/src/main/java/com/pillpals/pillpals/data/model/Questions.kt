@@ -12,7 +12,7 @@ open class Questions(
     var answers: RealmList<String> = RealmList(),
     var correctAnswer: Int? = null,
     var userAnswer: Int? = null,
-    val medication: RealmResults<Medications>? = null,
+    var medication: RealmResults<Medications>? = null,
     @LinkingObjects("questions")
-    val quiz: RealmResults<Quizzes>? = null
+    var quiz: RealmResults<Quizzes>? = null
     ) : RealmObject(){}

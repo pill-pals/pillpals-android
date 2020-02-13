@@ -13,12 +13,22 @@ import android.view.View
 import android.widget.ImageButton
 import android.widget.LinearLayout
 import androidx.core.view.children
+import com.pillpals.pillpals.data.model.Medications
+import com.pillpals.pillpals.data.model.Questions
+import com.pillpals.pillpals.data.model.Quizzes
 import com.pillpals.pillpals.data.model.Schedules
+import com.pillpals.pillpals.helpers.DateHelper
+import io.realm.Realm
+import io.realm.RealmList
+import io.realm.RealmObject
 import io.realm.RealmResults
+import java.util.*
 
 class QuizActivity: AppCompatActivity() {
 
     private lateinit var prefs: SharedPreferences
+
+    private lateinit var realm: Realm
 
     public lateinit var newStack: LinearLayout
     public lateinit var pausedStack: LinearLayout
@@ -32,6 +42,8 @@ class QuizActivity: AppCompatActivity() {
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
         supportActionBar!!.setTitle("Quizzes")
 
+        realm = Realm.getDefaultInstance()
+
         prefs = this.getPreferences(Context.MODE_PRIVATE)
 
         newStack = findViewById(R.id.newStack)
@@ -39,6 +51,8 @@ class QuizActivity: AppCompatActivity() {
         completedStack = findViewById(R.id.completedStack)
         pausedCollapseBtn = findViewById(R.id.pausedCollapseBtn)
         completedCollapseBtn = findViewById(R.id.completedCollapseBtn)
+
+        createTestData()
 
         setUpQuizCards()
         
@@ -157,4 +171,56 @@ class QuizActivity: AppCompatActivity() {
         update()
     }
 
+    private fun createTestData() {
+        var quizzes = readAllData(Quizzes::class.java) as RealmResults<Quizzes>
+        if (quizzes.count() == 0) {
+            createTestQuizData()
+        }
+    }
+
+    private fun createTestQuizData() {
+        val quizzes = Array(3){ Quizzes() }
+        val names = listOf("Test Quiz 1", "Test Quiz 2", "Test Quiz 3")
+        val dates = listOf(Date(), DateHelper.tomorrow(), DateHelper.addUnitToDate(Date(),2,Calendar.DATE))
+
+        realm.executeTransaction {
+            for (i in quizzes.indices) {
+                quizzes[i] = it.createObject(Quizzes::class.java, UUID.randomUUID().toString())
+                quizzes[i].name = names[i]
+                quizzes[i].date = dates[i]
+            }
+        }
+
+        val userAnswerList1 = listOf(null,null,null,null,null,null,null,null,null,null)
+        val userAnswerList2 = listOf(1,2,1,1,1,2,null,null,null,null)
+        val userAnswerList3 = listOf(1,2,1,1,1,2,1,1,1,2)
+
+        createTestQuestions(quizzes[0],userAnswerList1)
+        createTestQuestions(quizzes[1],userAnswerList2)
+        createTestQuestions(quizzes[2],userAnswerList3)
+
+    }
+
+    private fun createTestQuestions(quiz: Quizzes, userAnswerList: List<Int?>){
+        for (i in 0..9){
+            realm.executeTransaction {
+                val question = it.createObject(Questions::class.java, UUID.randomUUID().toString())
+                question.question = "Question String"
+                val answerList = RealmList<String>()
+                answerList.add("Answer 1")
+                answerList.add("Answer 2")
+                answerList.add("Answer 3")
+                answerList.add("Answer 4")
+                question.answers = answerList
+                question.correctAnswer = 1
+                question.userAnswer = userAnswerList[i]
+                question.medication = Realm.getDefaultInstance().where(Medications::class.java).findAll().random() as RealmResults<Medications>
+                question.quiz = quiz as RealmResults<Quizzes>
+            }
+        }
+    }
+
+    private fun readAllData(realmClass: Class<out RealmObject>): RealmResults<out RealmObject> {
+        return realm.where(realmClass).findAll()
+    }
 }
