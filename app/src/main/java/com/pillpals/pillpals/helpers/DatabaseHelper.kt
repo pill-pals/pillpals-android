@@ -32,6 +32,9 @@ class DatabaseHelper {
         fun getColorStringByID(id: Int): String {
             return Realm.getDefaultInstance().where(Colors::class.java).equalTo("id", id).findFirst()!!.color
         }
+        fun getQuizByUid(id: String): Quizzes? {
+            return Realm.getDefaultInstance().where(Quizzes::class.java).equalTo("uid", id).findFirst()
+        }
         fun getColorIDByString(color: String): Int {
             return Realm.getDefaultInstance().where(Colors::class.java).equalTo("color", color).findFirst()!!.id
         }
