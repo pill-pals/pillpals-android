@@ -130,7 +130,7 @@ class EditMedicationIcon : AppCompatActivity() {
         }
 
         bottomOptions.leftButton.setOnClickListener{
-            val resultIntent = Intent(this, EditScheduleActivity::class.java)
+            val resultIntent = Intent(this, EditMedicationIcon::class.java)
             resultIntent.putExtra("color-string", colorString)
             resultIntent.putExtra("image-string", imageDrawable)
             resultIntent.putExtra("photo-boolean", selectedPhoto)

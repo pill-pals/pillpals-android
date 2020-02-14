@@ -17,7 +17,8 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:paddingBottom="16dp">
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
@@ -194,14 +195,34 @@
                     app:layout_constraintTop_toBottomOf="@+id/editText" />
 
                 <TextView
-                    android:id="@+id/deleteButton"
+                    android:id="@+id/linkMedicationButton"
                     android:layout_width="wrap_content"
-                    android:layout_height="48dp"
+                    android:layout_height="0dp"
                     android:layout_gravity="center"
                     android:layout_marginStart="128dp"
                     android:layout_marginTop="32dp"
                     android:layout_marginEnd="128dp"
-                    android:layout_marginBottom="16dp"
+                    android:backgroundTint="@color/colorLightGrey"
+                    android:drawableLeft="@drawable/ic_add_small_18dp"
+                    android:drawablePadding="4dp"
+                    android:drawableTint="@color/colorGreen"
+                    android:gravity="center"
+                    android:padding="8dp"
+                    android:text="Link medication"
+                    android:textColor="@color/colorGreen"
+                    android:textSize="16sp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/editText3" />
+
+                <TextView
+                    android:id="@+id/deleteButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="0dp"
+                    android:layout_gravity="center"
+                    android:layout_marginStart="128dp"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginEnd="128dp"
                     android:backgroundTint="@color/colorLightGrey"
                     android:drawableLeft="@drawable/delete_outline_24dp"
                     android:gravity="center"
@@ -209,10 +230,9 @@
                     android:text="Delete medication"
                     android:textColor="@color/colorRed"
                     android:textSize="16sp"
-                    app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/editText3" />
+                    app:layout_constraintTop_toBottomOf="@+id/linkMedicationButton" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 

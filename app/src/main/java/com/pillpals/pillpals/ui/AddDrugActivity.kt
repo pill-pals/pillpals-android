@@ -11,6 +11,7 @@ import android.text.Spanned
 import android.text.style.ForegroundColorSpan
 import android.util.Log
 import android.view.LayoutInflater
+import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import android.widget.EditText
@@ -40,6 +41,7 @@ import com.pillpals.pillpals.helpers.DatabaseHelper.Companion.getRandomIcon
 import com.pillpals.pillpals.helpers.DatabaseHelper.Companion.getRandomUniqueColorString
 import com.pillpals.pillpals.helpers.DatabaseHelper.Companion.getScheduleByUid
 import com.pillpals.pillpals.helpers.calculateScheduleRecords
+import com.pillpals.pillpals.ui.search.SearchActivity
 import io.realm.RealmObject.deleteFromRealm
 import kotlinx.android.synthetic.main.delete_prompt.view.*
 
@@ -50,6 +52,7 @@ class AddDrugActivity : AppCompatActivity() {
     public lateinit var editText3: EditText
     public lateinit var addScheduleButton : MaterialButton
     public lateinit var deleteButton: TextView
+    lateinit var linkMedicationButton: TextView
     public lateinit var scheduleStack: LinearLayout
     public lateinit var bottomOptions: BottomOptions
     public lateinit var iconButton: MaterialButton
@@ -61,6 +64,8 @@ class AddDrugActivity : AppCompatActivity() {
     public lateinit var imageDrawable: String
     public var photoBoolean = false
 
+    var dpdIdToLink: Int? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Realm.init(this)
@@ -71,16 +76,29 @@ class AddDrugActivity : AppCompatActivity() {
         editText3 = findViewById(R.id.editText3)
         addScheduleButton = findViewById(R.id.addScheduleButton)
         deleteButton = findViewById(R.id.deleteButton)
+        linkMedicationButton = findViewById(R.id.linkMedicationButton)
         scheduleStack = findViewById(R.id.scheduleStack)
         iconButton = findViewById(R.id.iconButton)
         bottomOptions = findViewById(R.id.bottomOptions)
         bottomOptions.leftButton.text = "Save"
         bottomOptions.rightButton.text = "Cancel"
 
+        linkMedicationButton.visibility = View.GONE
+
         // region Bottom Button Listeners
         if (intent.hasExtra("medication-uid")) {
             val medID: String = intent.getStringExtra("medication-uid")
             val medication = getMedicationByUid(medID) as Medications
+
+            if(medication.dpd_object?.firstOrNull() == null) {
+                linkMedicationButton.visibility = View.VISIBLE
+                linkMedicationButton.setOnClickListener {
+                    val linkIntent = Intent(this, SearchActivity::class.java)
+                    linkIntent.putExtra("medication-uid", medication.uid)
+
+                    startActivityForResult(linkIntent, 3)
+                }
+            }
 
             editText.setText(medication.name)
             editText2.setText(medication.dosage)
@@ -92,11 +110,11 @@ class AddDrugActivity : AppCompatActivity() {
                     medication.color_id
                 )
             ))
-            if(photoBoolean){
+            if (photoBoolean) {
                 imageDrawable = medication.photo_uid
                 iconButton.icon = BitmapDrawable(resources, Bitmap.createScaledBitmap(convertByteArrayToBitmap(getByteArrayById(imageDrawable)), 64, 64, false))
                 iconButton.iconTint = null
-            }else{
+            } else {
                 imageDrawable = getIconByID(medication.icon_id)
                 iconButton.icon = resources.getDrawable(DatabaseHelper.getDrawableIconById(this, medication.icon_id), theme)
                 iconButton.iconTint = ColorStateList.valueOf(Color.parseColor("#0F0F0F"))
@@ -176,6 +194,13 @@ class AddDrugActivity : AppCompatActivity() {
 
             iconButton.backgroundTintList = ColorStateList.valueOf(Color.parseColor(colorString))
             iconButton.icon = resources.getDrawable(DatabaseHelper.getDrawableIconById(this, getIconIDByString(imageDrawable)), theme)
+
+            linkMedicationButton.visibility = View.VISIBLE
+            linkMedicationButton.setOnClickListener {
+                val linkIntent = Intent(this, SearchActivity::class.java)
+
+                startActivityForResult(linkIntent, 4)
+            }
 
             bottomOptions.leftButton.setOnClickListener{
                 if (editText.text.toString().trim().isNotEmpty() and editText2.text.toString().trim().isNotEmpty()) {
@@ -371,10 +396,15 @@ class AddDrugActivity : AppCompatActivity() {
                 }
             }
 
-            if(intent.hasExtra("dpd-id")) {
-                val dpdId = intent.getIntExtra("dpd-id", 0)
-                val dpdObject = DatabaseHelper.getDPDObjectById(dpdId)
-                dpdObject!!.medications.add(medication)
+            if(medication.dpd_object?.firstOrNull() == null) {
+                if (intent.hasExtra("dpd-id")) {
+                    val dpdId = intent.getIntExtra("dpd-id", 0)
+                    val dpdObject = DatabaseHelper.getDPDObjectById(dpdId)
+                    dpdObject!!.medications.add(medication)
+                } else if (dpdIdToLink != null && dpdIdToLink != 0) {
+                    val dpdObject = DatabaseHelper.getDPDObjectById(dpdIdToLink as Int)
+                    dpdObject!!.medications.add(medication)
+                }
             }
         }
     }
@@ -405,42 +435,59 @@ class AddDrugActivity : AppCompatActivity() {
 
     override fun onActivityResult(requestCode:Int, resultCode:Int, data:Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        if(requestCode == 1) { // Schedules
-            if(data != null) {
-                if(data.hasExtra("schedule-id-list")){
+        if(data != null) {
+            if (requestCode == 1) { // Schedules
+                if (data.hasExtra("schedule-id-list")) {
                     scheduleIdList = data.getStringArrayListExtra("schedule-id-list")
                     scheduleIdList.forEach {
                         toBeAdded.add(getScheduleByUid(it)!!)
                     }
                     updateScheduleList()
                 }
-            }
-        }
-        else if (requestCode == 2) { // Icon
-            if(data != null) {
-                if(data.getBooleanExtra("photo-boolean", false) == false){
+            } else if (requestCode == 2) { // Icon
+                if (data.getBooleanExtra("photo-boolean", false) == false) {
                     photoBoolean = false
-                    if(data.hasExtra("color-string")) {
+                    if (data.hasExtra("color-string")) {
                         colorString = data.getStringExtra("color-string")!!
-                        iconButton.backgroundTintList = ColorStateList.valueOf(Color.parseColor(colorString))
+                        iconButton.backgroundTintList =
+                            ColorStateList.valueOf(Color.parseColor(colorString))
                     }
-                    if(data.hasExtra("image-string")) {
+                    if (data.hasExtra("image-string")) {
                         imageDrawable = data.getStringExtra("image-string")!!
-                        iconButton.icon = resources.getDrawable(DatabaseHelper.getDrawableIconById(this, getIconIDByString(imageDrawable)), theme)
-                        iconButton.iconTint = ColorStateList.valueOf(Color.parseColor("#0F0F0F"))
+                        iconButton.icon = resources.getDrawable(
+                            DatabaseHelper.getDrawableIconById(
+                                this,
+                                getIconIDByString(imageDrawable)
+                            ), theme
+                        )
+                        iconButton.iconTint =
+                            ColorStateList.valueOf(Color.parseColor("#0F0F0F"))
                     }
-                }else {
+                } else {
                     photoBoolean = true
-                    if(data.hasExtra("color-string")) {
+                    if (data.hasExtra("color-string")) {
                         colorString = data.getStringExtra("color-string")!!
-                        iconButton.backgroundTintList = ColorStateList.valueOf(Color.parseColor(colorString))
+                        iconButton.backgroundTintList =
+                            ColorStateList.valueOf(Color.parseColor(colorString))
                     }
-                    if(data.hasExtra("image-string")) {
+                    if (data.hasExtra("image-string")) {
                         imageDrawable = data.getStringExtra("image-string")!!
-                        iconButton.icon = BitmapDrawable(resources, Bitmap.createScaledBitmap(convertByteArrayToBitmap(getByteArrayById(imageDrawable)), 64, 64, false))
+                        iconButton.icon = BitmapDrawable(
+                            resources,
+                            Bitmap.createScaledBitmap(
+                                convertByteArrayToBitmap(
+                                    getByteArrayById(
+                                        imageDrawable
+                                    )
+                                ), 64, 64, false
+                            )
+                        )
                         iconButton.iconTint = null
                     }
                 }
+            } else if (requestCode == 3) { // Link with existing medication
+            } else if (requestCode == 4) { // Link with non-existing medication
+                dpdIdToLink = data.getIntExtra("dpd-id", 0)
             }
         }
 

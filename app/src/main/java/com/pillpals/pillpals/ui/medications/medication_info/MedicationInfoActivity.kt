@@ -1,5 +1,6 @@
 package com.pillpals.pillpals.ui.medications.medication_info
 
+import android.app.Activity
 import android.content.Intent
 import android.content.res.ColorStateList
 import android.graphics.Color
@@ -49,6 +50,7 @@ class MedicationInfoActivity : AppCompatActivity() {
     public var dosageString = ""
     public var nameString = ""
     public var iconResourceString: String? = null
+    var linkingMedication: Boolean = false
 
     private lateinit var realm: Realm
 
@@ -95,6 +97,7 @@ class MedicationInfoActivity : AppCompatActivity() {
         activeIngredients = intent.getStringArrayListExtra("active-ingredients")!!.toList()
         dosageString = intent.getStringExtra("dosage-string")!!
         nameString = intent.getStringExtra("name-text")!!
+        linkingMedication = intent.getBooleanExtra("link-medication", false)
 
         iconResourceString = intent.getStringExtra("icon-resource")
         if (iconResourceString == null) {
@@ -102,7 +105,10 @@ class MedicationInfoActivity : AppCompatActivity() {
         }
 
         alreadyAdded.visibility = View.INVISIBLE
-        if(userTakesDrug()) {
+        if(linkingMedication) {
+            addButton.text = "+ Link"
+        }
+        else if(userTakesDrug()) {
             addButton.setTextColor(resources.getColor(R.color.colorLightGrey))
             addButton.backgroundTintList = ColorStateList.valueOf(ResourcesCompat.getColor(resources, R.color.colorDarkishGrey, null))
             alreadyAdded.visibility = View.VISIBLE
@@ -123,13 +129,25 @@ class MedicationInfoActivity : AppCompatActivity() {
         textParams.topMargin = textTopMargin
 
         addButton.setOnClickListener {
-            val intent = Intent(this, AddDrugActivity::class.java)
-            intent.putExtra("dpd-id", drugCode)
-            intent.putExtra("color-string", colorString)
-            intent.putExtra("image-string", iconResourceString)
-            intent.putExtra("name-string", nameString)
-            intent.putExtra("dosage-string", dosageString)
-            startActivityForResult(intent, 1)
+            if(linkingMedication) {
+                val intent = Intent(this, MedicationInfoActivity::class.java)
+                intent.putExtra("dpd-id", drugCode)
+                intent.putExtra("color-string", colorString)
+                intent.putExtra("image-string", iconResourceString)
+                intent.putExtra("name-string", nameString)
+                intent.putExtra("dosage-string", dosageString)
+                setResult(Activity.RESULT_OK, intent)
+                finish()
+            }
+            else {
+                val intent = Intent(this, AddDrugActivity::class.java)
+                intent.putExtra("dpd-id", drugCode)
+                intent.putExtra("color-string", colorString)
+                intent.putExtra("image-string", iconResourceString)
+                intent.putExtra("name-string", nameString)
+                intent.putExtra("dosage-string", dosageString)
+                startActivityForResult(intent, 1)
+            }
         }
 
         addDrugToDPDTable()

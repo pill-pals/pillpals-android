@@ -9,6 +9,6 @@
     <item
         android:id="@+id/viewDrugInfo"
         android:icon="@drawable/ic_clock"
-        android:title="View drug info" />
+        android:title="View medication info" />
 
 </menu>
