@@ -46,6 +46,7 @@ import com.pillpals.pillpals.helpers.DatabaseHelper.Companion.obliterateSchedule
 import com.pillpals.pillpals.helpers.MedicationInfoRetriever
 import com.pillpals.pillpals.ui.AddDrugActivity
 import com.pillpals.pillpals.ui.medications.medication_info.MedicationInfoActivity
+import com.pillpals.pillpals.ui.search.SearchActivity
 import com.shopify.promises.Promise
 import com.shopify.promises.then
 import kotlinx.android.synthetic.main.time_prompt.view.*
@@ -294,6 +295,11 @@ class DashboardFragment : Fragment() {
                     intent.putExtra("name-text", dpdObject.name)
                     startActivityForResult(intent, 2)
                 }
+                R.id.linkMedication -> {
+                    val intent = Intent(context, SearchActivity::class.java)
+                    intent.putExtra("medication-uid", medication.uid)
+                    startActivityForResult(intent, 3)
+                }
             }
             true
         }
@@ -358,6 +364,11 @@ class DashboardFragment : Fragment() {
                     intent.putExtra("dosage-string", dpdObject.dosageString)
                     intent.putExtra("name-text", dpdObject.name)
                     startActivityForResult(intent, 2)
+                }
+                R.id.linkMedication -> {
+                    val intent = Intent(context, SearchActivity::class.java)
+                    intent.putExtra("medication-uid", medication.uid)
+                    startActivityForResult(intent, 3)
                 }
             }
             true
@@ -429,6 +440,11 @@ class DashboardFragment : Fragment() {
                     intent.putExtra("dosage-string", dpdObject.dosageString)
                     intent.putExtra("name-text", dpdObject.name)
                     startActivityForResult(intent, 2)
+                }
+                R.id.linkMedication -> {
+                    val intent = Intent(context, SearchActivity::class.java)
+                    intent.putExtra("medication-uid", medication.uid)
+                    startActivityForResult(intent, 3)
                 }
             }
             true

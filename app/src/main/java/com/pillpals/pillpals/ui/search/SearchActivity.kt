@@ -1,5 +1,7 @@
 package com.pillpals.pillpals.ui.search
 
+import android.app.Activity
+import android.content.Context
 import android.content.Intent
 import android.database.Cursor
 import android.database.MatrixCursor
@@ -11,11 +13,13 @@ import androidx.fragment.app.Fragment
 import com.pillpals.pillpals.R
 import android.os.*
 import android.util.Log
+import android.view.MenuItem
 import android.view.View.GONE
 import android.view.animation.Animation
 import android.view.animation.LinearInterpolator
 import android.view.animation.RotateAnimation
 import android.widget.*
+import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
 import com.google.gson.Gson
 import com.pillpals.pillpals.data.model.Medications
@@ -24,6 +28,7 @@ import com.pillpals.pillpals.helpers.SearchSuggestionCursor
 import com.pillpals.pillpals.helpers.margin
 import com.pillpals.pillpals.ui.DrugCard
 import com.pillpals.pillpals.ui.medications.medication_info.MedicationInfoActivity
+import io.realm.Realm
 import io.realm.RealmResults
 import kotlinx.android.synthetic.main.drug_card.view.*
 import okhttp3.*
@@ -31,7 +36,9 @@ import okio.IOException
 import java.util.*
 import java.util.concurrent.TimeUnit
 
-class SearchFragment : Fragment() {
+
+// Used for linking DPDObjects to existing Medications
+class SearchActivity : AppCompatActivity() {
     public lateinit var medications: RealmResults<out Medications>
     public lateinit var searchView: android.widget.SearchView
     public lateinit var rootSearchView: ConstraintLayout
@@ -40,7 +47,7 @@ class SearchFragment : Fragment() {
     public var handler: Handler = Handler(Looper.getMainLooper())
     public var runnable: Runnable? = null
     public var suggestions: MutableList<String> = mutableListOf()
-    public var outerContext: SearchFragment = this
+    public lateinit var outerContext: Context
     public var updateSuggestionsFlag: Boolean = false
     public var clearQueriesFlag: Boolean = false
     public var showResultsFlag: Boolean = false
@@ -53,15 +60,19 @@ class SearchFragment : Fragment() {
     public var lastQuery: String? = null
     public var searchingUpcomingDrugs = false
 
-    override public fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        super.onCreateView(inflater, container, savedInstanceState)
-        val view = inflater!!.inflate(R.layout.fragment_search, container, false)
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        Realm.init(this)
 
-        searchView = view.findViewById(R.id.searchView)
-        rootSearchView = view.findViewById(R.id.rootSearchView)
-        searchResults = view.findViewById(R.id.searchResults)
-        apiWarning = view.findViewById(R.id.warningText)
-        searchLoading = view.findViewById(R.id.searchLoading)
+        supportActionBar!!.setDisplayHomeAsUpEnabled(true)
+
+        setContentView(R.layout.fragment_search)
+
+        searchView = findViewById(R.id.searchView)
+        rootSearchView = findViewById(R.id.rootSearchView)
+        searchResults = findViewById(R.id.searchResults)
+        apiWarning = findViewById(R.id.warningText)
+        searchLoading = findViewById(R.id.searchLoading)
         searchLoading.visibility = GONE
 
         apiWarning.visibility = GONE
@@ -230,9 +241,7 @@ class SearchFragment : Fragment() {
         })
 
         val cursor = MatrixCursor(arrayOf("_id", "suggestion"))
-        searchView.suggestionsAdapter = SearchSuggestionCursor(this.context!!, cursor, searchView)
-
-        return view
+        searchView.suggestionsAdapter = SearchSuggestionCursor(outerContext, cursor, searchView)
     }
 
     private fun updateSuggestions() {
@@ -286,6 +295,7 @@ class SearchFragment : Fragment() {
 
         drugsToSearch.forEachIndexed {index, suggestion ->
             drugCards.add(addDrugCard(suggestion))
+            Log.i("test", drugCards.toString())
             val re = Regex("[^A-Za-z ]")
             val url = "https://health-products.canada.ca/api/drug/drugproduct/?brandname=${re.replace(suggestion, "")}"
 
@@ -329,7 +339,7 @@ class SearchFragment : Fragment() {
 
                         uniquelyNamedDrugs.forEachIndexed {namedIndex, drugProduct ->
                             // gather info and set to card
-                            val newCard = DrugCard(outerContext.context!!)
+                            val newCard = DrugCard(outerContext)
                             newCard.nameText.text = drugProduct.brand_name
                             newCard.button.layoutParams.width = ViewGroup.LayoutParams.WRAP_CONTENT
                             newCard.overflowMenu.visibility = View.INVISIBLE
@@ -436,10 +446,10 @@ class SearchFragment : Fragment() {
 
                                                     // Add button action here, using drug code
                                                     newCard.button.setOnClickListener {
-                                                        val infoIntent = Intent(outerContext.context, MedicationInfoActivity::class.java)
+                                                        val infoIntent = Intent(outerContext, MedicationInfoActivity::class.java)
 
-                                                        // Not for linking DPDObject
-                                                        infoIntent.putExtra("link-medication", false)
+                                                        // For linking DPDObject
+                                                        infoIntent.putExtra("link-medication", true)
 
                                                         infoIntent.putExtra("drug-code", newCard.drugCode)
                                                         infoIntent.putExtra("icon-color", colorString)
@@ -476,7 +486,7 @@ class SearchFragment : Fragment() {
     }
 
     private fun addDrugCard(name: String): DrugCard {
-        var newCard = DrugCard(this.context!!)
+        var newCard = DrugCard(this)
 
         newCard.nameText.text = name
         newCard.timeText.text = "..."
@@ -486,6 +496,8 @@ class SearchFragment : Fragment() {
         newCard.button.layoutParams.width = ViewGroup.LayoutParams.WRAP_CONTENT
 
         newCard.overflowMenu.visibility = View.INVISIBLE
+
+        Log.i("test", newCard.toString())
 
         searchResults.addView(newCard)
         return newCard
@@ -535,29 +547,35 @@ class SearchFragment : Fragment() {
             else -> "ic_dropper"
         }
     }
-}
 
-data class Autocomplete(val query: String, val suggestions: MutableList<String>)
-data class DrugProduct(
-    val drug_code: Int,
-    val class_name: String,
-    val drug_identification_number: String,
-    val brand_name: String,
-    val descriptor: String,
-    val number_of_ais: String,
-    val ai_group_no: String,
-    val company_name: String
-)
-data class ActiveIngredient(
-    val dosage_unit: String,
-    val dosage_value: String,
-    val drug_code: Int,
-    val ingredient_name: String,
-    val strength: String,
-    val strength_unit: String
-)
-data class AdministrationRoute(
-    val drug_code: Int,
-    val route_of_administration_code: Int,
-    val route_of_administration_name: String
-)
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when (item.itemId) {
+            android.R.id.home -> finish()
+            else -> return super.onOptionsItemSelected(item)
+        }
+        return true
+    }
+
+    override fun onActivityResult(requestCode:Int, resultCode:Int, data:Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (data != null) {
+            if (requestCode == 1) {
+                // Going to modify medication here because this could be called from many places
+                val medicationUid = intent.getStringExtra("medication-uid")
+                if (medicationUid != null) {
+                    val medication = DatabaseHelper.getMedicationByUid(medicationUid)
+                    if (data.hasExtra("dpd-id")) {
+                        Realm.getDefaultInstance().executeTransaction {
+                            val dpdId = data.getIntExtra("dpd-id", 0)
+                            val dpdObject = DatabaseHelper.getDPDObjectById(dpdId)
+                            dpdObject!!.medications.add(medication)
+                        }
+                    }
+                }
+
+                setResult(Activity.RESULT_OK, data)
+                finish()
+            }
+        }
+    }
+}

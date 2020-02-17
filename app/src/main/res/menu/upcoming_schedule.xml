@@ -6,4 +6,9 @@
         android:icon="@drawable/ic_clock"
         android:title="Log at time" />
 
+    <item
+        android:id="@+id/linkMedication"
+        android:icon="@drawable/ic_clock"
+        android:title="Link medication" />
+
 </menu>
