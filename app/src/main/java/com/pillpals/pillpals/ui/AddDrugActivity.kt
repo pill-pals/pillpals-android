@@ -30,11 +30,13 @@ import java.util.*
 import com.pillpals.pillpals.data.model.Schedules
 import com.pillpals.pillpals.helpers.DateHelper
 import com.google.android.material.button.MaterialButton
+import com.pillpals.pillpals.data.model.DPDObjects
 import com.pillpals.pillpals.helpers.DatabaseHelper
 import com.pillpals.pillpals.helpers.DatabaseHelper.Companion.convertByteArrayToBitmap
 import com.pillpals.pillpals.helpers.DatabaseHelper.Companion.getByteArrayById
 import com.pillpals.pillpals.helpers.DatabaseHelper.Companion.getColorIDByString
 import com.pillpals.pillpals.helpers.DatabaseHelper.Companion.getColorStringByID
+import com.pillpals.pillpals.helpers.DatabaseHelper.Companion.getDPDObjectById
 import com.pillpals.pillpals.helpers.DatabaseHelper.Companion.getIconByID
 import com.pillpals.pillpals.helpers.DatabaseHelper.Companion.getIconIDByString
 import com.pillpals.pillpals.helpers.DatabaseHelper.Companion.getRandomIcon
@@ -53,6 +55,7 @@ class AddDrugActivity : AppCompatActivity() {
     public lateinit var addScheduleButton : MaterialButton
     public lateinit var deleteButton: TextView
     lateinit var linkMedicationButton: TextView
+    lateinit var unlinkMedicationButton: TextView
     public lateinit var scheduleStack: LinearLayout
     public lateinit var bottomOptions: BottomOptions
     public lateinit var iconButton: MaterialButton
@@ -64,7 +67,7 @@ class AddDrugActivity : AppCompatActivity() {
     public lateinit var imageDrawable: String
     public var photoBoolean = false
 
-    var dpdIdToLink: Int? = null
+    private var dpdIdToLink: Int? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -77,6 +80,7 @@ class AddDrugActivity : AppCompatActivity() {
         addScheduleButton = findViewById(R.id.addScheduleButton)
         deleteButton = findViewById(R.id.deleteButton)
         linkMedicationButton = findViewById(R.id.linkMedicationButton)
+        unlinkMedicationButton = findViewById(R.id.unlinkMedicationButton)
         scheduleStack = findViewById(R.id.scheduleStack)
         iconButton = findViewById(R.id.iconButton)
         bottomOptions = findViewById(R.id.bottomOptions)
@@ -84,6 +88,7 @@ class AddDrugActivity : AppCompatActivity() {
         bottomOptions.rightButton.text = "Cancel"
 
         linkMedicationButton.visibility = View.GONE
+        unlinkMedicationButton.visibility = View.GONE
 
         // region Bottom Button Listeners
         if (intent.hasExtra("medication-uid")) {
@@ -92,12 +97,20 @@ class AddDrugActivity : AppCompatActivity() {
 
             if(medication.dpd_object?.firstOrNull() == null) {
                 linkMedicationButton.visibility = View.VISIBLE
-                linkMedicationButton.setOnClickListener {
-                    val linkIntent = Intent(this, SearchActivity::class.java)
-                    linkIntent.putExtra("medication-uid", medication.uid)
+            }
+            else {
+                unlinkMedicationButton.visibility = View.VISIBLE
+            }
 
-                    startActivityForResult(linkIntent, 3)
-                }
+            linkMedicationButton.setOnClickListener {
+                val linkIntent = Intent(this, SearchActivity::class.java)
+                linkIntent.putExtra("medication-uid", medication.uid)
+
+                startActivityForResult(linkIntent, 3)
+            }
+
+            unlinkMedicationButton.setOnClickListener {
+                startUnlinkDialog(medication)
             }
 
             editText.setText(medication.name)
@@ -195,11 +208,24 @@ class AddDrugActivity : AppCompatActivity() {
             iconButton.backgroundTintList = ColorStateList.valueOf(Color.parseColor(colorString))
             iconButton.icon = resources.getDrawable(DatabaseHelper.getDrawableIconById(this, getIconIDByString(imageDrawable)), theme)
 
-            linkMedicationButton.visibility = View.VISIBLE
+
+
+            if(dpdIdToLink == null || dpdIdToLink == 0) {
+
+                linkMedicationButton.visibility = View.VISIBLE
+            }
+            else {
+
+            }
+
             linkMedicationButton.setOnClickListener {
                 val linkIntent = Intent(this, SearchActivity::class.java)
 
                 startActivityForResult(linkIntent, 4)
+            }
+
+            unlinkMedicationButton.setOnClickListener {
+                startUnlinkDialog(null)
             }
 
             bottomOptions.leftButton.setOnClickListener{
@@ -425,12 +451,73 @@ class AddDrugActivity : AppCompatActivity() {
         }
     }
 
+    private fun unlinkMedication(dpdObject: DPDObjects, medication: Medications) {
+        Realm.getDefaultInstance().executeTransaction {
+            dpdObject.medications.remove(medication)
+        }
+    }
+
     private fun updateScheduleList() {
         scheduleStack.removeAllViews()
         if (intent.hasExtra("medication-uid")) {
             addScheduleRecords(calculateScheduleRecords(getMedicationByUid(intent.getStringExtra("medication-uid"))!!.schedules, this, scheduleRecordsSetToDelete))
         }
         addScheduleRecords(calculateScheduleRecords(toBeAdded, this, scheduleRecordsSetToDelete))
+    }
+
+    private fun startUnlinkDialog(medication: Medications?) {
+        var dpdObject:DPDObjects?
+        if(medication == null) {
+            if(dpdIdToLink == null || dpdIdToLink == 0) return
+            dpdObject = getDPDObjectById(dpdIdToLink!!)
+        }
+        else {
+            dpdObject = medication.dpd_object?.firstOrNull() ?: return
+        }
+
+
+        val unlinkDialog = LayoutInflater.from(this).inflate(R.layout.delete_schedules_prompt, null)
+
+        unlinkDialog.findViewById<TextView>(R.id.deletePrompt).text = "Are you sure you want to unlink this medication?"
+        val title = SpannableString("Unlink Medication")
+        title.setSpan(
+            ForegroundColorSpan(ResourcesCompat.getColor(getResources(), R.color.colorLightGrey, null)),
+            0,
+            title.length,
+            Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+        )
+        val dialogBuilder = AlertDialog.Builder(this)
+            .setView(unlinkDialog)
+            .setTitle(title)
+
+        val whiteTextBox = unlinkDialog!!.findViewById<TextView>(R.id.deleteSchedules)
+
+        val whiteText = SpannableString(dpdObject!!.name)
+        whiteText.setSpan(
+            ForegroundColorSpan(ResourcesCompat.getColor(getResources(), R.color.colorLightGrey, null)),
+            0,
+            whiteText.length,
+            Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+        )
+
+        whiteTextBox.text = whiteText
+
+        val unlinkAlertDialog = dialogBuilder.show()
+        unlinkDialog.dialogConfirmBtn.setOnClickListener {
+            unlinkAlertDialog.dismiss()
+            if(medication != null) {
+                unlinkMedication(dpdObject!!, medication)
+            }
+            else {
+                dpdIdToLink = null
+            }
+            unlinkMedicationButton.visibility = View.GONE
+            linkMedicationButton.visibility = View.VISIBLE
+        }
+
+        unlinkDialog.dialogCancelBtn.setOnClickListener {
+            unlinkAlertDialog.dismiss()
+        }
     }
 
     override fun onActivityResult(requestCode:Int, resultCode:Int, data:Intent?) {
@@ -486,8 +573,17 @@ class AddDrugActivity : AppCompatActivity() {
                     }
                 }
             } else if (requestCode == 3) { // Link with existing medication
+                val responseId = data.getIntExtra("dpd-id", 0)
+                if(responseId != 0) {
+                    linkMedicationButton.visibility = View.GONE
+                    unlinkMedicationButton.visibility = View.VISIBLE
+                }
             } else if (requestCode == 4) { // Link with non-existing medication
                 dpdIdToLink = data.getIntExtra("dpd-id", 0)
+                if(dpdIdToLink != null && dpdIdToLink != 0) {
+                    linkMedicationButton.visibility = View.GONE
+                    unlinkMedicationButton.visibility = View.VISIBLE
+                }
             }
         }
 

@@ -77,7 +77,7 @@ class SearchActivity : AppCompatActivity() {
 
         apiWarning.visibility = GONE
 
-        outerContext = applicationContext
+        outerContext = this
         handler = Handler(Looper.getMainLooper())
 
         loadingAnimation = RotateAnimation(0f, 360f, 55f, 55f)
@@ -241,7 +241,7 @@ class SearchActivity : AppCompatActivity() {
         })
 
         val cursor = MatrixCursor(arrayOf("_id", "suggestion"))
-        searchView.suggestionsAdapter = SearchSuggestionCursor(applicationContext, cursor, searchView)
+        searchView.suggestionsAdapter = SearchSuggestionCursor(outerContext, cursor, searchView)
     }
 
     private fun updateSuggestions() {
@@ -295,6 +295,7 @@ class SearchActivity : AppCompatActivity() {
 
         drugsToSearch.forEachIndexed {index, suggestion ->
             drugCards.add(addDrugCard(suggestion))
+            Log.i("test", drugCards.toString())
             val re = Regex("[^A-Za-z ]")
             val url = "https://health-products.canada.ca/api/drug/drugproduct/?brandname=${re.replace(suggestion, "")}"
 
@@ -485,7 +486,7 @@ class SearchActivity : AppCompatActivity() {
     }
 
     private fun addDrugCard(name: String): DrugCard {
-        var newCard = DrugCard(applicationContext)
+        var newCard = DrugCard(this)
 
         newCard.nameText.text = name
         newCard.timeText.text = "..."
@@ -495,6 +496,8 @@ class SearchActivity : AppCompatActivity() {
         newCard.button.layoutParams.width = ViewGroup.LayoutParams.WRAP_CONTENT
 
         newCard.overflowMenu.visibility = View.INVISIBLE
+
+        Log.i("test", newCard.toString())
 
         searchResults.addView(newCard)
         return newCard

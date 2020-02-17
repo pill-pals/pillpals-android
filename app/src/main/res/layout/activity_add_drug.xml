@@ -144,10 +144,11 @@
                 <EditText
                     android:id="@+id/editText3"
                     android:layout_width="0dp"
-                    android:layout_height="wrap_content"
+                    android:layout_height="41dp"
                     android:layout_marginStart="16dp"
                     android:layout_marginTop="16dp"
                     android:layout_marginEnd="16dp"
+                    android:layout_marginBottom="32dp"
                     android:background="@color/colorGrey"
                     android:ems="10"
                     android:gravity="start|top"
@@ -157,6 +158,7 @@
                     android:padding="7dp"
                     android:textColor="@color/colorBlack"
                     android:textSize="20sp"
+                    app:layout_constraintBottom_toTopOf="@+id/linkMedicationButton"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@+id/textView" />
@@ -216,6 +218,27 @@
                     app:layout_constraintTop_toBottomOf="@+id/editText3" />
 
                 <TextView
+                    android:id="@+id/unlinkMedicationButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="0dp"
+                    android:layout_gravity="center"
+                    android:layout_marginStart="128dp"
+                    android:layout_marginTop="32dp"
+                    android:layout_marginEnd="128dp"
+                    android:backgroundTint="@color/colorLightGrey"
+                    android:drawableLeft="@drawable/ic_subtract"
+                    android:drawablePadding="6dp"
+                    android:drawableTint="@color/colorRed"
+                    android:gravity="center"
+                    android:padding="8dp"
+                    android:text="Unlink medication"
+                    android:textColor="@color/colorRed"
+                    android:textSize="16sp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/linkMedicationButton" />
+
+                <TextView
                     android:id="@+id/deleteButton"
                     android:layout_width="wrap_content"
                     android:layout_height="0dp"
@@ -232,7 +255,7 @@
                     android:textSize="16sp"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/linkMedicationButton" />
+                    app:layout_constraintTop_toBottomOf="@+id/unlinkMedicationButton" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 
