@@ -30,6 +30,12 @@ import io.realm.RealmList
 import io.realm.RealmObject
 import io.realm.RealmResults
 import java.util.*
+import io.realm.RealmObject.deleteFromRealm
+import androidx.core.app.ComponentActivity.ExtraData
+import androidx.core.content.ContextCompat.getSystemService
+import android.icu.lang.UCharacter.GraphemeClusterBreak.T
+
+
 
 class QuizActivity: AppCompatActivity() {
 
@@ -58,6 +64,8 @@ class QuizActivity: AppCompatActivity() {
         completedStack = findViewById(R.id.completedStack)
         pausedCollapseBtn = findViewById(R.id.pausedCollapseBtn)
         completedCollapseBtn = findViewById(R.id.completedCollapseBtn)
+
+        clearTestData()
 
         createTestData()
 
@@ -98,9 +106,15 @@ class QuizActivity: AppCompatActivity() {
         else if (QuizHelper.getQuestionsAnswered(quiz) == 10){
             //completed stack
             newCard.scoreText.text = QuizHelper.getQuizScore(quiz).toString()
+
             newCard.scoreBackground.setCardBackgroundColor(Color.parseColor(getColorStringByScore(QuizHelper.getQuizScore(quiz))))
             newCard.button.text = "View"
             newCard.button.backgroundTintList = ColorStateList.valueOf(ResourcesCompat.getColor(getResources(), R.color.colorDarkGrey, null))
+            newCard.button.setOnClickListener {
+                val intent = Intent(this, QuizResultsActivity::class.java)
+                intent.putExtra("quiz-uid", quiz.uid)
+                startActivityForResult(intent, 1)
+            }
             if (prefs.getBoolean(getString(R.string.quiz_completed_stack_collapsed), false)) {
                 newCard.visibility = View.GONE
             }
@@ -294,5 +308,15 @@ class QuizActivity: AppCompatActivity() {
 
     private fun readAllData(realmClass: Class<out RealmObject>): RealmResults<out RealmObject> {
         return realm.where(realmClass).findAll()
+    }
+
+    private fun clearTestData() {
+        realm.beginTransaction()
+            var questions = readAllData(Questions::class.java) as RealmResults<out Questions>
+            var quizzes = readAllData(Quizzes::class.java) as RealmResults<out Quizzes>
+
+            questions.deleteAllFromRealm()
+            quizzes.deleteAllFromRealm()
+        realm.commitTransaction()
     }
 }

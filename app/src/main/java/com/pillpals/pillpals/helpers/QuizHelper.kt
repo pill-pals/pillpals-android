@@ -1,8 +1,5 @@
 package com.pillpals.pillpals.helpers
 
-import com.pillpals.pillpals.data.model.Logs
-import com.pillpals.pillpals.data.model.Medications
-import com.pillpals.pillpals.data.model.Schedules
 import com.pillpals.pillpals.ui.statistics.DataLogs
 import com.pillpals.pillpals.ui.statistics.MissingLogs
 import com.pillpals.pillpals.ui.statistics.TimeCount
@@ -10,7 +7,7 @@ import io.realm.Realm
 import java.util.*
 import kotlin.math.abs
 import android.util.Log
-import com.pillpals.pillpals.data.model.Quizzes
+import com.pillpals.pillpals.data.model.*
 
 class QuizHelper {
     companion object {
@@ -31,6 +28,20 @@ class QuizHelper {
                 }
             }
             return questionsAnswered
+        }
+        fun getCorrectAnswerString(question: Questions):String {
+            return if (question.correctAnswer == null) {
+                "Missing Correct Answer"
+            } else {
+                question.answers[question.correctAnswer!!]!!
+            }
+        }
+        fun getUserAnswerString(question: Questions):String {
+            return if (question.userAnswer == null) {
+                "Missing User Answer"
+            } else {
+                question.answers[question.userAnswer!!]!!
+            }
         }
     }
 }
