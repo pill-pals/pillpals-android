@@ -11,4 +11,9 @@
         android:icon="@drawable/ic_undo_black_24dp"
         android:title="Undo log" />
 
+    <item
+        android:id="@+id/linkMedication"
+        android:icon="@drawable/ic_clock"
+        android:title="Link medication" />
+
 </menu>

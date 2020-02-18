@@ -6,4 +6,9 @@
         android:icon="@drawable/delete_outline_24dp"
         android:title="Delete medication" />
 
+    <item
+        android:id="@+id/linkMedication"
+        android:icon="@drawable/ic_clock"
+        android:title="Link medication" />
+
 </menu>

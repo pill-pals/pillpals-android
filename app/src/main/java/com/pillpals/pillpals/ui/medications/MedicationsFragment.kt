@@ -32,6 +32,7 @@ import com.pillpals.pillpals.helpers.DatabaseHelper.Companion.getCorrectIconDraw
 import com.pillpals.pillpals.helpers.calculateScheduleRecords
 import com.pillpals.pillpals.ui.ScheduleRecord
 import com.pillpals.pillpals.ui.medications.medication_info.MedicationInfoActivity
+import com.pillpals.pillpals.ui.search.SearchActivity
 import kotlinx.android.synthetic.main.delete_prompt.view.*
 import kotlinx.android.synthetic.main.drug_card.view.*
 
@@ -118,6 +119,11 @@ class MedicationsFragment : Fragment() {
                     intent.putExtra("dosage-string", dpdObject.dosageString)
                     intent.putExtra("name-text", dpdObject.name)
                     startActivityForResult(intent, 2)
+                }
+                R.id.linkMedication -> {
+                    val intent = Intent(context, SearchActivity::class.java)
+                    intent.putExtra("medication-uid", medication.uid)
+                    startActivityForResult(intent, 3)
                 }
             }
             true
