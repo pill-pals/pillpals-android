@@ -12,6 +12,7 @@ import android.text.Spanned
 import android.text.style.ForegroundColorSpan
 import android.util.Log
 import android.view.LayoutInflater
+import android.view.MenuItem
 import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import android.widget.EditText
@@ -21,6 +22,7 @@ import java.util.Calendar
 
 import androidx.appcompat.app.AppCompatActivity
 import androidx.cardview.widget.CardView
+import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
 import com.pillpals.pillpals.R
 import com.pillpals.pillpals.data.model.Medications
@@ -47,7 +49,11 @@ import com.pillpals.pillpals.helpers.QuizHelper
 import com.pillpals.pillpals.helpers.calculateScheduleRecords
 import io.realm.RealmObject.deleteFromRealm
 import kotlinx.android.synthetic.main.delete_prompt.view.*
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import org.w3c.dom.Text
+import kotlin.concurrent.thread
 
 class QuizQuestionActivity : AppCompatActivity() {
 
@@ -58,10 +64,14 @@ class QuizQuestionActivity : AppCompatActivity() {
     lateinit var drugName: TextView
     lateinit var questionTitle: TextView
     lateinit var questionText: TextView
-    lateinit var answer1btn: Button
-    lateinit var answer2btn: Button
-    lateinit var answer3btn: Button
-    lateinit var answer4btn: Button
+    lateinit var answer1btn: ImageButton
+    lateinit var answer2btn: ImageButton
+    lateinit var answer3btn: ImageButton
+    lateinit var answer4btn: ImageButton
+    lateinit var answer1: TextView
+    lateinit var answer2: TextView
+    lateinit var answer3: TextView
+    lateinit var answer4: TextView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -74,6 +84,9 @@ class QuizQuestionActivity : AppCompatActivity() {
         val quizUID = intent.getStringExtra("quiz-uid")
         quiz = DatabaseHelper.getQuizByUid(quizUID)!!
 
+        supportActionBar!!.setDisplayHomeAsUpEnabled(true)
+        supportActionBar!!.setTitle(quiz.name)
+
         icon = findViewById(R.id.icon)
         iconBackground = findViewById(R.id.iconBackground)
         drugName = findViewById(R.id.drugName)
@@ -83,6 +96,10 @@ class QuizQuestionActivity : AppCompatActivity() {
         answer2btn = findViewById(R.id.answer2btn)
         answer3btn = findViewById(R.id.answer3btn)
         answer4btn = findViewById(R.id.answer4btn)
+        answer1 = findViewById(R.id.answer1)
+        answer2 = findViewById(R.id.answer2)
+        answer3 = findViewById(R.id.answer3)
+        answer4 = findViewById(R.id.answer4)
 
         setPageContentsForQuestion(QuizHelper.getQuestionsAnswered(quiz))
     }
@@ -97,26 +114,46 @@ class QuizQuestionActivity : AppCompatActivity() {
             )
         )
         drugName.text = question.medication!!.name
-        questionTitle.text = quiz.name + " - Question " + (index + 1).toString()
+        questionTitle.text = "Question " + (index + 1).toString()
         questionText.text = question.question
-        answer1btn.text = question.answers[0]
-        answer1btn.setOnClickListener{answerQuestion(question,0, index)}
-        answer2btn.text = question.answers[1]
-        answer2btn.setOnClickListener{answerQuestion(question,1, index)}
-        answer3btn.text = question.answers[2]
-        answer3btn.setOnClickListener{answerQuestion(question,2, index)}
-        answer4btn.text = question.answers[3]
-        answer4btn.setOnClickListener{answerQuestion(question,3, index)}
+
+        setUpButtons(question, index)
+
     }
 
     private fun answerQuestion(question: Questions, answer: Int, index: Int) {
         realm.executeTransaction{
             question.userAnswer = answer
         }
+
         if(index == 9) {
-            //go to results screen
+            val intent = Intent(this, QuizResultsActivity::class.java)
+            intent.putExtra("quiz-uid", quiz.uid)
+            startActivityForResult(intent, 1)
+            this.finish()
         } else {
             setPageContentsForQuestion(index + 1)
         }
+    }
+
+    private fun setUpButtons(question: Questions, index: Int) {
+        answer1.text = question.answers[0]
+        answer1btn.setOnClickListener{answerQuestion(question,0, index)}
+        answer2.text = question.answers[1]
+        answer2btn.setOnClickListener{answerQuestion(question,1, index)}
+        answer3.text = question.answers[2]
+        answer3btn.setOnClickListener{answerQuestion(question,2, index)}
+        answer4.text = question.answers[3]
+        answer4btn.setOnClickListener{answerQuestion(question,3, index)}
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when (item.getItemId()) {
+            android.R.id.home -> {
+                onBackPressed()
+                return true
+            }
+        }
+        return super.onOptionsItemSelected(item)
     }
 }
