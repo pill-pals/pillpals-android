@@ -12,6 +12,7 @@ import android.text.Spanned
 import android.text.style.ForegroundColorSpan
 import android.util.Log
 import android.view.LayoutInflater
+import android.view.MenuItem
 import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import android.widget.EditText
@@ -135,5 +136,15 @@ class QuizQuestionActivity : AppCompatActivity() {
         answer3btn.setOnClickListener{answerQuestion(question,2, index)}
         answer4btn.text = question.answers[3]
         answer4btn.setOnClickListener{answerQuestion(question,3, index)}
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when (item.getItemId()) {
+            android.R.id.home -> {
+                onBackPressed()
+                return true
+            }
+        }
+        return super.onOptionsItemSelected(item)
     }
 }

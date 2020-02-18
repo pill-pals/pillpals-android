@@ -311,7 +311,6 @@ class QuizActivity: AppCompatActivity() {
     }
 
     private fun clearTestData() {
-
         realm.beginTransaction()
             var questions = readAllData(Questions::class.java) as RealmResults<out Questions>
             var quizzes = readAllData(Quizzes::class.java) as RealmResults<out Quizzes>
