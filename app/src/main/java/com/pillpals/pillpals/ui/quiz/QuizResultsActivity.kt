@@ -46,6 +46,7 @@ import com.pillpals.pillpals.helpers.DatabaseHelper.Companion.getRandomUniqueCol
 import com.pillpals.pillpals.helpers.DatabaseHelper.Companion.getScheduleByUid
 import com.pillpals.pillpals.helpers.QuizHelper
 import com.pillpals.pillpals.helpers.calculateScheduleRecords
+import com.pillpals.pillpals.ui.QuestionResult
 import com.pillpals.pillpals.ui.QuizCard
 import io.realm.RealmObject.deleteFromRealm
 import kotlinx.android.synthetic.main.delete_prompt.view.*
@@ -69,12 +70,23 @@ class QuizResultsActivity : AppCompatActivity() {
         val quizUID = intent.getStringExtra("quiz-uid")
         quiz = DatabaseHelper.getQuizByUid(quizUID)!!
 
+        supportActionBar!!.setDisplayHomeAsUpEnabled(true)
+        supportActionBar!!.setTitle(quiz.name + " Results")
+
         quizCardStack = findViewById(R.id.quizCardStack)
         resultsStack = findViewById(R.id.resultsStack)
 
         addQuizCard()
+        createQuestionResults()
     }
-    
+
+    private fun createQuestionResults() {
+        quiz.questions.forEachIndexed{ index,question ->
+            var questionResult = QuestionResult(question,index,this)
+            resultsStack.addView(questionResult)
+        }
+    }
+
     private fun addQuizCard() {
         var quizCard = QuizCard(this)
         quizCard.nameText.text = quiz.name

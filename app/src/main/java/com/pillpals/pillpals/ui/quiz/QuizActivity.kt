@@ -30,6 +30,12 @@ import io.realm.RealmList
 import io.realm.RealmObject
 import io.realm.RealmResults
 import java.util.*
+import io.realm.RealmObject.deleteFromRealm
+import androidx.core.app.ComponentActivity.ExtraData
+import androidx.core.content.ContextCompat.getSystemService
+import android.icu.lang.UCharacter.GraphemeClusterBreak.T
+
+
 
 class QuizActivity: AppCompatActivity() {
 
@@ -58,6 +64,8 @@ class QuizActivity: AppCompatActivity() {
         completedStack = findViewById(R.id.completedStack)
         pausedCollapseBtn = findViewById(R.id.pausedCollapseBtn)
         completedCollapseBtn = findViewById(R.id.completedCollapseBtn)
+
+        clearTestData()
 
         createTestData()
 
@@ -300,5 +308,16 @@ class QuizActivity: AppCompatActivity() {
 
     private fun readAllData(realmClass: Class<out RealmObject>): RealmResults<out RealmObject> {
         return realm.where(realmClass).findAll()
+    }
+
+    private fun clearTestData() {
+
+        realm.beginTransaction()
+            var questions = readAllData(Questions::class.java) as RealmResults<out Questions>
+            var quizzes = readAllData(Quizzes::class.java) as RealmResults<out Quizzes>
+
+            questions.deleteAllFromRealm()
+            quizzes.deleteAllFromRealm()
+        realm.commitTransaction()
     }
 }

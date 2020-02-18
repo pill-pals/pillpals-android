@@ -28,14 +28,6 @@
                 android:layout_marginTop="16dp"
                 android:orientation="vertical"></LinearLayout>
 
-            <View
-                android:id="@+id/view5"
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:layout_marginHorizontal="16dp"
-                android:layout_marginVertical="8dp"
-                android:background="@color/colorGrey" />
-
             <LinearLayout
                 android:id="@+id/resultsStack"
                 android:layout_width="match_parent"

@@ -47,7 +47,11 @@ import com.pillpals.pillpals.helpers.QuizHelper
 import com.pillpals.pillpals.helpers.calculateScheduleRecords
 import io.realm.RealmObject.deleteFromRealm
 import kotlinx.android.synthetic.main.delete_prompt.view.*
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import org.w3c.dom.Text
+import kotlin.concurrent.thread
 
 class QuizQuestionActivity : AppCompatActivity() {
 
@@ -74,6 +78,9 @@ class QuizQuestionActivity : AppCompatActivity() {
         val quizUID = intent.getStringExtra("quiz-uid")
         quiz = DatabaseHelper.getQuizByUid(quizUID)!!
 
+        supportActionBar!!.setDisplayHomeAsUpEnabled(true)
+        supportActionBar!!.setTitle(quiz.name)
+
         icon = findViewById(R.id.icon)
         iconBackground = findViewById(R.id.iconBackground)
         drugName = findViewById(R.id.drugName)
@@ -97,8 +104,29 @@ class QuizQuestionActivity : AppCompatActivity() {
             )
         )
         drugName.text = question.medication!!.name
-        questionTitle.text = quiz.name + " - Question " + (index + 1).toString()
+        questionTitle.text = "Question " + (index + 1).toString()
         questionText.text = question.question
+
+        setUpButtons(question, index)
+
+    }
+
+    private fun answerQuestion(question: Questions, answer: Int, index: Int) {
+        realm.executeTransaction{
+            question.userAnswer = answer
+        }
+
+        if(index == 9) {
+            val intent = Intent(this, QuizResultsActivity::class.java)
+            intent.putExtra("quiz-uid", quiz.uid)
+            startActivityForResult(intent, 1)
+            this.finish()
+        } else {
+            setPageContentsForQuestion(index + 1)
+        }
+    }
+
+    private fun setUpButtons(question: Questions, index: Int) {
         answer1btn.text = question.answers[0]
         answer1btn.setOnClickListener{answerQuestion(question,0, index)}
         answer2btn.text = question.answers[1]
@@ -107,18 +135,5 @@ class QuizQuestionActivity : AppCompatActivity() {
         answer3btn.setOnClickListener{answerQuestion(question,2, index)}
         answer4btn.text = question.answers[3]
         answer4btn.setOnClickListener{answerQuestion(question,3, index)}
-    }
-
-    private fun answerQuestion(question: Questions, answer: Int, index: Int) {
-        realm.executeTransaction{
-            question.userAnswer = answer
-        }
-        if(index == 9) {
-            val intent = Intent(this, QuizQuestionActivity::class.java)
-            intent.putExtra("quiz-uid", quiz.uid)
-            startActivityForResult(intent, 1)
-        } else {
-            setPageContentsForQuestion(index + 1)
-        }
     }
 }
