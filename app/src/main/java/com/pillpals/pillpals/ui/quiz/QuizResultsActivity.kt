@@ -12,6 +12,7 @@ import android.text.Spanned
 import android.text.style.ForegroundColorSpan
 import android.util.Log
 import android.view.LayoutInflater
+import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import android.widget.EditText
@@ -45,23 +46,17 @@ import com.pillpals.pillpals.helpers.DatabaseHelper.Companion.getRandomUniqueCol
 import com.pillpals.pillpals.helpers.DatabaseHelper.Companion.getScheduleByUid
 import com.pillpals.pillpals.helpers.QuizHelper
 import com.pillpals.pillpals.helpers.calculateScheduleRecords
+import com.pillpals.pillpals.ui.QuizCard
 import io.realm.RealmObject.deleteFromRealm
 import kotlinx.android.synthetic.main.delete_prompt.view.*
 import org.w3c.dom.Text
 
-class QuizQuestionActivity : AppCompatActivity() {
+class QuizResultsActivity : AppCompatActivity() {
 
     lateinit var realm: Realm
     lateinit var quiz: Quizzes
-    lateinit var icon: ImageView
-    lateinit var iconBackground: CardView
-    lateinit var drugName: TextView
-    lateinit var questionTitle: TextView
-    lateinit var questionText: TextView
-    lateinit var answer1btn: Button
-    lateinit var answer2btn: Button
-    lateinit var answer3btn: Button
-    lateinit var answer4btn: Button
+    lateinit var quizCardStack: LinearLayout
+    lateinit var resultsStack: LinearLayout
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -69,56 +64,44 @@ class QuizQuestionActivity : AppCompatActivity() {
 
         realm = Realm.getDefaultInstance()
 
-        setContentView(R.layout.activity_quiz_question)
+        setContentView(R.layout.activity_quiz_results)
 
         val quizUID = intent.getStringExtra("quiz-uid")
         quiz = DatabaseHelper.getQuizByUid(quizUID)!!
 
-        icon = findViewById(R.id.icon)
-        iconBackground = findViewById(R.id.iconBackground)
-        drugName = findViewById(R.id.drugName)
-        questionTitle = findViewById(R.id.questionTitle)
-        questionText = findViewById(R.id.questionText)
-        answer1btn = findViewById(R.id.answer1btn)
-        answer2btn = findViewById(R.id.answer2btn)
-        answer3btn = findViewById(R.id.answer3btn)
-        answer4btn = findViewById(R.id.answer4btn)
+        quizCardStack = findViewById(R.id.quizCardStack)
+        resultsStack = findViewById(R.id.resultsStack)
 
-        setPageContentsForQuestion(QuizHelper.getQuestionsAnswered(quiz))
+        addQuizCard()
     }
+    
+    private fun addQuizCard() {
+        var quizCard = QuizCard(this)
+        quizCard.nameText.text = quiz.name
+        val cal = Calendar.getInstance()
+        cal.time = quiz.date
+        quizCard.timeText.text = cal.getDisplayName(
+            Calendar.MONTH,
+            Calendar.SHORT,
+            Locale.US
+        ) + " " + cal.get(Calendar.DAY_OF_MONTH).toString() + ", " + cal.get(Calendar.YEAR).toString()
+        quizCard.scoreText.text = QuizHelper.getQuizScore(quiz).toString()
 
-    private fun setPageContentsForQuestion(index: Int){
-        val question = quiz!!.questions[index]!!
-        iconBackground.setCardBackgroundColor(Color.parseColor(getColorStringByID(question.medication!!.color_id)))
-        icon.setImageDrawable(
-            DatabaseHelper.getCorrectIconDrawable(
-                this,
-                question.medication!!
-            )
-        )
-        drugName.text = question.medication!!.name
-        questionTitle.text = quiz.name + " - Question " + (index + 1).toString()
-        questionText.text = question.question
-        answer1btn.text = question.answers[0]
-        answer1btn.setOnClickListener{answerQuestion(question,0, index)}
-        answer2btn.text = question.answers[1]
-        answer2btn.setOnClickListener{answerQuestion(question,1, index)}
-        answer3btn.text = question.answers[2]
-        answer3btn.setOnClickListener{answerQuestion(question,2, index)}
-        answer4btn.text = question.answers[3]
-        answer4btn.setOnClickListener{answerQuestion(question,3, index)}
+        quizCard.scoreBackground.setCardBackgroundColor(Color.parseColor(getColorStringByScore(QuizHelper.getQuizScore(quiz))))
+        quizCard.button.visibility = View.GONE
+
+        quizCardStack.addView(quizCard)
     }
-
-    private fun answerQuestion(question: Questions, answer: Int, index: Int) {
-        realm.executeTransaction{
-            question.userAnswer = answer
-        }
-        if(index == 9) {
-            val intent = Intent(this, QuizQuestionActivity::class.java)
-            intent.putExtra("quiz-uid", quiz.uid)
-            startActivityForResult(intent, 1)
-        } else {
-            setPageContentsForQuestion(index + 1)
+    
+    private fun getColorStringByScore(score: Int):String {
+        return when {
+            score > 8 -> "#43A047"
+            score > 7 -> "#7CB342"
+            score > 6 -> "#C0CA33"
+            score > 5 -> "#FDD835"
+            score > 4 -> "#FFB300"
+            score > 3 -> "#FB8C00"
+            else -> "#F4511E"
         }
     }
 }

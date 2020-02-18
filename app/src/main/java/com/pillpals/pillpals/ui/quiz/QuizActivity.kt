@@ -98,9 +98,15 @@ class QuizActivity: AppCompatActivity() {
         else if (QuizHelper.getQuestionsAnswered(quiz) == 10){
             //completed stack
             newCard.scoreText.text = QuizHelper.getQuizScore(quiz).toString()
+
             newCard.scoreBackground.setCardBackgroundColor(Color.parseColor(getColorStringByScore(QuizHelper.getQuizScore(quiz))))
             newCard.button.text = "View"
             newCard.button.backgroundTintList = ColorStateList.valueOf(ResourcesCompat.getColor(getResources(), R.color.colorDarkGrey, null))
+            newCard.button.setOnClickListener {
+                val intent = Intent(this, QuizResultsActivity::class.java)
+                intent.putExtra("quiz-uid", quiz.uid)
+                startActivityForResult(intent, 1)
+            }
             if (prefs.getBoolean(getString(R.string.quiz_completed_stack_collapsed), false)) {
                 newCard.visibility = View.GONE
             }
