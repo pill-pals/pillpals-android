@@ -14,7 +14,8 @@ public class BootupReceiver: BroadcastReceiver() {
         val schedules = DatabaseHelper.readAllData(
             Schedules::class.java
         ) as RealmResults<out Schedules>
-        DashboardFragment().setUpScheduleCards(schedules)
+        DashboardFragment().setUpSchedules(schedules, false)
+        NotificationUtils.createNotificationChannel(context)
         NotificationUtils.updateAlarms(context)
     }
 }

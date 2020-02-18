@@ -1,10 +1,14 @@
 package com.pillpals.pillpals.helpers
 
 import android.app.AlarmManager
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.os.Build
 import androidx.core.app.NotificationManagerCompat
+import com.pillpals.pillpals.R
 import com.pillpals.pillpals.data.model.Schedules
 import java.util.*
 import com.pillpals.pillpals.services.AlarmReceiver
@@ -56,6 +60,22 @@ class NotificationUtils {
                 intent,
                 0
             )
+        }
+
+        fun createNotificationChannel(context: Context) {
+            // Create the NotificationChannel, but only on API 26+ because
+            // the NotificationChannel class is new and not in the support library
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                val name = context.getString(R.string.channel_name)
+                val description = context.getString(R.string.channel_description)
+                val importance = NotificationManager.IMPORTANCE_HIGH
+                val channel = NotificationChannel(context.getString(R.string.channel_id), name, importance)
+                channel.description = description
+                // Register the channel with the system; you can't change the importance
+                // or other notification behaviors after this
+                val notificationManager = context.getSystemService(NotificationManager::class.java)
+                notificationManager!!.createNotificationChannel(channel)
+            }
         }
     }
 }
