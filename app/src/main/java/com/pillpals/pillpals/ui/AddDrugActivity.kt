@@ -20,6 +20,7 @@ import android.widget.Toast
 import java.util.Calendar
 
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.res.ResourcesCompat
 import com.pillpals.pillpals.R
 import com.pillpals.pillpals.data.model.Medications
@@ -42,6 +43,7 @@ import com.pillpals.pillpals.helpers.DatabaseHelper.Companion.getIconIDByString
 import com.pillpals.pillpals.helpers.DatabaseHelper.Companion.getRandomIcon
 import com.pillpals.pillpals.helpers.DatabaseHelper.Companion.getRandomUniqueColorString
 import com.pillpals.pillpals.helpers.DatabaseHelper.Companion.getScheduleByUid
+import com.pillpals.pillpals.helpers.NotificationUtils
 import com.pillpals.pillpals.helpers.calculateScheduleRecords
 import com.pillpals.pillpals.ui.search.SearchActivity
 import io.realm.RealmObject.deleteFromRealm
@@ -256,6 +258,10 @@ class AddDrugActivity : AppCompatActivity() {
                             deleteAlertDialog.dismiss()
                             val schedules = scheduleRecordsSetToDelete.flatMap { it.schedules }
                             DatabaseHelper.deleteSchedules(schedules)
+                            var nm = NotificationManagerCompat.from(applicationContext)
+                            for (schedule in schedules) {
+                                nm.cancel(schedule.uid!!.hashCode())
+                            }
                             createMedicationData(
                                 editText.text.toString(),
                                 editText2.text.toString(),
@@ -276,6 +282,7 @@ class AddDrugActivity : AppCompatActivity() {
                         )
                         finish()
                     }
+                    NotificationUtils.updateAlarms(applicationContext)
                 } else{
                     Toast.makeText(applicationContext, "Please set a name and dosage", Toast.LENGTH_SHORT).show()
                 }

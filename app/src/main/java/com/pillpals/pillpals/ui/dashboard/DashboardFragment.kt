@@ -16,7 +16,6 @@ import com.pillpals.pillpals.helpers.DateHelper
 import androidx.core.content.res.ResourcesCompat
 import com.pillpals.pillpals.ui.DrugCard
 
-import com.pillpals.pillpals.helpers.NotificationUtils
 import android.os.Handler
 import android.text.SpannableString
 import android.text.Spanned
@@ -34,8 +33,6 @@ import android.content.SharedPreferences
 import android.content.res.ColorStateList
 import android.graphics.*
 import android.graphics.drawable.AnimatedVectorDrawable
-import android.os.Looper
-import android.util.Log
 import androidx.cardview.widget.CardView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.app.NotificationManagerCompat
@@ -43,15 +40,12 @@ import androidx.core.view.children
 import com.pillpals.pillpals.helpers.DatabaseHelper
 import com.pillpals.pillpals.helpers.DatabaseHelper.Companion.getCorrectIconDrawable
 import com.pillpals.pillpals.helpers.DatabaseHelper.Companion.obliterateSchedule
-import com.pillpals.pillpals.helpers.MedicationInfoRetriever
 import com.pillpals.pillpals.ui.AddDrugActivity
 import com.pillpals.pillpals.ui.medications.medication_info.MedicationInfoActivity
 import com.pillpals.pillpals.ui.search.SearchActivity
 import com.shopify.promises.Promise
 import com.shopify.promises.then
 import kotlinx.android.synthetic.main.time_prompt.view.*
-import okio.IOException
-import java.lang.RuntimeException
 
 
 class DashboardFragment : Fragment() {
@@ -98,7 +92,7 @@ class DashboardFragment : Fragment() {
         //populateAllStacks(8)
         //endregion
 
-        setUpScheduleCards((readAllData(Schedules::class.java) as RealmResults<out Schedules>).sort("occurrence"))
+        setUpSchedules((readAllData(Schedules::class.java) as RealmResults<out Schedules>).sort("occurrence"), true)
         setUpMoodTracker()
 
         setUpCollapsing()
@@ -453,7 +447,7 @@ class DashboardFragment : Fragment() {
     }
     //endregion
 
-    fun setUpScheduleCards(schedules: RealmResults<out Schedules>) {
+    fun setUpSchedules(schedules: RealmResults<out Schedules>, addCards: Boolean) {
         for (databaseSchedule in schedules) {
             if (databaseSchedule.medication.isNullOrEmpty()) {
                 obliterateSchedule(databaseSchedule)
@@ -461,6 +455,11 @@ class DashboardFragment : Fragment() {
             }
             else if (databaseSchedule.deleted || databaseSchedule.medication!!.first()!!.deleted) {
                 continue
+            }
+
+            //Primarily for calling setUpSchedules from BootupReceiver without inflating fragment
+            if (!::realm.isInitialized) {
+                realm = Realm.getDefaultInstance()
             }
 
             val testSchedule = realm.copyFromRealm(databaseSchedule)
@@ -483,20 +482,22 @@ class DashboardFragment : Fragment() {
                 testSchedule.occurrence = DateHelper.addUnitToDate(testSchedule.occurrence!!, -n, u)
             }
 
-            while (testSchedule.occurrence!! < DateHelper.tomorrow()) {
-                if (testSchedule.occurrence!! > DateHelper.yesterdayAt12pm()) {
-                    val newSchedule = Schedules(
-                        testSchedule.uid,
-                        testSchedule.occurrence,
-                        testSchedule.startDate,
-                        testSchedule.repetitionCount,
-                        testSchedule.repetitionUnit,
-                        testSchedule.logs
-                    )
-                    addDrugCard(newSchedule, databaseSchedule.medication!!.first()!!)
-                }
+            if (addCards) {
+                while (testSchedule.occurrence!! < DateHelper.tomorrow()) {
+                    if (testSchedule.occurrence!! > DateHelper.yesterdayAt12pm()) {
+                        val newSchedule = Schedules(
+                            testSchedule.uid,
+                            testSchedule.occurrence,
+                            testSchedule.startDate,
+                            testSchedule.repetitionCount,
+                            testSchedule.repetitionUnit,
+                            testSchedule.logs
+                        )
+                        addDrugCard(newSchedule, databaseSchedule.medication!!.first()!!)
+                    }
 
-                testSchedule.occurrence = DateHelper.addUnitToDate(testSchedule.occurrence!!, n, u)
+                    testSchedule.occurrence = DateHelper.addUnitToDate(testSchedule.occurrence!!, n, u)
+                }
             }
         }
     }
@@ -564,8 +565,6 @@ class DashboardFragment : Fragment() {
                 popoverMenuCurrent(newCard, medication, schedule)
             }
             currentStack.addView(newCard)
-            // Send notification
-            NotificationUtils.startAlarm(this.context!!, schedule)
         } else {
             // Upcoming
             newCard.countdownLabel.visibility = LinearLayout.VISIBLE
@@ -627,7 +626,7 @@ class DashboardFragment : Fragment() {
         currentStack.removeViews(1, currentStack.childCount - 1)
         upcomingStack.removeViews(1, upcomingStack.childCount - 1)
         completedStack.removeViews(1, completedStack.childCount - 1)
-        setUpScheduleCards((readAllData(Schedules::class.java) as RealmResults<out Schedules>).sort("occurrence"))
+        setUpSchedules((readAllData(Schedules::class.java) as RealmResults<out Schedules>).sort("occurrence"), true)
 
         setUpCollapsing()
 
