@@ -88,23 +88,26 @@ public class AlarmReceiver: BroadcastReceiver() {
                 // notificationId is a unique int for each notification that you must define
                 notificationManager.notify(schedule.uid!!.hashCode(), mBuilder.build())
 
-                //Set up auto-cancel
-                val am = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-                val cancelIntent = Intent(intent)
-                cancelIntent.putExtra("cancel", true)
-
-                val cancelAlarmSender = PendingIntent.getBroadcast(
-                    context,
-                    schedule.uid!!.hashCode(),
-                    cancelIntent,
-                    0
-                )
-
-                val now = Calendar.getInstance()
-                val cancelDate = DateHelper.addUnitToDate(now.time, 10, Calendar.MINUTE) //TODO: Refine this end time
-
-                am.setExact(AlarmManager.RTC, cancelDate.time, cancelAlarmSender)
+                //setupAutoCancel(context, intent, schedule)
             }
         }
+    }
+
+    private fun setupAutoCancel(context: Context, intent: Intent, schedule: Schedules) {
+        val am = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        val cancelIntent = Intent(intent)
+        cancelIntent.putExtra("cancel", true)
+
+        val cancelAlarmSender = PendingIntent.getBroadcast(
+            context,
+            (schedule.uid!! + 1).hashCode(), //Can't be the same as the normal alarm ID
+            cancelIntent,
+            0
+        )
+
+        val now = Calendar.getInstance()
+        val cancelDate = DateHelper.addUnitToDate(now.time, 10, Calendar.MINUTE) //TODO: Refine this end time
+
+        am.setExact(AlarmManager.RTC, cancelDate.time, cancelAlarmSender)
     }
 }
