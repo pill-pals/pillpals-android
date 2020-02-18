@@ -28,7 +28,6 @@
         <shape>
             <padding
                 android:bottom="1dp"
-                android:left="1dp"
 />
             <solid android:color="#30777777" />
 
@@ -39,7 +38,6 @@
         <shape>
             <padding
                 android:bottom="1dp"
-                android:left="1dp"
                  />
 
             <solid android:color="#50777777" />
