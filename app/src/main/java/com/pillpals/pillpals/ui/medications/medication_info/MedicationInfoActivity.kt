@@ -50,7 +50,10 @@ class MedicationInfoActivity : AppCompatActivity() {
     public var dosageString = ""
     public var nameString = ""
     public var iconResourceString: String? = null
+    var ndcCode: String? = null
+    var rxcui: String? = null
     var linkingMedication: Boolean = false
+    var splSetId: String? = null
 
     private lateinit var realm: Realm
 
@@ -98,6 +101,10 @@ class MedicationInfoActivity : AppCompatActivity() {
         dosageString = intent.getStringExtra("dosage-string")!!
         nameString = intent.getStringExtra("name-text")!!
         linkingMedication = intent.getBooleanExtra("link-medication", false)
+        ndcCode = intent.getStringExtra("ndc-code")
+        rxcui = intent.getStringExtra("rxcui")
+        splSetId = intent.getStringExtra("spl-set-id")
+
 
         iconResourceString = intent.getStringExtra("icon-resource")
         if (iconResourceString == null) {
@@ -136,6 +143,9 @@ class MedicationInfoActivity : AppCompatActivity() {
                 intent.putExtra("image-string", iconResourceString)
                 intent.putExtra("name-string", nameString)
                 intent.putExtra("dosage-string", dosageString)
+                intent.putExtra("ndc-code", ndcCode)
+                intent.putExtra("rxcui", rxcui)
+                intent.putExtra("spl-set-id", splSetId)
                 setResult(Activity.RESULT_OK, intent)
                 finish()
             }
@@ -146,6 +156,9 @@ class MedicationInfoActivity : AppCompatActivity() {
                 intent.putExtra("image-string", iconResourceString)
                 intent.putExtra("name-string", nameString)
                 intent.putExtra("dosage-string", dosageString)
+                intent.putExtra("ndc-code", ndcCode)
+                intent.putExtra("rxcui", rxcui)
+                intent.putExtra("spl-set-id", splSetId)
                 startActivityForResult(intent, 1)
             }
         }
@@ -185,6 +198,9 @@ class MedicationInfoActivity : AppCompatActivity() {
             activeIngredientsRealmList.addAll(activeIngredients)
             dpdObject.activeIngredients = activeIngredientsRealmList
             dpdObject.dosageString = dosageString
+            dpdObject.ndc_id = ndcCode
+            dpdObject.rxcui = rxcui
+            dpdObject.spl_set_id = splSetId
         }
     }
 

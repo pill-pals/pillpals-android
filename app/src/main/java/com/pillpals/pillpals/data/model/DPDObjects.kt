@@ -13,5 +13,8 @@ open class DPDObjects(
     var administrationRoutes: RealmList<String> = RealmList(),
     var activeIngredients: RealmList<String> = RealmList(),
     var dosageString: String = "",
-    var medications: RealmList<Medications> = RealmList()
+    var medications: RealmList<Medications> = RealmList(),
+    var ndc_id: String? = null,
+    var rxcui: String? = null,
+    var spl_set_id: String? = null
 ) : RealmObject(){}

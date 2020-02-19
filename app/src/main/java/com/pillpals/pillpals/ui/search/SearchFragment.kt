@@ -350,14 +350,15 @@ class SearchFragment : Fragment() {
                                 return@forEachIndexed
                             }
 
-                            val url = "https://health-products.canada.ca/api/drug/activeingredient/?id=${drugProduct.drug_code}"
+                            // Get other ID's from FDA
+                            val url = "https://api.fda.gov/drug/ndc.json?search=brand_name:${drugProduct.brand_name}"
 
                             val request = Request.Builder().url(url).build()
 
                             client.newCall(request).enqueue(object : Callback {
                                 override fun onFailure(call: Call, e: IOException) {
                                     e.printStackTrace()
-                                    if(index < drugCards.count()) {
+                                    if (index < drugCards.count()) {
                                         drugCards[index] = null
                                     }
                                     apiDown = true
@@ -370,29 +371,18 @@ class SearchFragment : Fragment() {
 
                                         val jsonString = response.body!!.string()
                                         val gson = Gson()
-                                        val activeIngredients = gson.fromJson(jsonString, Array<ActiveIngredient>::class.java).toList()
+                                        val fdaResponse = gson.fromJson(jsonString, OpenFDAResponse::class.java)
 
-                                        val ingredientNameList = activeIngredients.fold(listOf<String>()) { acc, it ->
-                                            acc.plus(it.ingredient_name)
+                                        val fdaResults = fdaResponse.results.firstOrNull()
+
+                                        // SET FDA IDS
+                                        if(fdaResults != null) {
+                                            newCard.ndcCode = fdaResults.product_ndc
+                                            newCard.rxcui = fdaResults.openfda.rxcui?.firstOrNull()
+                                            newCard.splSetId = fdaResults.openfda.spl_set_id?.firstOrNull()
                                         }
 
-                                        val dosageValues = activeIngredients.fold("") { acc, it ->
-                                            if(acc.isNotEmpty()) acc + "/" + it.strength
-                                            else acc + it.strength
-                                        }
-
-                                        val dosageUnits = activeIngredients.fold(listOf<String>()) { acc, it ->
-                                            if(acc.contains(it.strength_unit)) acc
-                                            else acc.plus(it.strength_unit)
-                                        }.joinToString("/")
-
-                                        newCard.dosageString = "$dosageValues $dosageUnits"
-
-                                        newCard.activeIngredients = ingredientNameList
-
-                                        newCard.timeText.text = ingredientNameList.joinToString()
-
-                                        val url = "https://health-products.canada.ca/api/drug/route/?id=${drugProduct.drug_code}"
+                                        val url = "https://health-products.canada.ca/api/drug/activeingredient/?id=${drugProduct.drug_code}"
 
                                         val request = Request.Builder().url(url).build()
 
@@ -412,56 +402,105 @@ class SearchFragment : Fragment() {
 
                                                     val jsonString = response.body!!.string()
                                                     val gson = Gson()
-                                                    val administrationRoutes = gson.fromJson(jsonString, Array<AdministrationRoute>::class.java).toList()
+                                                    val activeIngredients = gson.fromJson(jsonString, Array<ActiveIngredient>::class.java).toList()
 
-                                                    var colorString =
-                                                        DatabaseHelper.getRandomColorString()
-                                                    while(colorString == "#000000") { // Let's not let black be selected randomly
-                                                        colorString = DatabaseHelper.getRandomColorString()
+                                                    val ingredientNameList = activeIngredients.fold(listOf<String>()) { acc, it ->
+                                                        acc.plus(it.ingredient_name)
                                                     }
-                                                    newCard.iconBackground.setCardBackgroundColor(Color.parseColor(colorString))
 
-                                                    var administrationRoutesList = listOf<String>()
+                                                    val dosageValues = activeIngredients.fold("") { acc, it ->
+                                                        if(acc.isNotEmpty()) acc + "/" + it.strength
+                                                        else acc + it.strength
+                                                    }
 
-                                                    val firstRoute = administrationRoutes.firstOrNull()
-                                                    if(firstRoute != null) {
-                                                        newCard.icon.setImageResource(administrationRouteToIcon(firstRoute.route_of_administration_name))
+                                                    val dosageUnits = activeIngredients.fold(listOf<String>()) { acc, it ->
+                                                        if(acc.contains(it.strength_unit)) acc
+                                                        else acc.plus(it.strength_unit)
+                                                    }.joinToString("/")
 
-                                                        administrationRoutesList = administrationRoutes.fold(listOf<String>()) { acc, it ->
-                                                            acc.plus(it.route_of_administration_name)
+                                                    newCard.dosageString = "$dosageValues $dosageUnits"
+
+                                                    newCard.activeIngredients = ingredientNameList
+
+                                                    newCard.timeText.text = ingredientNameList.joinToString()
+
+                                                    val url = "https://health-products.canada.ca/api/drug/route/?id=${drugProduct.drug_code}"
+
+                                                    val request = Request.Builder().url(url).build()
+
+                                                    client.newCall(request).enqueue(object : Callback {
+                                                        override fun onFailure(call: Call, e: IOException) {
+                                                            e.printStackTrace()
+                                                            if(index < drugCards.count()) {
+                                                                drugCards[index] = null
+                                                            }
+                                                            apiDown = true
+                                                            refreshCardsFlag = true
                                                         }
 
-                                                        newCard.lateText.text = administrationRoutesList.joinToString()
-                                                    }
+                                                        override fun onResponse(call: Call, response: Response) {
+                                                            response.use {
+                                                                if (!response.isSuccessful) throw IOException("Unexpected code $response")
 
-                                                    // Add button action here, using drug code
-                                                    newCard.button.setOnClickListener {
-                                                        val infoIntent = Intent(outerContext.context, MedicationInfoActivity::class.java)
+                                                                val jsonString = response.body!!.string()
+                                                                val gson = Gson()
+                                                                val administrationRoutes = gson.fromJson(jsonString, Array<AdministrationRoute>::class.java).toList()
 
-                                                        // Not for linking DPDObject
-                                                        infoIntent.putExtra("link-medication", false)
+                                                                var colorString =
+                                                                    DatabaseHelper.getRandomColorString()
+                                                                while(colorString == "#000000") { // Let's not let black be selected randomly
+                                                                    colorString = DatabaseHelper.getRandomColorString()
+                                                                }
+                                                                newCard.iconBackground.setCardBackgroundColor(Color.parseColor(colorString))
 
-                                                        infoIntent.putExtra("drug-code", newCard.drugCode)
-                                                        infoIntent.putExtra("icon-color", colorString)
-                                                        infoIntent.putStringArrayListExtra("administration-routes", ArrayList(administrationRoutesList))
-                                                        infoIntent.putStringArrayListExtra("active-ingredients", ArrayList(newCard.activeIngredients))
-                                                        infoIntent.putExtra("dosage-string", newCard.dosageString)
-                                                        infoIntent.putExtra("name-text", newCard.nameText.text.toString())
-                                                        if(firstRoute != null) {
-                                                            infoIntent.putExtra("icon-resource", administrationRouteToIconString(firstRoute.route_of_administration_name))
+                                                                var administrationRoutesList = listOf<String>()
+
+                                                                val firstRoute = administrationRoutes.firstOrNull()
+                                                                if(firstRoute != null) {
+                                                                    newCard.icon.setImageResource(administrationRouteToIcon(firstRoute.route_of_administration_name))
+
+                                                                    administrationRoutesList = administrationRoutes.fold(listOf<String>()) { acc, it ->
+                                                                        acc.plus(it.route_of_administration_name)
+                                                                    }
+
+                                                                    newCard.lateText.text = administrationRoutesList.joinToString()
+                                                                }
+
+                                                                // Add button action here, using drug code
+                                                                newCard.button.setOnClickListener {
+                                                                    val infoIntent = Intent(outerContext.context, MedicationInfoActivity::class.java)
+
+                                                                    // Not for linking DPDObject
+                                                                    infoIntent.putExtra("link-medication", false)
+
+                                                                    infoIntent.putExtra("drug-code", newCard.drugCode)
+                                                                    infoIntent.putExtra("icon-color", colorString)
+                                                                    infoIntent.putStringArrayListExtra("administration-routes", ArrayList(administrationRoutesList))
+                                                                    infoIntent.putStringArrayListExtra("active-ingredients", ArrayList(newCard.activeIngredients))
+                                                                    infoIntent.putExtra("dosage-string", newCard.dosageString)
+                                                                    infoIntent.putExtra("name-text", newCard.nameText.text.toString())
+                                                                    if(firstRoute != null) {
+                                                                        infoIntent.putExtra("icon-resource", administrationRouteToIconString(firstRoute.route_of_administration_name))
+                                                                    }
+
+                                                                    infoIntent.putExtra("ndc-code", newCard.ndcCode)
+                                                                    infoIntent.putExtra("rxcui", newCard.rxcui)
+                                                                    infoIntent.putExtra("spl-set-id", newCard.splSetId)
+
+                                                                    startActivityForResult(infoIntent, 1)
+                                                                }
+
+                                                                if(namedIndex > 0) {
+                                                                    drugCards.add(newCard)
+                                                                }
+                                                                else {
+                                                                    drugCards[index] = newCard
+                                                                }
+
+                                                                refreshCardsFlag = true
+                                                            }
                                                         }
-
-                                                        startActivityForResult(infoIntent, 1)
-                                                    }
-
-                                                    if(namedIndex > 0) {
-                                                        drugCards.add(newCard)
-                                                    }
-                                                    else {
-                                                        drugCards[index] = newCard
-                                                    }
-
-                                                    refreshCardsFlag = true
+                                                    })
                                                 }
                                             }
                                         })
@@ -560,4 +599,68 @@ data class AdministrationRoute(
     val drug_code: Int,
     val route_of_administration_code: Int,
     val route_of_administration_name: String
+)
+
+data class OpenFDAMetaResults(
+    val skip: Int,
+    val limit: Int,
+    val total: Int
+)
+
+data class OpenFDAMeta(
+    val disclaimer: String,
+    val terms: String,
+    val license: String,
+    val last_updated: String,
+    val results: OpenFDAMetaResults
+)
+
+data class OpenFDAResultPackaging(
+    val marketing_start_date: String,
+    val package_ndc: String,
+    val description: String,
+    val sample: Boolean
+)
+
+data class OpenFDAResultActiveIngredient(
+    val strength: String,
+    val name: String
+)
+
+data class OpenFDAResultOpenFDAObject(
+    val is_original_packager: List<Boolean>?,
+    val spl_set_id: List<String>?,
+    val upc: List<String>?,
+    val manufacturer_name: List<String>?,
+    val rxcui: List<String>?,
+    val unii: List<String>?
+)
+
+data class OpenFDAResult(
+    val product_ndc: String,
+    val generic_name: String,
+    val labeler_name: String,
+    val dea_schedule: String,
+    val packaging: List<OpenFDAResultPackaging>,
+    val brand_name_suffix: String,
+    val brand_name: String,
+    val active_ingredients: List<OpenFDAResultActiveIngredient>,
+    val finished: Boolean,
+    val openfda: OpenFDAResultOpenFDAObject,
+    val listing_expiration_date: String,
+    val marketing_category: String,
+    val dosage_form: String,
+    val spl_id: String,
+    val route: List<String>,
+    val marketing_start_date: String,
+    val product_type: String,
+    val product_id: String,
+    val application_number: String,
+    val brand_name_base: String,
+    val pharm_class: List<String>
+)
+
+data class OpenFDAResponse(
+    val meta: OpenFDAMeta,
+    val results: List<OpenFDAResult>
 )
