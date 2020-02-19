@@ -30,6 +30,9 @@ class DrugCard : LinearLayout {
     public var drugCode: Int = 0
     public var activeIngredients = listOf<String>()
     public var dosageString = ""
+    public var ndcCode: String? = null
+    public var rxcui: String? = null
+    var splSetId: String? = null
 
     constructor(context: Context) : super(context) {
         init()
