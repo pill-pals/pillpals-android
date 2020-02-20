@@ -242,6 +242,7 @@ class EditMedicationIcon : AppCompatActivity() {
             Realm.getDefaultInstance().executeTransaction{
                 var newPhoto = it.createObject(Photos::class.java, UUID.randomUUID().toString())
                 newPhoto.icon = DatabaseHelper.convertBitmapToByteArray(croppedImageBitmap)
+                imageDrawable = newPhoto.uid
             }
 
             photoList.removeAllViews()
