@@ -30,7 +30,7 @@ object OkHttpUtils {
 class MedicationInfoRetriever {
     companion object {
         /* Example of use
-        MedicationInfoRetriever.activeIngredients(2).whenComplete { result: Promise.Result<List<String>, RuntimeException> ->
+        MedicationInfoRetriever.activeIngredients(73177).whenComplete { result: Promise.Result<List<String>, RuntimeException> ->
             when (result) {
                 is Promise.Result.Success -> {
                     // Use result here
@@ -85,6 +85,58 @@ class MedicationInfoRetriever {
                             }.joinToString("/")
 
                             resolve(ingredientNameList)
+                        }
+                    }
+                })
+            }
+        }
+
+        /* Example of use
+        MedicationInfoRetriever.intakeRoutes(73177).whenComplete { result: Promise.Result<List<String>, RuntimeException> ->
+            when (result) {
+                is Promise.Result.Success -> {
+                    // Use result here
+                    Log.i("Success", result.value.toString())
+                }
+                is Promise.Result.Error -> Log.i("Error", result.error.message!!)
+            }
+        }
+         */
+        fun intakeRoutes(dpdId: Int): Promise<List<String>, RuntimeException> {
+            return Promise {
+                val client = OkHttpClient
+                    .Builder()
+                    .connectTimeout(20, TimeUnit.SECONDS)
+                    .readTimeout(20, TimeUnit.SECONDS)
+                    .build()
+
+                val url = "https://health-products.canada.ca/api/drug/route/?id=${dpdId}"
+
+                val request = Request.Builder().url(url).build()
+
+                onCancel {
+                    reject(RuntimeException("Canceled"))
+                }
+
+                client.newCall(request).enqueue(object : Callback {
+                    override fun onFailure(call: Call, e: IOException) {
+                        e.printStackTrace()
+                        reject(RuntimeException("Failed"))
+                    }
+
+                    override fun onResponse(call: Call, response: Response) {
+                        response.use {
+                            if (!response.isSuccessful) throw IOException("Unexpected code $response")
+
+                            val jsonString = response.body!!.string()
+                            val gson = Gson()
+                            val administrationRoutes = gson.fromJson(jsonString, Array<AdministrationRoute>::class.java).toList()
+
+                            val administrationRouteNames = administrationRoutes.fold(listOf<String>()) { acc, it ->
+                                acc.plus(it.route_of_administration_name)
+                            }
+
+                            resolve(administrationRouteNames)
                         }
                     }
                 })
