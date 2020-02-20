@@ -21,16 +21,14 @@ class QuizGenerator() {
                 quiz.date = DateHelper.today()
                 quiz.name = generateQuizName()
 
-                //get 10 question templates
+                //TODO: handle template failures and pick a new template
+                //get 10 question templates and generate questions
                 var selectedTemplates = mutableListOf<QuestionTemplates>()
+                var generatedQuestions = mutableListOf<Questions>()
+
                 for (i in 0..9) {
                     selectedTemplates.add(getRandomTemplate())
-                }
-
-                //generate question from each template
-                var generatedQuestions = mutableListOf<Questions>()
-                selectedTemplates.forEach {
-                    generatedQuestions.add(generateQuestion(it.id,getRandomMedication(it)))
+                    generatedQuestions.add(generateQuestion(selectedTemplates[i].id,getRandomMedication(selectedTemplates[i])))
                 }
 
                 //create objects in realm for linking
