@@ -50,6 +50,7 @@ class QuizActivity: AppCompatActivity() {
     public lateinit var pausedCollapseBtn: ImageButton
     public lateinit var completedCollapseBtn: ImageButton
     public lateinit var medicationScoresButton: Button
+    public lateinit var generateQuizButton: Button
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -67,10 +68,16 @@ class QuizActivity: AppCompatActivity() {
         pausedCollapseBtn = findViewById(R.id.pausedCollapseBtn)
         completedCollapseBtn = findViewById(R.id.completedCollapseBtn)
         medicationScoresButton = findViewById(R.id.medicationScoresButton)
+        generateQuizButton = findViewById(R.id.generateQuizButton)
 
         medicationScoresButton.setOnClickListener {
             val intent = Intent(this, MedicationScoresActivity::class.java)
             startActivityForResult(intent, 1)
+        }
+
+        generateQuizButton.setOnClickListener{
+            QuizGenerator.generateQuiz()
+            update()
         }
 
         clearTestData()

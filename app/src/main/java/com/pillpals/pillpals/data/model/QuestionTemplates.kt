@@ -7,8 +7,7 @@ import io.realm.annotations.LinkingObjects
 import io.realm.annotations.PrimaryKey
 
 open class QuestionTemplates(
-    @PrimaryKey var uid: String = "",
-    var genFnct: Function<Questions>? = null,
+    @PrimaryKey var id: Int = 0,
     var canUseOnNonLinkedMedications: Boolean = false,
     var questions: RealmList<Questions> = RealmList()
     ) : RealmObject(){}
