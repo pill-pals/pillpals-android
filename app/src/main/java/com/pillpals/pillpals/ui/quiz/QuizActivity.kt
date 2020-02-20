@@ -34,7 +34,8 @@ import io.realm.RealmObject.deleteFromRealm
 import androidx.core.app.ComponentActivity.ExtraData
 import androidx.core.content.ContextCompat.getSystemService
 import android.icu.lang.UCharacter.GraphemeClusterBreak.T
-
+import android.widget.Button
+import com.pillpals.pillpals.ui.statistics.MedicationScoresActivity
 
 
 class QuizActivity: AppCompatActivity() {
@@ -48,7 +49,8 @@ class QuizActivity: AppCompatActivity() {
     public lateinit var completedStack: LinearLayout
     public lateinit var pausedCollapseBtn: ImageButton
     public lateinit var completedCollapseBtn: ImageButton
-    
+    public lateinit var medicationScoresButton: Button
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_quiz)
@@ -64,6 +66,12 @@ class QuizActivity: AppCompatActivity() {
         completedStack = findViewById(R.id.completedStack)
         pausedCollapseBtn = findViewById(R.id.pausedCollapseBtn)
         completedCollapseBtn = findViewById(R.id.completedCollapseBtn)
+        medicationScoresButton = findViewById(R.id.medicationScoresButton)
+
+        medicationScoresButton.setOnClickListener {
+            val intent = Intent(this, MedicationScoresActivity::class.java)
+            startActivityForResult(intent, 1)
+        }
 
         clearTestData()
 

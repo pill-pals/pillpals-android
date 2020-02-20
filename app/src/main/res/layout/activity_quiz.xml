@@ -10,7 +10,7 @@
 
     <com.pillpals.pillpals.ui.ColorFadeScrollView
         android:layout_width="match_parent"
-        android:layout_height="0dp"
+        android:layout_height="match_parent"
         android:background="@color/colorLightGrey"
         android:requiresFadingEdge="vertical"
         app:layout_constraintEnd_toEndOf="parent"
@@ -188,5 +188,31 @@
             </LinearLayout>
         </androidx.constraintlayout.widget.ConstraintLayout>
     </com.pillpals.pillpals.ui.ColorFadeScrollView>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="64dp"
+        android:background="#BBF2F2F2"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <Button
+            android:id="@+id/medicationScoresButton"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginBottom="8dp"
+            android:gravity="center"
+            android:text="View Medication Scores"
+            android:textColor="@color/colorWhite"
+            android:textSize="18dp"
+            app:backgroundTint="@color/colorGreen"
+            app:cornerRadius="8dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
