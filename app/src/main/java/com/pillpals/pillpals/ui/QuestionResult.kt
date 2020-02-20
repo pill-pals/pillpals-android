@@ -71,7 +71,7 @@ class QuestionResult : LinearLayout {
         userAnswerStack = findViewById(R.id.userAnswerStack)
         icon = findViewById(R.id.icon)
 
-        questionTitle.text = "Question" + (questionIndex + 1).toString()
+        questionTitle.text = "Question " + (questionIndex + 1).toString()
         questionText.text = question.question
         userAnswer.text = QuizHelper.getUserAnswerString(question)
         correctAnswer.text = QuizHelper.getCorrectAnswerString(question)
