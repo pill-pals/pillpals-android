@@ -13,10 +13,16 @@ import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
+import com.google.android.material.internal.NavigationMenu
 import com.pillpals.pillpals.R
+import com.pillpals.pillpals.data.model.Medications
+import com.pillpals.pillpals.data.model.Quizzes
 import com.pillpals.pillpals.helpers.NotificationUtils
+import com.pillpals.pillpals.helpers.QuizHelper
 import com.pillpals.pillpals.ui.quiz.QuizActivity
 import io.realm.Realm
+import io.realm.RealmObject
+import io.realm.RealmResults
 
 class MainActivity : AppCompatActivity() {
 
@@ -67,6 +73,23 @@ class MainActivity : AppCompatActivity() {
         getMenuInflater().inflate(R.menu.navigation_menu, menu)
         return true
         //return super.onCreateOptionsMenu(menu)
+    }
+
+    override fun onPrepareOptionsMenu(menu: Menu?): Boolean {
+        val starIcon: MenuItem = menu!!.findItem(R.id.action_stars)
+        val medList = readAllData(Medications::class.java) as RealmResults<out Medications>
+        val quizList = readAllData(Quizzes::class.java) as RealmResults<out Quizzes>
+
+        if(medList.all{it.dpd_object.isNullOrEmpty()} || quizList.any{ QuizHelper.getQuestionsAnswered(it) == 0 }){
+            starIcon.setIcon(R.drawable.ic_navigation_stars_active)
+        }else{
+            starIcon.setIcon(R.drawable.ic_navigation_stars)
+        }
+        return super.onPrepareOptionsMenu(menu)
+    }
+
+    private fun readAllData(realmClass: Class<out RealmObject>): RealmResults<out RealmObject> {
+        return Realm.getDefaultInstance().where(realmClass).findAll()
     }
 }
 

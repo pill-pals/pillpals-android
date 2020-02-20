@@ -352,6 +352,7 @@ class QuizActivity: AppCompatActivity() {
 
     private fun checkLinkedDrugs(){
         var isLinked = false
+        buttonLayout.removeViews(1, buttonLayout.childCount - 1)
 
         for(medication in readAllData(Medications::class.java) as RealmResults<out Medications>){
             if(!medication.dpd_object.isNullOrEmpty()){

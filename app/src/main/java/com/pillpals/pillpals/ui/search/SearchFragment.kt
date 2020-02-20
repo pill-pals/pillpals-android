@@ -62,6 +62,7 @@ class SearchFragment : Fragment() {
         searchResults = view.findViewById(R.id.searchResults)
         apiWarning = view.findViewById(R.id.warningText)
         searchLoading = view.findViewById(R.id.searchLoading)
+        getActivity()!!.invalidateOptionsMenu()
         searchLoading.visibility = GONE
 
         apiWarning.visibility = GONE

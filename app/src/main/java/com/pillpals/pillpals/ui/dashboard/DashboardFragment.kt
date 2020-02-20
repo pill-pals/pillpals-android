@@ -35,6 +35,7 @@ import android.graphics.*
 import android.graphics.drawable.AnimatedVectorDrawable
 import androidx.cardview.widget.CardView
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.app.ActivityCompat.invalidateOptionsMenu
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.view.children
 import com.pillpals.pillpals.helpers.DatabaseHelper
@@ -92,6 +93,7 @@ class DashboardFragment : Fragment() {
         //populateAllStacks(8)
         //endregion
 
+        getActivity()!!.invalidateOptionsMenu()
         setUpSchedules((readAllData(Schedules::class.java) as RealmResults<out Schedules>).sort("occurrence"), true)
         setUpMoodTracker()
 
@@ -112,6 +114,11 @@ class DashboardFragment : Fragment() {
         timer.schedule(doAsynchronousTask, 0, 60000)
 
         return view
+    }
+
+    override fun onResume() {
+        super.onResume()
+        getActivity()!!.invalidateOptionsMenu()
     }
 
     //Mood tracker
