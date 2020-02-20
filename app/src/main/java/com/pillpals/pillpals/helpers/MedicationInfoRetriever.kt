@@ -144,6 +144,58 @@ class MedicationInfoRetriever {
         }
 
         /* Example of use
+        MedicationInfoRetriever.drugSchedules(73177).whenComplete { result: Promise.Result<List<String>, RuntimeException> ->
+            when (result) {
+                is Promise.Result.Success -> {
+                    // Use result here
+                    Log.i("Success", result.value.toString())
+                }
+                is Promise.Result.Error -> Log.i("Error", result.error.message!!)
+            }
+        }
+         */
+        fun drugSchedules(dpdId: Int): Promise<List<String>, RuntimeException> {
+            return Promise {
+                val client = OkHttpClient
+                    .Builder()
+                    .connectTimeout(20, TimeUnit.SECONDS)
+                    .readTimeout(20, TimeUnit.SECONDS)
+                    .build()
+
+                val url = "https://health-products.canada.ca/api/drug/schedule/?id=${dpdId}"
+
+                val request = Request.Builder().url(url).build()
+
+                onCancel {
+                    reject(RuntimeException("Canceled"))
+                }
+
+                client.newCall(request).enqueue(object : Callback {
+                    override fun onFailure(call: Call, e: IOException) {
+                        e.printStackTrace()
+                        reject(RuntimeException("Failed"))
+                    }
+
+                    override fun onResponse(call: Call, response: Response) {
+                        response.use {
+                            if (!response.isSuccessful) throw IOException("Unexpected code $response")
+
+                            val jsonString = response.body!!.string()
+                            val gson = Gson()
+                            val drugSchedules = gson.fromJson(jsonString, Array<DrugSchedule>::class.java).toList()
+
+                            val drugScheduleNames = drugSchedules.fold(listOf<String>()) { acc, it ->
+                                acc.plus(if(it.schedule_name == "OTC") "Over The Counter (OTC)" else it.schedule_name)
+                            }
+
+                            resolve(drugScheduleNames)
+                        }
+                    }
+                })
+            }
+        }
+
+        /* Example of use
         MedicationInfoRetriever.interactions(listOf("207106", "152923", "656659")).whenComplete { result: Promise.Result<List<InteractionResult>, RuntimeException> ->
             when (result) {
                 is Promise.Result.Success -> {

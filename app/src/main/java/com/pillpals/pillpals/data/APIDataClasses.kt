@@ -79,6 +79,11 @@ data class AdministrationRoute(
     val route_of_administration_name: String
 )
 
+data class DrugSchedule(
+    val drug_code: Int,
+    val schedule_name: String
+)
+
 
 // Open FDA
 data class OpenFDAMetaResults(
