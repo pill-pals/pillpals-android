@@ -1,5 +1,7 @@
 package com.pillpals.pillpals.ui.quiz
 
+import android.animation.Animator
+import android.animation.AnimatorListenerAdapter
 import android.content.Intent
 import android.content.res.ColorStateList
 import android.graphics.Bitmap
@@ -13,6 +15,7 @@ import android.text.style.ForegroundColorSpan
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.MenuItem
+import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import android.widget.EditText
@@ -136,15 +139,58 @@ class QuizQuestionActivity : AppCompatActivity() {
         }
     }
 
+    private fun handleButtonOnClick(question: Questions, answer: Int, index: Int) {
+        val fadeoutTime = 200.toLong()
+        questionText.animate().alpha(0f)
+            .setDuration(fadeoutTime)
+            .setListener(object : AnimatorListenerAdapter() {
+                override fun onAnimationEnd(animation: Animator) {
+                    answerQuestion(question,answer,index)
+                    animateViewIn()
+                }
+            })
+        answer1.animate().alpha(0f)
+            .setDuration(fadeoutTime)
+            .setListener(null)
+        answer2.animate().alpha(0f)
+            .setDuration(fadeoutTime)
+            .setListener(null)
+        answer3.animate().alpha(0f)
+            .setDuration(fadeoutTime)
+            .setListener(null)
+        answer4.animate().alpha(0f)
+            .setDuration(fadeoutTime)
+            .setListener(null)
+    }
+
+    private fun animateViewIn() {
+        val fadeinTime = 200.toLong()
+        questionText.animate().alpha(1f)
+            .setDuration(fadeinTime)
+            .setListener(null)
+        answer1.animate().alpha(1f)
+            .setDuration(fadeinTime)
+            .setListener(null)
+        answer2.animate().alpha(1f)
+            .setDuration(fadeinTime)
+            .setListener(null)
+        answer3.animate().alpha(1f)
+            .setDuration(fadeinTime)
+            .setListener(null)
+        answer4.animate().alpha(1f)
+            .setDuration(fadeinTime)
+            .setListener(null)
+    }
+
     private fun setUpButtons(question: Questions, index: Int) {
         answer1.text = question.answers[0]
-        answer1btn.setOnClickListener{answerQuestion(question,0, index)}
+        answer1btn.setOnClickListener{handleButtonOnClick(question,0,index)}
         answer2.text = question.answers[1]
-        answer2btn.setOnClickListener{answerQuestion(question,1, index)}
+        answer2btn.setOnClickListener{handleButtonOnClick(question,1,index)}
         answer3.text = question.answers[2]
-        answer3btn.setOnClickListener{answerQuestion(question,2, index)}
+        answer3btn.setOnClickListener{handleButtonOnClick(question,2,index)}
         answer4.text = question.answers[3]
-        answer4btn.setOnClickListener{answerQuestion(question,3, index)}
+        answer4btn.setOnClickListener{handleButtonOnClick(question,3,index)}
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
