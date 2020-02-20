@@ -34,6 +34,13 @@ import io.realm.RealmObject.deleteFromRealm
 import androidx.core.app.ComponentActivity.ExtraData
 import androidx.core.content.ContextCompat.getSystemService
 import android.icu.lang.UCharacter.GraphemeClusterBreak.T
+import android.util.Log
+import android.view.ViewGroup
+import android.widget.Button
+import com.pillpals.pillpals.helpers.DatabaseHelper.Companion.getColorStringByID
+import com.pillpals.pillpals.helpers.DatabaseHelper.Companion.getCorrectIconDrawable
+import com.pillpals.pillpals.ui.DrugCard
+import com.pillpals.pillpals.ui.search.SearchActivity
 import android.widget.Button
 import com.pillpals.pillpals.ui.statistics.MedicationScoresActivity
 
@@ -49,6 +56,8 @@ class QuizActivity: AppCompatActivity() {
     public lateinit var completedStack: LinearLayout
     public lateinit var pausedCollapseBtn: ImageButton
     public lateinit var completedCollapseBtn: ImageButton
+    public lateinit var parentLayout: LinearLayout
+    public lateinit var buttonLayout: LinearLayout
     public lateinit var medicationScoresButton: Button
     public lateinit var generateQuizButton: Button
 
@@ -67,6 +76,9 @@ class QuizActivity: AppCompatActivity() {
         completedStack = findViewById(R.id.completedStack)
         pausedCollapseBtn = findViewById(R.id.pausedCollapseBtn)
         completedCollapseBtn = findViewById(R.id.completedCollapseBtn)
+        parentLayout = findViewById(R.id.parentLayout)
+        buttonLayout = findViewById(R.id.buttonLayout)
+
         medicationScoresButton = findViewById(R.id.medicationScoresButton)
         generateQuizButton = findViewById(R.id.generateQuizButton)
 
@@ -81,6 +93,8 @@ class QuizActivity: AppCompatActivity() {
         }
 
         clearTestData()
+
+        checkLinkedDrugs()
 
         createTestData()
 
@@ -235,6 +249,8 @@ class QuizActivity: AppCompatActivity() {
         pausedStack.removeViews(1, pausedStack.childCount - 1)
         completedStack.removeViews(1, completedStack.childCount - 1)
 
+        checkLinkedDrugs()
+
         setUpQuizCards((readAllData(Quizzes::class.java) as RealmResults<out Quizzes>).sort("date"))
 
         setUpCollapsing()
@@ -333,5 +349,45 @@ class QuizActivity: AppCompatActivity() {
             questions.deleteAllFromRealm()
             quizzes.deleteAllFromRealm()
         realm.commitTransaction()
+    }
+
+    private fun checkLinkedDrugs(){
+        var isLinked = false
+
+        for(medication in readAllData(Medications::class.java) as RealmResults<out Medications>){
+            if(!medication.dpd_object.isNullOrEmpty()){
+                isLinked = true
+            }
+            addDrugCard(medication)
+        }
+
+        if(!isLinked){
+            parentLayout.visibility=View.GONE
+            buttonLayout.visibility=View.VISIBLE
+        }else{
+            parentLayout.visibility=View.VISIBLE
+            buttonLayout.visibility=View.GONE
+        }
+    }
+
+    private fun addDrugCard(medication: Medications) {
+        var newCard = DrugCard(this)
+
+        newCard.nameText.text = medication.name
+        newCard.altText.text = medication.dosage
+        newCard.iconBackground.setCardBackgroundColor(Color.parseColor(getColorStringByID(medication.color_id)))
+        newCard.icon.setImageDrawable(getCorrectIconDrawable(this, medication))
+
+        newCard.button.setOnClickListener {
+            val linkIntent = Intent(this, SearchActivity::class.java)
+            linkIntent.putExtra("medication-uid", medication.uid)
+            startActivityForResult(linkIntent, 1)
+        }
+        newCard.button.text = "Link"
+        newCard.button.layoutParams.width = ViewGroup.LayoutParams.WRAP_CONTENT
+        newCard.button.visibility = View.VISIBLE
+        newCard.overflowMenu.visibility = View.GONE
+
+        buttonLayout.addView(newCard)
     }
 }
