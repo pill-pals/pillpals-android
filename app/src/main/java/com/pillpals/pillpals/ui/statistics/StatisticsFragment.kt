@@ -85,6 +85,7 @@ class StatisticsFragment : Fragment() {
         leftTimeButton = view.findViewById(R.id.leftTimeButton)
         rightTimeButton = view.findViewById(R.id.rightTimeButton)
         medicationScoresButton = view.findViewById(R.id.medicationScoresButton)
+        getActivity()!!.invalidateOptionsMenu()
 
         medicationScoresButton.setOnClickListener {
             val intent = Intent(context, MedicationScoresActivity::class.java)

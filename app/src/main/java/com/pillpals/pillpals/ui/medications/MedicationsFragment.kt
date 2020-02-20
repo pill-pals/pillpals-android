@@ -57,6 +57,7 @@ class MedicationsFragment : Fragment() {
         stack.layoutTransition.enableTransitionType(LayoutTransition.CHANGING) //Makes collapsing smooth
 
         drugButton = view!!.findViewById(R.id.drugButton)
+        getActivity()!!.invalidateOptionsMenu()
 
         drugButton.setOnClickListener {
             val intent = Intent(context, AddDrugActivity::class.java)
@@ -66,6 +67,11 @@ class MedicationsFragment : Fragment() {
         updateMedicationList()
 
         return view
+    }
+
+    override fun onResume() {
+        super.onResume()
+        getActivity()!!.invalidateOptionsMenu()
     }
 
     private fun popoverMenuMedication(v: View, medication: Medications) {
