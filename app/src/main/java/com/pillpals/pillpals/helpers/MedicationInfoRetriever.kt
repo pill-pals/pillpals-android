@@ -2,11 +2,13 @@ package com.pillpals.pillpals.helpers
 
 import android.util.Log
 import com.google.gson.Gson
-import com.pillpals.pillpals.ui.search.ActiveIngredient
+import com.pillpals.pillpals.data.*
 import com.shopify.promises.Promise
 import okhttp3.*
 import okio.IOException
 import java.util.concurrent.TimeUnit
+
+
 
 import okhttp3.Call
 import okhttp3.OkHttpClient
@@ -88,5 +90,76 @@ class MedicationInfoRetriever {
                 })
             }
         }
+
+        /* Example of use
+        MedicationInfoRetriever.interactions(listOf("207106", "152923", "656659")).whenComplete { result: Promise.Result<List<InteractionResult>, RuntimeException> ->
+            when (result) {
+                is Promise.Result.Success -> {
+                    // Use result here
+                    Log.i("Success", result.value.toString())
+                }
+                is Promise.Result.Error -> Log.i("Error", result.error.message!!)
+            }
+        }
+         */
+        fun interactions(rxcuis: List<String>): Promise<List<InteractionResult>, RuntimeException> {
+            return Promise {
+                val client = OkHttpClient
+                    .Builder()
+                    .connectTimeout(20, TimeUnit.SECONDS)
+                    .readTimeout(20, TimeUnit.SECONDS)
+                    .build()
+
+                val url = "https://rxnav.nlm.nih.gov/REST/interaction/list.json?rxcuis=${rxcuis.joinToString("+")}"
+
+                val request = Request.Builder().url(url).build()
+
+                onCancel {
+                    reject(RuntimeException("Canceled"))
+                }
+
+                client.newCall(request).enqueue(object : Callback {
+                    override fun onFailure(call: Call, e: IOException) {
+                        e.printStackTrace()
+                        reject(RuntimeException("Failed"))
+                    }
+
+                    override fun onResponse(call: Call, response: Response) {
+                        response.use {
+                            if (!response.isSuccessful) throw IOException("Unexpected code $response")
+
+                            val jsonString = response.body!!.string()
+                            val gson = Gson()
+                            val interactionsResponse = gson.fromJson(jsonString, InteractionsResponse::class.java)
+
+                            var res: List<InteractionResult> = listOf()
+
+                            // Use first source I guess. Might specify to try for DrugBank later
+                            val source = interactionsResponse.fullInteractionTypeGroup.firstOrNull()
+
+                            source ?: return resolve(res)
+
+                            source.fullInteractionType.forEach { fullInteractionType ->
+                                fullInteractionType.interactionPair.forEach { interactionPair ->
+                                    val interactionRxcuis = interactionPair.interactionConcept.fold(listOf<String>()) { acc, it ->
+                                        acc.plus(it.minConceptItem.rxcui)
+                                    }
+
+                                    res = res.plus(InteractionResult(interactionRxcuis, interactionPair.description))
+                                }
+                            }
+
+                            resolve(res.distinctBy { interactionResult -> interactionResult.interaction })
+                        }
+                    }
+                })
+            }
+        }
     }
 }
+
+data class InteractionResult(
+    var rxcuis: List<String>,
+    var interaction: String
+)
+

@@ -33,6 +33,7 @@ import android.content.SharedPreferences
 import android.content.res.ColorStateList
 import android.graphics.*
 import android.graphics.drawable.AnimatedVectorDrawable
+import android.util.Log
 import androidx.cardview.widget.CardView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.app.NotificationManagerCompat
@@ -40,6 +41,8 @@ import androidx.core.view.children
 import com.pillpals.pillpals.helpers.DatabaseHelper
 import com.pillpals.pillpals.helpers.DatabaseHelper.Companion.getCorrectIconDrawable
 import com.pillpals.pillpals.helpers.DatabaseHelper.Companion.obliterateSchedule
+import com.pillpals.pillpals.helpers.InteractionResult
+import com.pillpals.pillpals.helpers.MedicationInfoRetriever
 import com.pillpals.pillpals.ui.AddDrugActivity
 import com.pillpals.pillpals.ui.medications.medication_info.MedicationInfoActivity
 import com.pillpals.pillpals.ui.search.SearchActivity
