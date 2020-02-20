@@ -41,7 +41,6 @@ import com.pillpals.pillpals.helpers.DatabaseHelper.Companion.getColorStringByID
 import com.pillpals.pillpals.helpers.DatabaseHelper.Companion.getCorrectIconDrawable
 import com.pillpals.pillpals.ui.DrugCard
 import com.pillpals.pillpals.ui.search.SearchActivity
-import android.widget.Button
 import com.pillpals.pillpals.ui.statistics.MedicationScoresActivity
 
 
@@ -363,9 +362,13 @@ class QuizActivity: AppCompatActivity() {
 
         if(!isLinked){
             parentLayout.visibility=View.GONE
+            generateQuizButton.visibility=View.GONE
+            medicationScoresButton.visibility=View.GONE
             buttonLayout.visibility=View.VISIBLE
         }else{
             parentLayout.visibility=View.VISIBLE
+            generateQuizButton.visibility=View.VISIBLE
+            medicationScoresButton.visibility=View.VISIBLE
             buttonLayout.visibility=View.GONE
         }
     }
