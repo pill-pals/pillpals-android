@@ -16,6 +16,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
+import android.view.animation.DecelerateInterpolator
 import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import android.widget.EditText
@@ -25,6 +26,7 @@ import java.util.Calendar
 
 import androidx.appcompat.app.AppCompatActivity
 import androidx.cardview.widget.CardView
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
 import com.pillpals.pillpals.R
@@ -57,6 +59,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.w3c.dom.Text
 import kotlin.concurrent.thread
+import kotlin.concurrent.timerTask
 
 class QuizQuestionActivity : AppCompatActivity() {
 
@@ -75,6 +78,13 @@ class QuizQuestionActivity : AppCompatActivity() {
     lateinit var answer2: TextView
     lateinit var answer3: TextView
     lateinit var answer4: TextView
+    lateinit var answer1constraint: ConstraintLayout
+    lateinit var answer2constraint: ConstraintLayout
+    lateinit var answer3constraint: ConstraintLayout
+    lateinit var answer4constraint: ConstraintLayout
+    val fadeoutTime = 300.toLong()
+    val fadeinTime = 300.toLong()
+    var buttonOnClickEnabled = true
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -103,6 +113,10 @@ class QuizQuestionActivity : AppCompatActivity() {
         answer2 = findViewById(R.id.answer2)
         answer3 = findViewById(R.id.answer3)
         answer4 = findViewById(R.id.answer4)
+        answer1constraint = findViewById(R.id.answer1constraint)
+        answer2constraint = findViewById(R.id.answer2constraint)
+        answer3constraint = findViewById(R.id.answer3constraint)
+        answer4constraint = findViewById(R.id.answer4constraint)
 
         setPageContentsForQuestion(QuizHelper.getQuestionsAnswered(quiz))
     }
@@ -124,11 +138,13 @@ class QuizQuestionActivity : AppCompatActivity() {
 
     }
 
-    private fun answerQuestion(question: Questions, answer: Int, index: Int) {
+    private fun answerQuestion(question: Questions, answer: Int) {
         realm.executeTransaction{
             question.userAnswer = answer
         }
+    }
 
+    private fun loadNextQuestion(index: Int){
         if(index == 9) {
             val intent = Intent(this, QuizResultsActivity::class.java)
             intent.putExtra("quiz-uid", quiz.uid)
@@ -140,12 +156,26 @@ class QuizQuestionActivity : AppCompatActivity() {
     }
 
     private fun handleButtonOnClick(question: Questions, answer: Int, index: Int) {
-        val fadeoutTime = 200.toLong()
+        var debounceTimer = Timer()
+        debounceTimer.schedule(timerTask {
+            buttonOnClickEnabled = true
+        },fadeinTime+fadeoutTime)
+
+        if (buttonOnClickEnabled) {
+            answerQuestion(question,answer)
+            animateViewOut(index)
+        }
+
+        buttonOnClickEnabled = false
+
+    }
+
+    private fun animateViewOut(index: Int) {
         questionText.animate().alpha(0f)
             .setDuration(fadeoutTime)
             .setListener(object : AnimatorListenerAdapter() {
                 override fun onAnimationEnd(animation: Animator) {
-                    answerQuestion(question,answer,index)
+                    loadNextQuestion(index)
                     animateViewIn()
                 }
             })
@@ -161,10 +191,25 @@ class QuizQuestionActivity : AppCompatActivity() {
         answer4.animate().alpha(0f)
             .setDuration(fadeoutTime)
             .setListener(null)
+        answer1constraint.animate().translationXBy(-900f)
+            .setDuration(fadeoutTime)
+            .setListener(null)
+            .interpolator = DecelerateInterpolator()
+        answer2constraint.animate().translationXBy(900f)
+            .setDuration(fadeoutTime)
+            .setListener(null)
+            .interpolator = DecelerateInterpolator()
+        answer3constraint.animate().translationXBy(-900f)
+            .setDuration(fadeoutTime)
+            .setListener(null)
+            .interpolator = DecelerateInterpolator()
+        answer4constraint.animate().translationXBy(900f)
+            .setDuration(fadeoutTime)
+            .setListener(null)
+            .interpolator = DecelerateInterpolator()
     }
 
     private fun animateViewIn() {
-        val fadeinTime = 200.toLong()
         questionText.animate().alpha(1f)
             .setDuration(fadeinTime)
             .setListener(null)
@@ -180,6 +225,22 @@ class QuizQuestionActivity : AppCompatActivity() {
         answer4.animate().alpha(1f)
             .setDuration(fadeinTime)
             .setListener(null)
+        answer1constraint.animate().translationXBy(900f)
+            .setDuration(fadeinTime)
+            .setListener(null)
+            .interpolator = DecelerateInterpolator()
+        answer2constraint.animate().translationXBy(-900f)
+            .setDuration(fadeinTime)
+            .setListener(null)
+            .interpolator = DecelerateInterpolator()
+        answer3constraint.animate().translationXBy(900f)
+            .setDuration(fadeinTime)
+            .setListener(null)
+            .interpolator = DecelerateInterpolator()
+        answer4constraint.animate().translationXBy(-900f)
+            .setDuration(fadeinTime)
+            .setListener(null)
+            .interpolator = DecelerateInterpolator()
     }
 
     private fun setUpButtons(question: Questions, index: Int) {

@@ -105,6 +105,7 @@
                 android:textSize="18sp" />
 
             <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/answer1constraint"
                 android:layout_width="match_parent"
                 android:layout_height="70dp"
                 android:layout_marginTop="32dp">
@@ -167,6 +168,7 @@
             </androidx.constraintlayout.widget.ConstraintLayout>
 
             <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/answer2constraint"
                 android:layout_width="match_parent"
                 android:layout_height="70dp"
                 android:layout_marginTop="32dp">
@@ -229,6 +231,7 @@
             </androidx.constraintlayout.widget.ConstraintLayout>
 
             <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/answer3constraint"
                 android:layout_width="match_parent"
                 android:layout_height="70dp"
                 android:layout_marginTop="32dp">
@@ -291,6 +294,7 @@
             </androidx.constraintlayout.widget.ConstraintLayout>
 
             <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/answer4constraint"
                 android:layout_width="match_parent"
                 android:layout_height="70dp"
                 android:layout_marginTop="32dp">
