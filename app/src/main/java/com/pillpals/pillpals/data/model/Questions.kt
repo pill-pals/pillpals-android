@@ -14,5 +14,7 @@ open class Questions(
     var userAnswer: Int? = null,
     var medication: Medications? = null,
     @LinkingObjects("questions")
+    val template: RealmResults<QuestionTemplates>? = null,
+    @LinkingObjects("questions")
     val quiz: RealmResults<Quizzes>? = null
     ) : RealmObject(){}

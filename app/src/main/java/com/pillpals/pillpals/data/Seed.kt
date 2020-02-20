@@ -10,6 +10,7 @@ class Seed : Realm.Transaction {
         seedColors(realm)
         seedIcons(realm)
         seedMoodIcons(realm)
+        seedQuestionTemplates(realm)
     }
 
     private fun seedColors(realm: Realm) {

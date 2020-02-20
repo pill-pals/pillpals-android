@@ -97,7 +97,7 @@ class StatisticsFragment : Fragment() {
         leftTimeButton.setOnClickListener{timeButtonClick(-1)}
         rightTimeButton.setOnClickListener{timeButtonClick(1)}
 
-        timeSpanFilter = Filter(timeSpanFilterView,"Day")
+        timeSpanFilter = Filter(timeSpanFilterView,"Week")
         viewModeFilter = Filter(viewModeFilterView,"Timeline")
 
         setupFilter(timeSpanFilter)

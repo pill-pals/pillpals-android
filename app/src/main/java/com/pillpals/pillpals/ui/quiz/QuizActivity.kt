@@ -41,6 +41,8 @@ import com.pillpals.pillpals.helpers.DatabaseHelper.Companion.getColorStringByID
 import com.pillpals.pillpals.helpers.DatabaseHelper.Companion.getCorrectIconDrawable
 import com.pillpals.pillpals.ui.DrugCard
 import com.pillpals.pillpals.ui.search.SearchActivity
+import android.widget.Button
+import com.pillpals.pillpals.ui.statistics.MedicationScoresActivity
 
 
 class QuizActivity: AppCompatActivity() {
@@ -56,6 +58,8 @@ class QuizActivity: AppCompatActivity() {
     public lateinit var completedCollapseBtn: ImageButton
     public lateinit var parentLayout: LinearLayout
     public lateinit var buttonLayout: LinearLayout
+    public lateinit var medicationScoresButton: Button
+    public lateinit var generateQuizButton: Button
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -75,6 +79,18 @@ class QuizActivity: AppCompatActivity() {
         parentLayout = findViewById(R.id.parentLayout)
         buttonLayout = findViewById(R.id.buttonLayout)
 
+        medicationScoresButton = findViewById(R.id.medicationScoresButton)
+        generateQuizButton = findViewById(R.id.generateQuizButton)
+
+        medicationScoresButton.setOnClickListener {
+            val intent = Intent(this, MedicationScoresActivity::class.java)
+            startActivityForResult(intent, 1)
+        }
+
+        generateQuizButton.setOnClickListener{
+            QuizGenerator.generateQuiz()
+            update()
+        }
 
         clearTestData()
 

@@ -17,6 +17,8 @@ import androidx.appcompat.app.AppCompatActivity
 import com.pillpals.pillpals.R
 import com.pillpals.pillpals.data.model.Medications
 import com.pillpals.pillpals.data.model.MoodLogs
+import com.pillpals.pillpals.data.model.Questions
+import com.pillpals.pillpals.data.model.Quizzes
 
 import com.pillpals.pillpals.helpers.DatabaseHelper
 import com.pillpals.pillpals.helpers.DatabaseHelper.Companion.getColorStringByID
@@ -36,7 +38,7 @@ class MedicationScoresActivity : AppCompatActivity() {
     public lateinit var stack: LinearLayout
     private lateinit var realm: Realm
     private lateinit var prefs: SharedPreferences
-
+    private lateinit var questions: List<Questions>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -48,6 +50,8 @@ class MedicationScoresActivity : AppCompatActivity() {
         setContentView(R.layout.activity_medication_scores)
 
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
+
+        questions = realm.where(Questions::class.java).findAll() as List<Questions>
 
         stack = this!!.findViewById(R.id.stack)
         stack.layoutTransition.enableTransitionType(LayoutTransition.CHANGING) //Makes collapsing smooth
@@ -103,53 +107,63 @@ class MedicationScoresActivity : AppCompatActivity() {
         var timeCounts = StatsHelper.averageLogsAcrossSchedules(medication,realm,"Days")
 
         val adherenceScoreValue = calculateAdherenceScore(timeCounts)
-        var adherenceScore = DataPair(this)
-        adherenceScore.key.text = "Overall Score"
-        adherenceScore.value.text = StatsHelper.getGradeStringFromTimeDifference(adherenceScoreValue)
-        adherenceScore.drawableValue.visibility = View.GONE
+        var adherenceScorePair = DataPair(this)
+        adherenceScorePair.key.text = "Overall Score"
+        adherenceScorePair.value.text = StatsHelper.getGradeStringFromTimeDifference(adherenceScoreValue)
+        adherenceScorePair.drawableValue.visibility = View.GONE
 
         val allMoodLogs = DatabaseHelper.readAllData(MoodLogs::class.java) as RealmResults<out MoodLogs>
         var relevantMoodLogs = allMoodLogs.filter{ DatabaseHelper.moodLogIsRelatedToMedication(it,medication) }
         val avgMood = calculateRecentMoodScore(relevantMoodLogs)
 
-        var avgMoodScore = DataPair(this)
-        avgMoodScore.key.text = "Overall Mood"
+        var avgMoodScorePair = DataPair(this)
+        avgMoodScorePair.key.text = "Overall Mood"
         if (avgMood == -1f) {
-            avgMoodScore.value.text = "No Logs"
-            avgMoodScore.drawableValue.visibility = View.GONE
+            avgMoodScorePair.value.text = "No Logs"
+            avgMoodScorePair.drawableValue.visibility = View.GONE
         } else {
-            avgMoodScore.value.text = ""
-            avgMoodScore.drawableValue.setImageResource(DatabaseHelper.getDrawableMoodIconById(this,avgMood.roundToInt()))
+            avgMoodScorePair.value.text = ""
+            avgMoodScorePair.drawableValue.setImageResource(DatabaseHelper.getDrawableMoodIconById(this,avgMood.roundToInt()))
         }
 
         timeCounts = timeCounts.filter{it.time > DateHelper.addUnitToDate(DateHelper.today(),-7,Calendar.DATE) && it.time <= DateHelper.today()}
 
         val recentAdherenceScoreValue = calculateAdherenceScore(timeCounts)
-        var recentAdherenceScore = DataPair(this)
-        recentAdherenceScore.key.text = "Recent Adherence"
-        recentAdherenceScore.value.text = StatsHelper.getGradeStringFromTimeDifference(recentAdherenceScoreValue)
-        recentAdherenceScore.drawableValue.visibility = View.GONE
+        var recentAdherenceScorePair = DataPair(this)
+        recentAdherenceScorePair.key.text = "Recent Adherence"
+        recentAdherenceScorePair.value.text = StatsHelper.getGradeStringFromTimeDifference(recentAdherenceScoreValue)
+        recentAdherenceScorePair.drawableValue.visibility = View.GONE
 
         relevantMoodLogs = relevantMoodLogs.filter{it.date!! > DateHelper.addUnitToDate(DateHelper.today(),-7,Calendar.DATE) && it.date!! <= DateHelper.today()}
 
         val recentAvgMood = calculateRecentMoodScore(relevantMoodLogs)
 
-        var recentAvgMoodScore = DataPair(this)
-        recentAvgMoodScore.key.text = "Recent Mood"
+        var recentAvgMoodScorePair = DataPair(this)
+        recentAvgMoodScorePair.key.text = "Recent Mood"
         if (recentAvgMood == -1f) {
-            recentAvgMoodScore.value.text = "No Logs"
-            recentAvgMoodScore.drawableValue.visibility = View.GONE
+            recentAvgMoodScorePair.value.text = "No Logs"
+            recentAvgMoodScorePair.drawableValue.visibility = View.GONE
         } else {
-            recentAvgMoodScore.value.text = ""
-            recentAvgMoodScore.drawableValue.setImageResource(DatabaseHelper.getDrawableMoodIconById(this,recentAvgMood.roundToInt()))
+            recentAvgMoodScorePair.value.text = ""
+            recentAvgMoodScorePair.drawableValue.setImageResource(DatabaseHelper.getDrawableMoodIconById(this,recentAvgMood.roundToInt()))
         }
 
+        var quizScorePair = DataPair(this)
+        var quizScore = calculateQuizScore(medication)
+        quizScorePair.key.text = "Quiz Score"
+        if (quizScore == -1f) {
+            quizScorePair.value.text = "No data"
+            quizScorePair.drawableValue.visibility = View.GONE
+        } else {
+            quizScorePair.value.text = (quizScore * 100).roundToInt().toString() + "%"
+            quizScorePair.drawableValue.visibility = View.GONE
+        }
 
-
-        dataPairs.add(recentAdherenceScore)
-        dataPairs.add(recentAvgMoodScore)
-        dataPairs.add(adherenceScore)
-        dataPairs.add(avgMoodScore)
+        dataPairs.add(recentAdherenceScorePair)
+        dataPairs.add(recentAvgMoodScorePair)
+        dataPairs.add(adherenceScorePair)
+        dataPairs.add(avgMoodScorePair)
+        dataPairs.add(quizScorePair)
 
         return dataPairs
     }
@@ -170,6 +184,24 @@ class MedicationScoresActivity : AppCompatActivity() {
         with (prefs.edit()) {
             putBoolean(getString(R.string.schedule_preview_collapsed_prefix) + medication.uid, !previouslyCollapsed)
             commit()
+        }
+    }
+
+    private fun calculateQuizScore(medication: Medications):Float {
+        var correctCount = 0
+        var answeredCount = 0
+        questions.forEach{
+            if (it.medication == medication && it.userAnswer != null && it.userAnswer == it.correctAnswer) {
+                correctCount++
+            }
+            if (it.medication == medication && it.userAnswer != null) {
+                answeredCount++
+            }
+        }
+        return if(answeredCount == 0) {
+            -1f
+        } else {
+            correctCount*1f/answeredCount
         }
     }
 
