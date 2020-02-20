@@ -259,11 +259,77 @@ class MedicationInfoRetriever {
                 })
             }
         }
+
+        /* Example of use
+        MedicationInfoRetriever.sideEffects("54092-381").whenComplete { result: Promise.Result<List<SideEffectResult>, RuntimeException> ->
+            when (result) {
+                is Promise.Result.Success -> {
+                    // Use result here
+                    Log.i("Success", result.value.toString())
+                }
+                is Promise.Result.Error -> Log.i("Error", result.error.message!!)
+            }
+        }
+         */
+        fun sideEffects(ndcId: String): Promise<List<SideEffectResult>, RuntimeException> {
+            return Promise {
+                val client = OkHttpClient
+                    .Builder()
+                    .connectTimeout(20, TimeUnit.SECONDS)
+                    .readTimeout(20, TimeUnit.SECONDS)
+                    .build()
+
+                val url = "https://api.fda.gov/drug/event.json?search=patient.drug.openfda.product_ndc:\"${ndcId}\"&count=patient.reaction.reactionmeddrapt.exact"
+
+                val request = Request.Builder().url(url).build()
+
+                onCancel {
+                    reject(RuntimeException("Canceled"))
+                }
+
+                client.newCall(request).enqueue(object : Callback {
+                    override fun onFailure(call: Call, e: IOException) {
+                        e.printStackTrace()
+                        reject(RuntimeException("Failed"))
+                    }
+
+                    override fun onResponse(call: Call, response: Response) {
+                        response.use {
+                            if (!response.isSuccessful) throw IOException("Unexpected code $response")
+
+                            val jsonString = response.body!!.string()
+                            val gson = Gson()
+                            val adverseEffectResults = gson.fromJson(jsonString, OpenFDAAdverseEffectsAggregateResponse::class.java)
+
+                            var res: List<SideEffectResult> = listOf()
+
+                            val termObjects = adverseEffectResults.results
+
+                            Log.i("test", termObjects.toString())
+
+                            if(termObjects.isEmpty()) return resolve(res)
+
+                            val totalCount = termObjects.fold(0) {acc, it -> acc + it.count}.toFloat()
+
+                            res = termObjects.fold(listOf<SideEffectResult>()) {acc, it -> acc.plus(SideEffectResult(it.term, it.count, it.count.toFloat() / totalCount))}
+
+                            resolve(res)
+                        }
+                    }
+                })
+            }
+        }
     }
 }
 
 data class InteractionResult(
     var rxcuis: List<String>,
     var interaction: String
+)
+
+data class SideEffectResult(
+    var sideEffect: String,
+    var rawCount: Int,
+    var percent: Float
 )
 

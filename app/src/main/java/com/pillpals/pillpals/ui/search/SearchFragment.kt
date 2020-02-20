@@ -372,7 +372,7 @@ class SearchFragment : Fragment() {
 
                                         val jsonString = response.body!!.string()
                                         val gson = Gson()
-                                        val fdaResponse = gson.fromJson(jsonString, OpenFDAResponse::class.java)
+                                        val fdaResponse = gson.fromJson(jsonString, OpenFDANameResponse::class.java)
 
                                         val fdaResults = fdaResponse.results.firstOrNull()
 

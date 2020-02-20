@@ -100,19 +100,19 @@ data class OpenFDAMeta(
     val results: OpenFDAMetaResults
 )
 
-data class OpenFDAResultPackaging(
+data class OpenFDANameResultPackaging(
     val marketing_start_date: String,
     val package_ndc: String,
     val description: String,
     val sample: Boolean
 )
 
-data class OpenFDAResultActiveIngredient(
+data class OpenFDANameResultActiveIngredient(
     val strength: String,
     val name: String
 )
 
-data class OpenFDAResultOpenFDAObject(
+data class OpenFDANameResultOpenFDAObject(
     val is_original_packager: List<Boolean>?,
     val spl_set_id: List<String>?,
     val upc: List<String>?,
@@ -121,17 +121,17 @@ data class OpenFDAResultOpenFDAObject(
     val unii: List<String>?
 )
 
-data class OpenFDAResult(
+data class OpenFDANameResult(
     val product_ndc: String,
     val generic_name: String,
     val labeler_name: String,
     val dea_schedule: String,
-    val packaging: List<OpenFDAResultPackaging>,
+    val packaging: List<OpenFDANameResultPackaging>,
     val brand_name_suffix: String,
     val brand_name: String,
-    val active_ingredients: List<OpenFDAResultActiveIngredient>,
+    val active_ingredients: List<OpenFDANameResultActiveIngredient>,
     val finished: Boolean,
-    val openfda: OpenFDAResultOpenFDAObject,
+    val openfda: OpenFDANameResultOpenFDAObject,
     val listing_expiration_date: String,
     val marketing_category: String,
     val dosage_form: String,
@@ -145,9 +145,19 @@ data class OpenFDAResult(
     val pharm_class: List<String>
 )
 
-data class OpenFDAResponse(
+data class OpenFDANameResponse(
     val meta: OpenFDAMeta,
-    val results: List<OpenFDAResult>
+    val results: List<OpenFDANameResult>
+)
+
+data class OpenFDAAdverseEffectsAggregateResult(
+    val term: String,
+    val count: Int
+)
+
+data class OpenFDAAdverseEffectsAggregateResponse(
+    val meta: OpenFDAMeta,
+    val results: List<OpenFDAAdverseEffectsAggregateResult>
 )
 
 
