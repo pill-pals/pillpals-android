@@ -22,6 +22,7 @@ import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
 import com.google.gson.Gson
+import com.pillpals.pillpals.data.*
 import com.pillpals.pillpals.data.model.Medications
 import com.pillpals.pillpals.helpers.DatabaseHelper
 import com.pillpals.pillpals.helpers.SearchSuggestionCursor
@@ -380,7 +381,7 @@ class SearchActivity : AppCompatActivity() {
 
                                         val jsonString = response.body!!.string()
                                         val gson = Gson()
-                                        val fdaResponse = gson.fromJson(jsonString, OpenFDAResponse::class.java)
+                                        val fdaResponse = gson.fromJson(jsonString, OpenFDANameResponse::class.java)
 
                                         val fdaResults = fdaResponse.results.firstOrNull()
 

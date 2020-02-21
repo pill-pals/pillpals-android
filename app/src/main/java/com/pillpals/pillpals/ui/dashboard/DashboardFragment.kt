@@ -12,7 +12,6 @@ import com.pillpals.pillpals.data.model.Schedules
 import com.pillpals.pillpals.data.model.Logs
 import com.pillpals.pillpals.data.model.MoodLogs
 import io.realm.RealmResults
-import com.pillpals.pillpals.helpers.DateHelper
 import androidx.core.content.res.ResourcesCompat
 import com.pillpals.pillpals.ui.DrugCard
 
@@ -33,12 +32,13 @@ import android.content.SharedPreferences
 import android.content.res.ColorStateList
 import android.graphics.*
 import android.graphics.drawable.AnimatedVectorDrawable
+import android.util.Log
 import androidx.cardview.widget.CardView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.app.ActivityCompat.invalidateOptionsMenu
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.view.children
-import com.pillpals.pillpals.helpers.DatabaseHelper
+import com.pillpals.pillpals.helpers.*
 import com.pillpals.pillpals.helpers.DatabaseHelper.Companion.getCorrectIconDrawable
 import com.pillpals.pillpals.helpers.DatabaseHelper.Companion.obliterateSchedule
 import com.pillpals.pillpals.ui.AddDrugActivity
