@@ -1,7 +1,7 @@
 package com.pillpals.pillpals.data
 
 
-// Iteractions
+// RxNorm
 data class InteractionsResponse(
     val nlmDisclaimer: String,
     val userInput: InteractionsUserInput,
@@ -45,6 +45,144 @@ data class InteractionsFullInteractionType(
     val comment: String,
     val minConcept: List<InteractionsFullInteractionTypeMinConcept>,
     val interactionPair: List<InteractionsFullInteractionTypeInteractionPair>
+)
+
+data class RxNormPropertyConcept(
+    val propName: String,
+    val propValue: String
+)
+
+data class RxNormPropertyConceptList(
+    val propertyConcept: List<RxNormPropertyConcept>
+)
+
+data class RxNormPackagingList(
+    val packaging: List<String>
+)
+
+data class RxNormProperty(
+    val ndcItem: String,
+    val ndc9: String,
+    val ndc10: String,
+    val rxcui: String,
+    val splSetIdItem: String,
+    val packagingList: RxNormPackagingList,
+    val propertyConceptList: RxNormPropertyConceptList
+)
+
+data class RxNormPropertiesList(
+    val ndcProperty: List<RxNormProperty>
+)
+
+data class RxNormPropertiesResponse(
+    val ndcPropertyList: RxNormPropertiesList?
+)
+
+
+// thecolorapi
+data class ColorAPIHex(
+    val value: String,
+    val clean: String
+)
+
+data class ColorAPIRGBFraction(
+    val r: Float,
+    val g: Float,
+    val b: Float
+)
+
+data class ColorAPIRGB(
+    val fraction: ColorAPIRGBFraction,
+    val r: Int,
+    val g: Int,
+    val b: Int,
+    val value: String
+)
+
+data class ColorAPIHSLFraction(
+    val h: Float,
+    val s: Float,
+    val l: Float
+)
+
+data class ColorAPIHSL(
+    val fraction: ColorAPIHSLFraction,
+    val h: Int,
+    val s: Int,
+    val l: Int,
+    val value: String
+)
+
+data class ColorAPIHSVFraction(
+    val h: Float,
+    val s: Float,
+    val v: Float
+)
+
+data class ColorAPIHSV(
+    val fraction: ColorAPIHSVFraction,
+    val h: Int,
+    val s: Int,
+    val v: Int,
+    val value: String
+)
+
+data class ColorAPICMYKFraction(
+    val c: Float,
+    val m: Float,
+    val y: Float,
+    val k: Float
+)
+
+data class ColorAPICMYK(
+    val fraction: ColorAPICMYKFraction,
+    val c: Int,
+    val m: Int,
+    val y: Int,
+    val k: Int,
+    val value: String
+)
+
+data class ColorAPIXYZFraction(
+    val x: Float,
+    val y: Float,
+    val z: Float
+)
+
+data class ColorAPIXYZ(
+    val fraction: ColorAPIXYZFraction,
+    val x: Int,
+    val y: Int,
+    val z: Int,
+    val value: String
+)
+
+data class ColorName(
+    val value: String,
+    val closest_named_hex: String,
+    val exact_match_name: Boolean,
+    val distance: Int
+)
+
+data class ColorImage(
+    val bare: String,
+    val named: String
+)
+
+data class ColorContrast(
+    val value: String
+)
+
+data class ColorAPIResponse(
+    val hex: ColorAPIHex,
+    val rgb: ColorAPIRGB,
+    val hsl: ColorAPIHSL,
+    val hsv: ColorAPIHSV,
+    val cmyk: ColorAPICMYK,
+    val xyz: ColorAPIXYZ,
+    val name: ColorName,
+    val image: ColorImage,
+    val contrast: ColorContrast
 )
 
 
@@ -202,9 +340,10 @@ data class OpenFDALabelResult(
     val drug_abuse_and_dependence: List<String>,
     val pregnancy: List<String>,
     val spl_product_data_elements: List<String>,
-    val boxed_warning: List<String>,
+    val boxed_warning: List<String>?,
+    val warnings: List<String>?,
     val adverse_reactions_table: List<String>,
-    val warnings_and_cautions: List<String>,
+    val warnings_and_cautions: List<String>?,
     val openfda: OpenFDALabelOpenFDAObject,
     val controlled_substance: List<String>,
     val version: String,

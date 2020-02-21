@@ -421,11 +421,27 @@ class MedicationInfoRetriever {
 
                             label ?: return resolve("")
 
-                            val warning = label.warnings_and_cautions.firstOrNull()
+                            val warningsAndCautions = label.warnings_and_cautions?.firstOrNull()
+                            val warnings = label.warnings?.firstOrNull()
+                            val boxedWarnings = label.boxed_warning?.firstOrNull()
 
-                            warning ?: return resolve("")
-
-                            resolve(warning.removePrefix("5 WARNINGS AND PRECAUTIONS ").replace("(\\(5\\..\\))".toRegex(), "\n"))
+                            if(warningsAndCautions != null) {
+                                resolve(
+                                    warningsAndCautions
+                                        .removePrefix("5 WARNINGS AND PRECAUTIONS ")
+                                        .replace("(\\(5\\..\\))".toRegex(), "\n")
+                                        .replace("(•)".toRegex(), "\n •")
+                                )
+                            }
+                            else if(warnings != null) {
+                                resolve(warnings.removePrefix("WARNINGS ").replace("(•)".toRegex(), "\n •"))
+                            }
+                            else if(boxedWarnings != null) {
+                                resolve(boxedWarnings.replace("(•)".toRegex(), "\n •"))
+                            }
+                            else {
+                                resolve("")
+                            }
                         }
                     }
                 })
@@ -546,6 +562,230 @@ class MedicationInfoRetriever {
                 })
             }
         }
+
+        /* Example of use
+        MedicationInfoRetriever.color("54092-189").whenComplete { result: Promise.Result<ColorResult, RuntimeException> ->
+            when (result) {
+                is Promise.Result.Success -> {
+                    // Use result here
+                    Log.i("Success", result.value.toString())
+                }
+                is Promise.Result.Error -> Log.i("Error", result.error.message!!)
+            }
+        }
+         */
+        fun color(ndcId: String): Promise<ColorResult, RuntimeException> {
+            return Promise {
+                val client = OkHttpClient
+                    .Builder()
+                    .connectTimeout(20, TimeUnit.SECONDS)
+                    .readTimeout(20, TimeUnit.SECONDS)
+                    .build()
+
+                val url = "https://rxnav.nlm.nih.gov/REST/ndcproperties.json?id=${ndcId}"
+
+                val request = Request.Builder().url(url).build()
+
+                onCancel {
+                    reject(RuntimeException("Canceled"))
+                }
+
+                client.newCall(request).enqueue(object : Callback {
+                    override fun onFailure(call: Call, e: IOException) {
+                        e.printStackTrace()
+                        reject(RuntimeException("Failed"))
+                    }
+
+                    override fun onResponse(call: Call, response: Response) {
+                        response.use {
+                            if (!response.isSuccessful) throw IOException("Unexpected code $response")
+
+                            val jsonString = response.body!!.string()
+                            val gson = Gson()
+                            val propertiesResponse = gson.fromJson(jsonString, RxNormPropertiesResponse::class.java)
+
+                            propertiesResponse ?: return resolve(ColorResult(false, null, null))
+
+                            val properties = propertiesResponse.ndcPropertyList?.ndcProperty?.firstOrNull()?.propertyConceptList?.propertyConcept
+
+                            properties ?: return resolve(ColorResult(false, null, null))
+
+                            val colorProperty = properties.filter { it.propName == "COLOR" }.firstOrNull()
+
+                            colorProperty ?: return resolve(ColorResult(false, null, null))
+
+                            val colorHex = colorProperty.propValue.replace("(;.*)".toRegex(), "")
+
+                            // Get color name
+                            val url = "https://www.thecolorapi.com/id?hex=${colorHex}"
+
+                            val request = Request.Builder().url(url).build()
+
+                            onCancel {
+                                reject(RuntimeException("Canceled"))
+                            }
+
+                            client.newCall(request).enqueue(object : Callback {
+                                override fun onFailure(call: Call, e: IOException) {
+                                    e.printStackTrace()
+                                    resolve(ColorResult(true, "#${colorHex}", null))
+                                }
+
+                                override fun onResponse(call: Call, response: Response) {
+                                    response.use {
+                                        if (!response.isSuccessful) throw IOException("Unexpected code $response")
+
+                                        val jsonString = response.body!!.string()
+                                        val gson = Gson()
+                                        val colorResponse = gson.fromJson(jsonString, ColorAPIResponse::class.java)
+
+                                        colorResponse ?: return resolve(ColorResult(true, "#${colorHex}", null))
+
+                                        val name = colorResponse.name.value
+
+                                        resolve(ColorResult(true, "#${colorHex}", name))
+                                    }
+                                }
+                            })
+                        }
+                    }
+                })
+            }
+        }
+
+        /* Example of use
+        MedicationInfoRetriever.interactsWithAlcohol("68788-0285").whenComplete { result: Promise.Result<Boolean, RuntimeException> ->
+            when (result) {
+                is Promise.Result.Success -> {
+                    // Use result here
+                    Log.i("Success", result.value.toString())
+                }
+                is Promise.Result.Error -> Log.i("Error", result.error.message!!)
+            }
+        }
+         */
+        fun interactsWithAlcohol(ndcId: String): Promise<Boolean, RuntimeException> {
+            return Promise {
+                val client = OkHttpClient
+                    .Builder()
+                    .connectTimeout(20, TimeUnit.SECONDS)
+                    .readTimeout(20, TimeUnit.SECONDS)
+                    .build()
+
+                val url = "https://api.fda.gov/drug/label.json?search=openfda.product_ndc:\"${ndcId}\""
+
+                val request = Request.Builder().url(url).build()
+
+                onCancel {
+                    reject(RuntimeException("Canceled"))
+                }
+
+                client.newCall(request).enqueue(object : Callback {
+                    override fun onFailure(call: Call, e: IOException) {
+                        e.printStackTrace()
+                        reject(RuntimeException("Failed"))
+                    }
+
+                    override fun onResponse(call: Call, response: Response) {
+                        response.use {
+                            if (!response.isSuccessful) throw IOException("Unexpected code $response")
+
+                            val jsonString = response.body!!.string()
+                            val gson = Gson()
+                            val labelResult = gson.fromJson(jsonString, OpenFDALabelResponse::class.java)
+
+                            val label = labelResult.results.firstOrNull()
+
+                            label ?: return resolve(false)
+
+                            val warningsAndCautions = label.warnings_and_cautions?.firstOrNull()
+                            val warnings = label.warnings?.firstOrNull()
+                            val boxedWarnings = label.boxed_warning?.firstOrNull()
+
+                            if(warningsAndCautions != null) {
+                                resolve(warningsAndCautions.toLowerCase(Locale.ENGLISH).contains(" alcohol "))
+                            }
+                            else if(warnings != null) {
+                                resolve(warnings.toLowerCase(Locale.ENGLISH).contains(" alcohol "))
+                            }
+                            else if(boxedWarnings != null) {
+                                resolve(boxedWarnings.toLowerCase(Locale.ENGLISH).contains(" alcohol "))
+                            }
+                            else {
+                                resolve(false)
+                            }
+                        }
+                    }
+                })
+            }
+        }
+
+        /* Example of use
+        MedicationInfoRetriever.interactsWithCaffeine("68788-0285").whenComplete { result: Promise.Result<Boolean, RuntimeException> ->
+            when (result) {
+                is Promise.Result.Success -> {
+                    // Use result here
+                    Log.i("Success", result.value.toString())
+                }
+                is Promise.Result.Error -> Log.i("Error", result.error.message!!)
+            }
+        }
+         */
+        fun interactsWithCaffeine(ndcId: String): Promise<Boolean, RuntimeException> {
+            return Promise {
+                val client = OkHttpClient
+                    .Builder()
+                    .connectTimeout(20, TimeUnit.SECONDS)
+                    .readTimeout(20, TimeUnit.SECONDS)
+                    .build()
+
+                val url = "https://api.fda.gov/drug/label.json?search=openfda.product_ndc:\"${ndcId}\""
+
+                val request = Request.Builder().url(url).build()
+
+                onCancel {
+                    reject(RuntimeException("Canceled"))
+                }
+
+                client.newCall(request).enqueue(object : Callback {
+                    override fun onFailure(call: Call, e: IOException) {
+                        e.printStackTrace()
+                        reject(RuntimeException("Failed"))
+                    }
+
+                    override fun onResponse(call: Call, response: Response) {
+                        response.use {
+                            if (!response.isSuccessful) throw IOException("Unexpected code $response")
+
+                            val jsonString = response.body!!.string()
+                            val gson = Gson()
+                            val labelResult = gson.fromJson(jsonString, OpenFDALabelResponse::class.java)
+
+                            val label = labelResult.results.firstOrNull()
+
+                            label ?: return resolve(false)
+
+                            val warningsAndCautions = label.warnings_and_cautions?.firstOrNull()
+                            val warnings = label.warnings?.firstOrNull()
+                            val boxedWarnings = label.boxed_warning?.firstOrNull()
+
+                            if(warningsAndCautions != null) {
+                                resolve(warningsAndCautions.toLowerCase(Locale.ENGLISH).contains(" caffeine "))
+                            }
+                            else if(warnings != null) {
+                                resolve(warnings.toLowerCase(Locale.ENGLISH).contains(" caffeine "))
+                            }
+                            else if(boxedWarnings != null) {
+                                resolve(boxedWarnings.toLowerCase(Locale.ENGLISH).contains(" caffeine "))
+                            }
+                            else {
+                                resolve(false)
+                            }
+                        }
+                    }
+                })
+            }
+        }
     }
 }
 
@@ -564,5 +804,11 @@ data class RecallsResult(
     val hasBeenRecalled: Boolean,
     val anyMandatoryRecalls: Boolean,
     val recallQuantities: List<String>
+)
+
+data class ColorResult(
+    val hasColor: Boolean,
+    val colorHex: String?,
+    val colorName: String?
 )
 
