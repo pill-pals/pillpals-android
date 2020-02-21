@@ -319,6 +319,233 @@ class MedicationInfoRetriever {
                 })
             }
         }
+
+        /* Example of use
+        MedicationInfoRetriever.description("54092-381").whenComplete { result: Promise.Result<String, RuntimeException> ->
+            when (result) {
+                is Promise.Result.Success -> {
+                    // Use result here
+                    Log.i("Success", result.value.toString())
+                }
+                is Promise.Result.Error -> Log.i("Error", result.error.message!!)
+            }
+        }
+         */
+        fun description(ndcId: String): Promise<String, RuntimeException> {
+            return Promise {
+                val client = OkHttpClient
+                    .Builder()
+                    .connectTimeout(20, TimeUnit.SECONDS)
+                    .readTimeout(20, TimeUnit.SECONDS)
+                    .build()
+
+                val url = "https://api.fda.gov/drug/label.json?search=openfda.product_ndc:\"${ndcId}\""
+
+                val request = Request.Builder().url(url).build()
+
+                onCancel {
+                    reject(RuntimeException("Canceled"))
+                }
+
+                client.newCall(request).enqueue(object : Callback {
+                    override fun onFailure(call: Call, e: IOException) {
+                        e.printStackTrace()
+                        reject(RuntimeException("Failed"))
+                    }
+
+                    override fun onResponse(call: Call, response: Response) {
+                        response.use {
+                            if (!response.isSuccessful) throw IOException("Unexpected code $response")
+
+                            val jsonString = response.body!!.string()
+                            val gson = Gson()
+                            val labelResult = gson.fromJson(jsonString, OpenFDALabelResponse::class.java)
+
+                            val label = labelResult.results.firstOrNull()
+
+                            label ?: return resolve("")
+
+                            val description = label.description.firstOrNull()
+
+                            description ?: return resolve("")
+
+                            resolve(description.removePrefix("11 DESCRIPTION "))
+                        }
+                    }
+                })
+            }
+        }
+
+        /* Example of use
+        MedicationInfoRetriever.warning("54092-381").whenComplete { result: Promise.Result<String, RuntimeException> ->
+            when (result) {
+                is Promise.Result.Success -> {
+                    // Use result here
+                    Log.i("Success", result.value.toString())
+                }
+                is Promise.Result.Error -> Log.i("Error", result.error.message!!)
+            }
+        }
+         */
+        fun warning(ndcId: String): Promise<String, RuntimeException> {
+            return Promise {
+                val client = OkHttpClient
+                    .Builder()
+                    .connectTimeout(20, TimeUnit.SECONDS)
+                    .readTimeout(20, TimeUnit.SECONDS)
+                    .build()
+
+                val url = "https://api.fda.gov/drug/label.json?search=openfda.product_ndc:\"${ndcId}\""
+
+                val request = Request.Builder().url(url).build()
+
+                onCancel {
+                    reject(RuntimeException("Canceled"))
+                }
+
+                client.newCall(request).enqueue(object : Callback {
+                    override fun onFailure(call: Call, e: IOException) {
+                        e.printStackTrace()
+                        reject(RuntimeException("Failed"))
+                    }
+
+                    override fun onResponse(call: Call, response: Response) {
+                        response.use {
+                            if (!response.isSuccessful) throw IOException("Unexpected code $response")
+
+                            val jsonString = response.body!!.string()
+                            val gson = Gson()
+                            val labelResult = gson.fromJson(jsonString, OpenFDALabelResponse::class.java)
+
+                            val label = labelResult.results.firstOrNull()
+
+                            label ?: return resolve("")
+
+                            val warning = label.warnings_and_cautions.firstOrNull()
+
+                            warning ?: return resolve("")
+
+                            resolve(warning.removePrefix("5 WARNINGS AND PRECAUTIONS ").replace("(\\(5\\..\\))".toRegex(), "\n"))
+                        }
+                    }
+                })
+            }
+        }
+
+        /* Example of use
+        MedicationInfoRetriever.overdosage("54092-381").whenComplete { result: Promise.Result<String, RuntimeException> ->
+            when (result) {
+                is Promise.Result.Success -> {
+                    // Use result here
+                    Log.i("Success", result.value.toString())
+                }
+                is Promise.Result.Error -> Log.i("Error", result.error.message!!)
+            }
+        }
+         */
+        fun overdosage(ndcId: String): Promise<String, RuntimeException> {
+            return Promise {
+                val client = OkHttpClient
+                    .Builder()
+                    .connectTimeout(20, TimeUnit.SECONDS)
+                    .readTimeout(20, TimeUnit.SECONDS)
+                    .build()
+
+                val url = "https://api.fda.gov/drug/label.json?search=openfda.product_ndc:\"${ndcId}\""
+
+                val request = Request.Builder().url(url).build()
+
+                onCancel {
+                    reject(RuntimeException("Canceled"))
+                }
+
+                client.newCall(request).enqueue(object : Callback {
+                    override fun onFailure(call: Call, e: IOException) {
+                        e.printStackTrace()
+                        reject(RuntimeException("Failed"))
+                    }
+
+                    override fun onResponse(call: Call, response: Response) {
+                        response.use {
+                            if (!response.isSuccessful) throw IOException("Unexpected code $response")
+
+                            val jsonString = response.body!!.string()
+                            val gson = Gson()
+                            val labelResult = gson.fromJson(jsonString, OpenFDALabelResponse::class.java)
+
+                            val label = labelResult.results.firstOrNull()
+
+                            label ?: return resolve("")
+
+                            val overdosage = label.overdosage.firstOrNull()
+
+                            overdosage ?: return resolve("")
+
+                            resolve(overdosage.removePrefix("10 OVERDOSAGE "))
+                        }
+                    }
+                })
+            }
+        }
+
+        /* Example of use
+        MedicationInfoRetriever.recalls("54092-189").whenComplete { result: Promise.Result<RecallsResult, RuntimeException> ->
+            when (result) {
+                is Promise.Result.Success -> {
+                    // Use result here
+                    Log.i("Success", result.value.toString())
+                }
+                is Promise.Result.Error -> Log.i("Error", result.error.message!!)
+            }
+        }
+         */
+        fun recalls(ndcId: String): Promise<RecallsResult, RuntimeException> {
+            return Promise {
+                val client = OkHttpClient
+                    .Builder()
+                    .connectTimeout(20, TimeUnit.SECONDS)
+                    .readTimeout(20, TimeUnit.SECONDS)
+                    .build()
+
+                val url = "https://api.fda.gov/drug/enforcement.json?search=openfda.product_ndc:\"${ndcId}\""
+
+                val request = Request.Builder().url(url).build()
+
+                onCancel {
+                    reject(RuntimeException("Canceled"))
+                }
+
+                client.newCall(request).enqueue(object : Callback {
+                    override fun onFailure(call: Call, e: IOException) {
+                        e.printStackTrace()
+                        reject(RuntimeException("Failed"))
+                    }
+
+                    override fun onResponse(call: Call, response: Response) {
+                        response.use {
+                            if (!response.isSuccessful) throw IOException("Unexpected code $response")
+
+                            val jsonString = response.body!!.string()
+                            val gson = Gson()
+                            val recallsResult = gson.fromJson(jsonString, OpenFDARecallsResponse::class.java)
+
+                            val recalls = recallsResult.results
+
+                            if(recalls.isEmpty()) return resolve(RecallsResult(false, false, listOf()))
+
+                            var mandated = false
+
+                            val recallQuantitiesList = recalls.fold(listOf<String>()) {acc, it ->
+                                if(it.voluntary_mandated.contains("Mandated")) mandated = true
+                                acc.plus(it.product_quantity)
+                            }
+
+                            resolve(RecallsResult(recallQuantitiesList.any(), mandated, recallQuantitiesList))
+                        }
+                    }
+                })
+            }
+        }
     }
 }
 
@@ -331,5 +558,11 @@ data class SideEffectResult(
     var sideEffect: String,
     var rawCount: Int,
     var percent: Float
+)
+
+data class RecallsResult(
+    val hasBeenRecalled: Boolean,
+    val anyMandatoryRecalls: Boolean,
+    val recallQuantities: List<String>
 )
 
