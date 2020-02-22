@@ -10,10 +10,12 @@ import android.util.Log
 import com.pillpals.pillpals.data.model.*
 import com.pillpals.pillpals.helpers.DateHelper
 import io.realm.kotlin.createObject
+import java.io.IOException
 
 class QuizGenerator() {
     companion object {
         val realm = Realm.getDefaultInstance()
+        var questions: MutableList<QuestionTemplates> = realm.where(QuestionTemplates::class.java).findAll() as MutableList<QuestionTemplates>
 
         fun generateQuiz() {
             realm.executeTransaction {
@@ -21,14 +23,21 @@ class QuizGenerator() {
                 quiz.date = DateHelper.today()
                 quiz.name = generateQuizName()
 
-                //TODO: handle template failures and pick a new template
-                //get 10 question templates and generate questions
+                var attemptedTemplates = mutableListOf<QuestionTemplates>()
                 var selectedTemplates = mutableListOf<QuestionTemplates>()
                 var generatedQuestions = mutableListOf<Questions>()
 
-                for (i in 0..9) {
-                    selectedTemplates.add(getRandomTemplate())
-                    generatedQuestions.add(generateQuestion(selectedTemplates[i].id,getRandomMedication(selectedTemplates[i])))
+                var counter = 0
+                while (counter <= 9) {
+                    var template = getRandomTemplate(attemptedTemplates)
+                    var question: Questions? = try {generateQuestion(template.id,getRandomMedication(template))} catch(e: IOException) {null}
+                    attemptedTemplates.add(template)
+
+                    if (question != null) {
+                        counter++
+                        selectedTemplates.add(template)
+                        generatedQuestions.add(question)
+                    }
                 }
 
                 //create objects in realm for linking
@@ -51,7 +60,7 @@ class QuizGenerator() {
             return "Gen Quiz " + quizzes.size.toString()
         }
 
-        private fun getRandomTemplate():QuestionTemplates {
+        private fun getRandomTemplate(attemptedTemplates: MutableList<QuestionTemplates>):QuestionTemplates {
             //TODO: rules on what templates to get (e.g. no repeats in same quiz)
             return realm.where(QuestionTemplates::class.java).findAll().random()
         }
