@@ -15,7 +15,6 @@ import java.io.IOException
 class QuizGenerator() {
     companion object {
         val realm = Realm.getDefaultInstance()
-        var questions: MutableList<QuestionTemplates> = realm.where(QuestionTemplates::class.java).findAll() as MutableList<QuestionTemplates>
 
         fun generateQuiz() {
             realm.executeTransaction {
@@ -61,8 +60,16 @@ class QuizGenerator() {
         }
 
         private fun getRandomTemplate(attemptedTemplates: MutableList<QuestionTemplates>):QuestionTemplates {
-            //TODO: rules on what templates to get (e.g. no repeats in same quiz)
-            return realm.where(QuestionTemplates::class.java).findAll().random()
+            var query = realm.where(QuestionTemplates::class.java)
+
+            attemptedTemplates.forEach{
+                query.notEqualTo("id",it.id)
+            }
+            var unattemptedTemplates = query.findAll()
+            if (unattemptedTemplates.size == 0) {
+                throw IOException("Quiz Generator ran out of unattempted templates")
+            }
+            return unattemptedTemplates.random()
         }
 
         private fun getRandomMedication(template: QuestionTemplates):Medications {

@@ -3,6 +3,7 @@ package com.pillpals.pillpals.ui.quiz
 import com.pillpals.pillpals.data.model.Medications
 import com.pillpals.pillpals.data.model.Questions
 import io.realm.RealmList
+import java.io.IOException
 
 
 fun generateQuestion(id: Int, medication: Medications):Questions {
@@ -85,6 +86,14 @@ fun generateQuestion(id: Int, medication: Medications):Questions {
             incorrectAnswers.add("Incorrect 2")
             incorrectAnswers.add("Incorrect 3")
             question.question = "This question is asking about " + medication.name + " using template 105"
+        }
+        106-> {
+            correctAnswerString = "Correct"
+            incorrectAnswers.add("Incorrect 1")
+            incorrectAnswers.add("Incorrect 2")
+            incorrectAnswers.add("Incorrect 3")
+            question.question = "This question is asking about " + medication.name + " using template 105"
+            throw IOException("question failed to generate")
         }
 
     }
