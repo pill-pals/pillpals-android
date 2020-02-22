@@ -98,6 +98,10 @@ fun generateQuestion(id: Int, medication: Medications):Questions {
 
     }
 
+    //if there are more than 3 incorrect answers, remove some
+    incorrectAnswers.shuffle()
+    incorrectAnswers = incorrectAnswers.take(3) as MutableList<String>
+
     //randomize Answers
     incorrectAnswers.add(correctAnswerString)
     incorrectAnswers.shuffle()
