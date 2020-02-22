@@ -106,7 +106,7 @@ class MedicationScoresActivity : AppCompatActivity() {
 
         var timeCounts = StatsHelper.averageLogsAcrossSchedules(medication,realm,"Days")
 
-        val adherenceScoreValue = calculateAdherenceScore(timeCounts)
+        val adherenceScoreValue = StatsHelper.calculateAdherenceScore(timeCounts)
         var adherenceScorePair = DataPair(this)
         adherenceScorePair.key.text = "Overall Score"
         adherenceScorePair.value.text = StatsHelper.getGradeStringFromTimeDifference(adherenceScoreValue)
@@ -114,7 +114,7 @@ class MedicationScoresActivity : AppCompatActivity() {
 
         val allMoodLogs = DatabaseHelper.readAllData(MoodLogs::class.java) as RealmResults<out MoodLogs>
         var relevantMoodLogs = allMoodLogs.filter{ DatabaseHelper.moodLogIsRelatedToMedication(it,medication) }
-        val avgMood = calculateRecentMoodScore(relevantMoodLogs)
+        val avgMood = StatsHelper.calculateMoodScore(relevantMoodLogs)
 
         var avgMoodScorePair = DataPair(this)
         avgMoodScorePair.key.text = "Overall Mood"
@@ -128,7 +128,7 @@ class MedicationScoresActivity : AppCompatActivity() {
 
         timeCounts = timeCounts.filter{it.time > DateHelper.addUnitToDate(DateHelper.today(),-7,Calendar.DATE) && it.time <= DateHelper.today()}
 
-        val recentAdherenceScoreValue = calculateAdherenceScore(timeCounts)
+        val recentAdherenceScoreValue = StatsHelper.calculateAdherenceScore(timeCounts)
         var recentAdherenceScorePair = DataPair(this)
         recentAdherenceScorePair.key.text = "Recent Adherence"
         recentAdherenceScorePair.value.text = StatsHelper.getGradeStringFromTimeDifference(recentAdherenceScoreValue)
@@ -136,7 +136,7 @@ class MedicationScoresActivity : AppCompatActivity() {
 
         relevantMoodLogs = relevantMoodLogs.filter{it.date!! > DateHelper.addUnitToDate(DateHelper.today(),-7,Calendar.DATE) && it.date!! <= DateHelper.today()}
 
-        val recentAvgMood = calculateRecentMoodScore(relevantMoodLogs)
+        val recentAvgMood = StatsHelper.calculateMoodScore(relevantMoodLogs)
 
         var recentAvgMoodScorePair = DataPair(this)
         recentAvgMoodScorePair.key.text = "Recent Mood"
@@ -149,7 +149,7 @@ class MedicationScoresActivity : AppCompatActivity() {
         }
 
         var quizScorePair = DataPair(this)
-        var quizScore = calculateQuizScore(medication)
+        var quizScore = StatsHelper.calculateQuizScore(medication, questions)
         quizScorePair.key.text = "Quiz Score"
         if (quizScore == -1f) {
             quizScorePair.value.text = "No data"
@@ -184,57 +184,6 @@ class MedicationScoresActivity : AppCompatActivity() {
         with (prefs.edit()) {
             putBoolean(getString(R.string.schedule_preview_collapsed_prefix) + medication.uid, !previouslyCollapsed)
             commit()
-        }
-    }
-
-    private fun calculateQuizScore(medication: Medications):Float {
-        var correctCount = 0
-        var answeredCount = 0
-        questions.forEach{
-            if (it.medication == medication && it.userAnswer != null && it.userAnswer == it.correctAnswer) {
-                correctCount++
-            }
-            if (it.medication == medication && it.userAnswer != null) {
-                answeredCount++
-            }
-        }
-        return if(answeredCount == 0) {
-            -1f
-        } else {
-            correctCount*1f/answeredCount
-        }
-    }
-
-    private fun calculateAdherenceScore(timeCounts: List<TimeCount>):Float {
-        var sum = 0f
-        timeCounts.forEach{
-            sum += it.offset
-        }
-
-        return if (timeCounts.count() == 0) {
-            -1f
-        } else {
-            sum / timeCounts.count() / 1000 / 60
-        }
-    }
-
-    private fun calculateRecentMoodScore(relevantMoodLogs: List<MoodLogs>):Float {
-        //Log.i("test",medication.name + " - " + relevantMoodLogs.toString())
-        var sum = 0f
-        var count = 0f
-        relevantMoodLogs.forEach{
-            if (it.rating != null) {
-                sum += it.rating!!
-                count += 1f
-            }
-        }
-
-        //Log.i("test",medication.name + " : " + avg + " : " + count)
-
-        return if (count == 0f) {
-            -1f
-        } else {
-            sum/count
         }
     }
 
