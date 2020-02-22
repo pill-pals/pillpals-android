@@ -1,8 +1,5 @@
 package com.pillpals.pillpals.helpers
 
-import com.pillpals.pillpals.data.model.Logs
-import com.pillpals.pillpals.data.model.Medications
-import com.pillpals.pillpals.data.model.Schedules
 import com.pillpals.pillpals.ui.statistics.DataLogs
 import com.pillpals.pillpals.ui.statistics.MissingLogs
 import com.pillpals.pillpals.ui.statistics.TimeCount
@@ -10,6 +7,7 @@ import io.realm.Realm
 import java.util.*
 import kotlin.math.abs
 import android.util.Log
+import com.pillpals.pillpals.data.model.*
 
 class StatsHelper {
     companion object {
@@ -138,6 +136,55 @@ class StatsHelper {
                 }
             }
             return equalFlag
+        }
+
+        fun calculateQuizScore(medication: Medications, questions: List<Questions>):Float {
+            var correctCount = 0
+            var answeredCount = 0
+
+            questions.forEach{
+                if (it.medication == medication && it.userAnswer != null && it.userAnswer == it.correctAnswer) {
+                    correctCount++
+                }
+                if (it.medication == medication && it.userAnswer != null) {
+                    answeredCount++
+                }
+            }
+            return if(answeredCount == 0) {
+                -1f
+            } else {
+                correctCount*1f/answeredCount
+            }
+        }
+
+        fun calculateAdherenceScore(timeCounts: List<TimeCount>):Float {
+            var sum = 0f
+            timeCounts.forEach{
+                sum += it.offset
+            }
+
+            return if (timeCounts.count() == 0) {
+                -1f
+            } else {
+                sum / timeCounts.count() / 1000 / 60
+            }
+        }
+
+        fun calculateMoodScore(moodLogs: List<MoodLogs>):Float {
+            var sum = 0f
+            var count = 0f
+            moodLogs.forEach{
+                if (it.rating != null) {
+                    sum += it.rating!!
+                    count += 1f
+                }
+            }
+
+            return if (count == 0f) {
+                -1f
+            } else {
+                sum/count
+            }
         }
     }
 }

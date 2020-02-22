@@ -70,9 +70,6 @@
                 </RelativeLayout>
 
 
-
-
-
                 <EditText
                     android:id="@+id/editText"
                     android:layout_width="0dp"
@@ -83,32 +80,32 @@
                     android:background="@color/colorGrey"
                     android:ems="10"
                     android:gravity="start|top"
+                    android:hint="Drug Name"
                     android:inputType="text"
                     android:lines="1"
                     android:padding="7dp"
                     android:textColor="@color/colorBlack"
-                    android:textSize="20sp"
-                    android:hint="Drug Name"
                     android:textColorHint="@color/colorDarkGrey"
+                    android:textSize="20sp"
                     app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toEndOf="@+id/button"
+                    app:layout_constraintStart_toEndOf="@+id/imagePreview"
                     app:layout_constraintTop_toTopOf="parent" />
 
                 <View
                     android:id="@+id/view"
                     android:layout_width="match_parent"
                     android:layout_height="1dp"
-                    android:layout_marginTop="20dp"
+                    android:layout_marginTop="10dp"
                     android:background="@color/colorGrey"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/editText2" />
+                    app:layout_constraintTop_toBottomOf="@+id/linkedTextLayout" />
 
                 <TextView
                     android:id="@+id/textView2"
                     android:layout_width="wrap_content"
                     android:layout_height="30dp"
                     android:layout_marginStart="16dp"
-                    android:layout_marginTop="30dp"
+                    android:layout_marginTop="14dp"
                     android:text="Schedule"
                     android:textAppearance="@style/TextAppearance.AppCompat.Large"
                     android:textColor="@color/colorBlack"
@@ -120,7 +117,7 @@
                     android:id="@+id/addScheduleButton"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="20dp"
+                    android:layout_marginTop="10dp"
                     android:layout_marginEnd="16dp"
                     android:insetTop="0dp"
                     android:insetBottom="0dp"
@@ -193,7 +190,7 @@
                     android:textColorHint="@color/colorDarkGrey"
                     android:textSize="20sp"
                     app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toEndOf="@+id/button"
+                    app:layout_constraintStart_toEndOf="@+id/imagePreview"
                     app:layout_constraintTop_toBottomOf="@+id/editText" />
 
                 <TextView
@@ -256,6 +253,36 @@
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@+id/unlinkMedicationButton" />
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/linkedTextLayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginEnd="16dp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/editText2">
+
+                    <TextView
+                        android:id="@+id/textView9"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Linked with:"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <TextView
+                        android:id="@+id/linkedDrugText"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="125dp"
+                        android:text="TextView"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="@+id/textView9"
+                        app:layout_constraintTop_toTopOf="parent" />
+                </androidx.constraintlayout.widget.ConstraintLayout>
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 
