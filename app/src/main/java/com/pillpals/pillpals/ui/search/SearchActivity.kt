@@ -261,10 +261,10 @@ class SearchActivity : AppCompatActivity() {
         searchResults.removeAllViews()
     }
 
-    private fun multipleDrugsExistsWithName(drug: DrugProduct): Boolean {
+    private fun multipleDrugsExistsWithName(name: String, dosage: String): Boolean {
         searchingUpcomingDrugs = true
         val res = upcomingDrugCards.filter {
-            it?.nameText?.text.toString() == drug.brand_name
+            it?.nameText?.text.toString() == name && it?.lateText?.text.toString() == dosage
         }.count() > 1
         searchingUpcomingDrugs = false
         return res
@@ -337,7 +337,7 @@ class SearchActivity : AppCompatActivity() {
                             return
                         }
 
-                        uniquelyNamedDrugs.forEachIndexed {namedIndex, drugProduct ->
+                        drugProducts.forEachIndexed {namedIndex, drugProduct ->
                             // gather info and set to card
                             val newCard = DrugCard(outerContext)
                             newCard.nameText.text = drugProduct.brand_name
@@ -354,21 +354,14 @@ class SearchActivity : AppCompatActivity() {
                             }
                             upcomingDrugCards.add(newCard)
 
-                            if(multipleDrugsExistsWithName(drugProduct)) {
-                                drugCards[index] = null
-                                refreshCardsFlag = true
-                                return@forEachIndexed
-                            }
-
-                            // Get other ID's from FDA
-                            val url = "https://api.fda.gov/drug/ndc.json?search=brand_name:${drugProduct.brand_name}"
+                            val url = "https://health-products.canada.ca/api/drug/activeingredient/?id=${drugProduct.drug_code}"
 
                             val request = Request.Builder().url(url).build()
 
                             client.newCall(request).enqueue(object : Callback {
                                 override fun onFailure(call: Call, e: IOException) {
                                     e.printStackTrace()
-                                    if (index < drugCards.count()) {
+                                    if(index < drugCards.count()) {
                                         drugCards[index] = null
                                     }
                                     apiDown = true
@@ -381,25 +374,46 @@ class SearchActivity : AppCompatActivity() {
 
                                         val jsonString = response.body!!.string()
                                         val gson = Gson()
-                                        val fdaResponse = gson.fromJson(jsonString, OpenFDANameResponse::class.java)
+                                        val activeIngredients = gson.fromJson(jsonString, Array<ActiveIngredient>::class.java).toList()
 
-                                        val fdaResults = fdaResponse.results.firstOrNull()
-
-                                        // SET FDA IDS
-                                        if(fdaResults != null) {
-                                            newCard.ndcCode = fdaResults.product_ndc
-                                            newCard.rxcui = fdaResults.openfda.rxcui?.firstOrNull()
-                                            newCard.splSetId = fdaResults.openfda.spl_set_id?.firstOrNull()
+                                        val ingredientNameList = activeIngredients.fold(listOf<String>()) { acc, it ->
+                                            acc.plus(it.ingredient_name)
                                         }
 
-                                        val url = "https://health-products.canada.ca/api/drug/activeingredient/?id=${drugProduct.drug_code}"
+                                        val dosageValues = activeIngredients.fold(listOf<String>()) { acc, it ->
+                                            acc.plus(it.strength)
+                                        }
+
+                                        val dosageUnits = activeIngredients.fold(listOf<String>()) { acc, it ->
+                                            if(acc.contains(it.strength_unit)) acc
+                                            else acc.plus(it.strength_unit)
+                                        }
+
+                                        newCard.dosageString = "${dosageValues.joinToString("/")} ${dosageUnits.joinToString("/")}"
+
+                                        newCard.lateText.text = newCard.dosageString
+
+                                        newCard.lateText.visibility = View.VISIBLE
+
+                                        if(multipleDrugsExistsWithName(drugProduct.brand_name, newCard.dosageString)) {
+                                            drugCards[index] = null
+                                            refreshCardsFlag = true
+                                            return
+                                        }
+
+                                        newCard.activeIngredients = ingredientNameList
+
+                                        newCard.timeText.text = ingredientNameList.joinToString()
+
+                                        // Get other ID's from FDA
+                                        val url = "https://api.fda.gov/drug/ndc.json?limit=100&search=brand_name:${drugProduct.brand_name.replace("( .*)".toRegex(), "")}"
 
                                         val request = Request.Builder().url(url).build()
 
                                         client.newCall(request).enqueue(object : Callback {
                                             override fun onFailure(call: Call, e: IOException) {
                                                 e.printStackTrace()
-                                                if(index < drugCards.count()) {
+                                                if (index < drugCards.count()) {
                                                     drugCards[index] = null
                                                 }
                                                 apiDown = true
@@ -412,27 +426,34 @@ class SearchActivity : AppCompatActivity() {
 
                                                     val jsonString = response.body!!.string()
                                                     val gson = Gson()
-                                                    val activeIngredients = gson.fromJson(jsonString, Array<ActiveIngredient>::class.java).toList()
+                                                    val fdaResponse = gson.fromJson(jsonString, OpenFDANameResponse::class.java)
 
-                                                    val ingredientNameList = activeIngredients.fold(listOf<String>()) { acc, it ->
-                                                        acc.plus(it.ingredient_name)
+                                                    if(fdaResponse.error == null) {
+                                                        val fdaResults = fdaResponse.results
+
+                                                        val fdaResultWithDosage = fdaResults.filter {
+                                                            val totalVal = it.active_ingredients.fold(0f) {acc, it ->
+                                                                acc + it.strength.replace("( .*)".toRegex(), "").toFloat()
+                                                            }
+                                                            it.active_ingredients.any {
+                                                                it.strength.contains("${dosageValues.first()} ${dosageUnits.firstOrNull()?.toLowerCase()}")
+                                                            } || dosageValues.firstOrNull()?.toFloat() == totalVal
+                                                        }.firstOrNull()
+
+                                                        val firstFdaResult = fdaResults.firstOrNull()
+
+                                                        // SET FDA IDS
+                                                        if(fdaResultWithDosage != null) {
+                                                            newCard.ndcCode = fdaResultWithDosage.product_ndc
+                                                            newCard.rxcui = fdaResultWithDosage.openfda.rxcui?.firstOrNull()
+                                                            newCard.splSetId = fdaResultWithDosage.openfda.spl_set_id?.firstOrNull()
+                                                        }
+                                                        else if(firstFdaResult != null) {
+                                                            newCard.ndcCode = firstFdaResult.product_ndc
+                                                            newCard.rxcui = firstFdaResult.openfda.rxcui?.firstOrNull()
+                                                            newCard.splSetId = firstFdaResult.openfda.spl_set_id?.firstOrNull()
+                                                        }
                                                     }
-
-                                                    val dosageValues = activeIngredients.fold("") { acc, it ->
-                                                        if(acc.isNotEmpty()) acc + "/" + it.strength
-                                                        else acc + it.strength
-                                                    }
-
-                                                    val dosageUnits = activeIngredients.fold(listOf<String>()) { acc, it ->
-                                                        if(acc.contains(it.strength_unit)) acc
-                                                        else acc.plus(it.strength_unit)
-                                                    }.joinToString("/")
-
-                                                    newCard.dosageString = "$dosageValues $dosageUnits"
-
-                                                    newCard.activeIngredients = ingredientNameList
-
-                                                    newCard.timeText.text = ingredientNameList.joinToString()
 
                                                     val url = "https://health-products.canada.ca/api/drug/route/?id=${drugProduct.drug_code}"
 
@@ -473,7 +494,7 @@ class SearchActivity : AppCompatActivity() {
                                                                         acc.plus(it.route_of_administration_name)
                                                                     }
 
-                                                                    newCard.lateText.text = administrationRoutesList.joinToString()
+                                                                    //newCard.lateText.text = administrationRoutesList.joinToString()
                                                                 }
 
                                                                 // Add button action here, using drug code
@@ -535,8 +556,6 @@ class SearchActivity : AppCompatActivity() {
         newCard.button.layoutParams.width = ViewGroup.LayoutParams.WRAP_CONTENT
 
         newCard.overflowMenu.visibility = View.INVISIBLE
-
-        Log.i("test", newCard.toString())
 
         searchResults.addView(newCard)
         return newCard

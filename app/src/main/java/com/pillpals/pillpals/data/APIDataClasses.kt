@@ -284,6 +284,7 @@ data class OpenFDANameResult(
 )
 
 data class OpenFDANameResponse(
+    val error: OpenFDARecallsError?,
     val meta: OpenFDAMeta,
     val results: List<OpenFDANameResult>
 )
@@ -295,7 +296,8 @@ data class OpenFDAAdverseEffectsAggregateResult(
 
 data class OpenFDAAdverseEffectsAggregateResponse(
     val meta: OpenFDAMeta,
-    val results: List<OpenFDAAdverseEffectsAggregateResult>
+    val results: List<OpenFDAAdverseEffectsAggregateResult>,
+    val error: OpenFDARecallsError?
 )
 
 data class OpenFDALabelOpenFDAObject(
@@ -366,6 +368,7 @@ data class OpenFDALabelResult(
 )
 
 data class OpenFDALabelResponse(
+    val error: OpenFDARecallsError?,
     val meta: OpenFDAMeta,
     val results: List<OpenFDALabelResult>
 )
@@ -406,6 +409,6 @@ data class OpenFDARecallsResult(
 data class OpenFDARecallsResponse(
     val meta: OpenFDAMeta,
     val results: List<OpenFDARecallsResult>,
-    val error: OpenFDARecallsError
+    val error: OpenFDARecallsError?
 )
 

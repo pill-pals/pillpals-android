@@ -301,6 +301,8 @@ class MedicationInfoRetriever {
                             val gson = Gson()
                             val adverseEffectResults = gson.fromJson(jsonString, OpenFDAAdverseEffectsAggregateResponse::class.java)
 
+                            if(adverseEffectResults.error != null) return resolve(listOf())
+
                             var res: List<SideEffectResult> = listOf()
 
                             val termObjects = adverseEffectResults.results
@@ -361,6 +363,8 @@ class MedicationInfoRetriever {
                             val gson = Gson()
                             val labelResult = gson.fromJson(jsonString, OpenFDALabelResponse::class.java)
 
+                            if(labelResult.error != null) return resolve("")
+
                             val label = labelResult.results.firstOrNull()
 
                             label ?: return resolve("")
@@ -416,6 +420,8 @@ class MedicationInfoRetriever {
                             val jsonString = response.body!!.string()
                             val gson = Gson()
                             val labelResult = gson.fromJson(jsonString, OpenFDALabelResponse::class.java)
+
+                            if(labelResult.error != null) return resolve("")
 
                             val label = labelResult.results.firstOrNull()
 
@@ -489,6 +495,8 @@ class MedicationInfoRetriever {
                             val gson = Gson()
                             val labelResult = gson.fromJson(jsonString, OpenFDALabelResponse::class.java)
 
+                            if(labelResult.error != null) return resolve("")
+
                             val label = labelResult.results.firstOrNull()
 
                             label ?: return resolve("")
@@ -544,6 +552,8 @@ class MedicationInfoRetriever {
                             val jsonString = response.body!!.string()
                             val gson = Gson()
                             val recallsResult = gson.fromJson(jsonString, OpenFDARecallsResponse::class.java)
+
+                            if(recallsResult.error != null) return resolve(RecallsResult(false, false, listOf()))
 
                             val recalls = recallsResult.results
 
@@ -604,49 +614,162 @@ class MedicationInfoRetriever {
                             val gson = Gson()
                             val propertiesResponse = gson.fromJson(jsonString, RxNormPropertiesResponse::class.java)
 
-                            propertiesResponse ?: return resolve(ColorResult(false, null, null))
+                            propertiesResponse ?: return resolve(ColorResult(false, null))
 
                             val properties = propertiesResponse.ndcPropertyList?.ndcProperty?.firstOrNull()?.propertyConceptList?.propertyConcept
 
-                            properties ?: return resolve(ColorResult(false, null, null))
+                            properties ?: return resolve(ColorResult(false, null))
 
-                            val colorProperty = properties.filter { it.propName == "COLOR" }.firstOrNull()
+                            val colorProperty = properties.filter { it.propName == "COLORTEXT" }.firstOrNull()
 
-                            colorProperty ?: return resolve(ColorResult(false, null, null))
+                            colorProperty ?: return resolve(ColorResult(false, null))
 
-                            val colorHex = colorProperty.propValue.replace("(;.*)".toRegex(), "")
+                            resolve(ColorResult(false, colorProperty.propValue))
 
-                            // Get color name
-                            val url = "https://www.thecolorapi.com/id?hex=${colorHex}"
+//                            val colorHex = colorProperty.propValue.replace("(;.*)".toRegex(), "")
+//
+//                            // Get color name
+//                            val url = "https://www.thecolorapi.com/id?hex=${colorHex}"
+//
+//                            val request = Request.Builder().url(url).build()
+//
+//                            onCancel {
+//                                reject(RuntimeException("Canceled"))
+//                            }
+//
+//                            client.newCall(request).enqueue(object : Callback {
+//                                override fun onFailure(call: Call, e: IOException) {
+//                                    e.printStackTrace()
+//                                    resolve(ColorResult(true, "#${colorHex}", null))
+//                                }
+//
+//                                    response.use {
+//                                        if (!response.isSuccessful) throw IOException("Unexpected code $response")
+//
+//                                        val jsonString = response.body!!.string()
+//                                        val gson = Gson()
+//                                        val colorResponse = gson.fromJson(jsonString, ColorAPIResponse::class.java)
+//
+//                                        colorResponse ?: return resolve(ColorResult(true, "#${colorHex}", null))
+//
+//                                        val name = colorResponse.name.value
+//
+//                                        resolve(ColorResult(true, "#${colorHex}", name))
+//                                    }
+//                                }
+//                            })
+                        }
+                    }
+                })
+            }
+        }
 
-                            val request = Request.Builder().url(url).build()
+        /* Example of use
+        MedicationInfoRetriever.shape("54092-189").whenComplete { result: Promise.Result<ShapeResult, RuntimeException> ->
+            when (result) {
+                is Promise.Result.Success -> {
+                    // Use result here
+                    Log.i("Success", result.value.toString())
+                }
+                is Promise.Result.Error -> Log.i("Error", result.error.message!!)
+            }
+        }
+         */
+        fun shape(ndcId: String): Promise<ShapeResult, RuntimeException> {
+            return Promise {
+                val client = OkHttpClient
+                    .Builder()
+                    .connectTimeout(20, TimeUnit.SECONDS)
+                    .readTimeout(20, TimeUnit.SECONDS)
+                    .build()
 
-                            onCancel {
-                                reject(RuntimeException("Canceled"))
-                            }
+                val url = "https://rxnav.nlm.nih.gov/REST/ndcproperties.json?id=${ndcId}"
 
-                            client.newCall(request).enqueue(object : Callback {
-                                override fun onFailure(call: Call, e: IOException) {
-                                    e.printStackTrace()
-                                    resolve(ColorResult(true, "#${colorHex}", null))
-                                }
+                val request = Request.Builder().url(url).build()
 
-                                override fun onResponse(call: Call, response: Response) {
-                                    response.use {
-                                        if (!response.isSuccessful) throw IOException("Unexpected code $response")
+                onCancel {
+                    reject(RuntimeException("Canceled"))
+                }
 
-                                        val jsonString = response.body!!.string()
-                                        val gson = Gson()
-                                        val colorResponse = gson.fromJson(jsonString, ColorAPIResponse::class.java)
+                client.newCall(request).enqueue(object : Callback {
+                    override fun onFailure(call: Call, e: IOException) {
+                        e.printStackTrace()
+                        reject(RuntimeException("Failed"))
+                    }
 
-                                        colorResponse ?: return resolve(ColorResult(true, "#${colorHex}", null))
+                    override fun onResponse(call: Call, response: Response) {
+                        response.use {
+                            if (!response.isSuccessful) throw IOException("Unexpected code $response")
 
-                                        val name = colorResponse.name.value
+                            val jsonString = response.body!!.string()
+                            val gson = Gson()
+                            val propertiesResponse = gson.fromJson(jsonString, RxNormPropertiesResponse::class.java)
 
-                                        resolve(ColorResult(true, "#${colorHex}", name))
-                                    }
-                                }
-                            })
+                            propertiesResponse ?: return resolve(ShapeResult(false, null))
+
+                            val properties = propertiesResponse.ndcPropertyList?.ndcProperty?.firstOrNull()?.propertyConceptList?.propertyConcept
+
+                            properties ?: return resolve(ShapeResult(false, null))
+
+                            val shapeProperty = properties.filter { it.propName == "SHAPETEXT" }.firstOrNull()
+
+                            shapeProperty ?: return resolve(ShapeResult(false, null))
+
+                            resolve(ShapeResult(false, shapeProperty.propValue))
+                        }
+                    }
+                })
+            }
+        }
+
+        /* Example of use
+        MedicationInfoRetriever.packageSizes("54092-189").whenComplete { result: Promise.Result<List<String>, RuntimeException> ->
+            when (result) {
+                is Promise.Result.Success -> {
+                    // Use result here
+                    Log.i("Success", result.value.toString())
+                }
+                is Promise.Result.Error -> Log.i("Error", result.error.message!!)
+            }
+        }
+         */
+        fun packageSizes(ndcId: String): Promise<List<String>, RuntimeException> {
+            return Promise {
+                val client = OkHttpClient
+                    .Builder()
+                    .connectTimeout(20, TimeUnit.SECONDS)
+                    .readTimeout(20, TimeUnit.SECONDS)
+                    .build()
+
+                val url = "https://rxnav.nlm.nih.gov/REST/ndcproperties.json?id=${ndcId}"
+
+                val request = Request.Builder().url(url).build()
+
+                onCancel {
+                    reject(RuntimeException("Canceled"))
+                }
+
+                client.newCall(request).enqueue(object : Callback {
+                    override fun onFailure(call: Call, e: IOException) {
+                        e.printStackTrace()
+                        reject(RuntimeException("Failed"))
+                    }
+
+                    override fun onResponse(call: Call, response: Response) {
+                        response.use {
+                            if (!response.isSuccessful) throw IOException("Unexpected code $response")
+
+                            val jsonString = response.body!!.string()
+                            val gson = Gson()
+                            val propertiesResponse = gson.fromJson(jsonString, RxNormPropertiesResponse::class.java)
+
+                            propertiesResponse ?: return resolve(listOf())
+
+                            val packageList = propertiesResponse.ndcPropertyList?.ndcProperty?.firstOrNull()?.packagingList?.packaging
+
+                            packageList ?: return resolve(listOf())
+
+                            resolve(packageList)
                         }
                     }
                 })
@@ -693,6 +816,8 @@ class MedicationInfoRetriever {
                             val jsonString = response.body!!.string()
                             val gson = Gson()
                             val labelResult = gson.fromJson(jsonString, OpenFDALabelResponse::class.java)
+
+                            if(labelResult.error != null) return resolve(false)
 
                             val label = labelResult.results.firstOrNull()
 
@@ -761,6 +886,8 @@ class MedicationInfoRetriever {
                             val gson = Gson()
                             val labelResult = gson.fromJson(jsonString, OpenFDALabelResponse::class.java)
 
+                            if(labelResult.error != null) return resolve(false)
+
                             val label = labelResult.results.firstOrNull()
 
                             label ?: return resolve(false)
@@ -808,7 +935,12 @@ data class RecallsResult(
 
 data class ColorResult(
     val hasColor: Boolean,
-    val colorHex: String?,
     val colorName: String?
+)
+
+
+data class ShapeResult(
+    val hasShape: Boolean,
+    val shapeName: String?
 )
 
