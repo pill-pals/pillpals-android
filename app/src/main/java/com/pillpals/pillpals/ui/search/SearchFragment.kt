@@ -256,7 +256,7 @@ class SearchFragment : Fragment() {
     private fun multipleDrugsExistsWithName(name: String, dosage: String): Boolean {
         searchingUpcomingDrugs = true
         val res = upcomingDrugCards.filter {
-            it?.nameText?.text.toString() == name && it?.lateText?.text.toString() == dosage
+            it?.nameText?.text.toString() == name && it?.dosageString == dosage
         }.count() > 1
         searchingUpcomingDrugs = false
         return res
@@ -329,7 +329,7 @@ class SearchFragment : Fragment() {
                             return
                         }
 
-                        drugProducts.forEachIndexed {namedIndex, drugProduct ->
+                        drugProducts.take(100).forEachIndexed {namedIndex, drugProduct ->
                             // gather info and set to card
                             val newCard = DrugCard(outerContext.context!!)
                             newCard.nameText.text = drugProduct.brand_name
@@ -340,11 +340,6 @@ class SearchFragment : Fragment() {
                             newCard.button.margin(right = 0F)
 
                             newCard.drugCode = drugProduct.drug_code
-
-                            while(searchingUpcomingDrugs) {
-                                Thread.sleep(50)
-                            }
-                            upcomingDrugCards.add(newCard)
 
                             val url = "https://health-products.canada.ca/api/drug/activeingredient/?id=${drugProduct.drug_code}"
 
@@ -381,13 +376,20 @@ class SearchFragment : Fragment() {
                                             else acc.plus(it.strength_unit)
                                         }
 
-                                        newCard.dosageString = "${dosageValues.joinToString("/")} ${dosageUnits.joinToString("/")}"
+                                        val dosageString = "${dosageValues.joinToString("/")} ${dosageUnits.joinToString("/")}"
 
-                                        newCard.lateText.text = newCard.dosageString
+                                        newCard.dosageString = dosageString
+
+                                        newCard.lateText.text = dosageString
 
                                         newCard.lateText.visibility = View.VISIBLE
 
-                                        if(multipleDrugsExistsWithName(drugProduct.brand_name, newCard.dosageString)) {
+                                        while(searchingUpcomingDrugs) {
+                                            Thread.sleep(50)
+                                        }
+                                        upcomingDrugCards.add(newCard)
+
+                                        if(multipleDrugsExistsWithName(drugProduct.brand_name, dosageString)) {
                                             drugCards[index] = null
                                             refreshCardsFlag = true
                                             return
@@ -424,12 +426,15 @@ class SearchFragment : Fragment() {
                                                         val fdaResults = fdaResponse.results
 
                                                         val fdaResultWithDosage = fdaResults.filter {
-                                                            val totalVal = it.active_ingredients.fold(0f) {acc, it ->
-                                                                acc + it.strength.replace("( .*)".toRegex(), "").toFloat()
+                                                            if(it.active_ingredients == null) false
+                                                            else {
+                                                                val totalVal = it.active_ingredients.fold(0f) {acc, it ->
+                                                                    acc + it.strength.replace("( .*)".toRegex(), "").toFloat()
+                                                                }
+                                                                it.active_ingredients.any {
+                                                                    it.strength.contains("${dosageValues.first()} ${dosageUnits.firstOrNull()?.toLowerCase()}")
+                                                                } || dosageValues.firstOrNull()?.toFloat() == totalVal
                                                             }
-                                                            it.active_ingredients.any {
-                                                                it.strength.contains("${dosageValues.first()} ${dosageUnits.firstOrNull()?.toLowerCase()}")
-                                                            } || dosageValues.firstOrNull()?.toFloat() == totalVal
                                                         }.firstOrNull()
 
                                                         val firstFdaResult = fdaResults.firstOrNull()

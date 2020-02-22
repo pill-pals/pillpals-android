@@ -56,7 +56,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="20dp"
-            android:layout_marginBottom="2dp"
+            android:layout_marginBottom="8dp"
             android:singleLine="true"
             android:text="retrieving updated drug info"
             android:textColor="@color/colorDarkGrey"
@@ -183,5 +183,6 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/tabLayout" />
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

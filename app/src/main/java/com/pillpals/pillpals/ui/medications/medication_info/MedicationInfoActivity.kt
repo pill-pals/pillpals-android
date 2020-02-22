@@ -6,6 +6,7 @@ import android.content.res.ColorStateList
 import android.graphics.Color
 import android.os.Bundle
 import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import android.view.ViewGroup
 import android.widget.Button
@@ -109,7 +110,7 @@ class MedicationInfoActivity : AppCompatActivity() {
 
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
 
-        loadingAnimation = RotateAnimation(0f, 360f, 55f, 55f)
+        loadingAnimation = RotateAnimation(0f, 360f, 21f, 21f)
         loadingAnimation.interpolator = LinearInterpolator()
         loadingAnimation.repeatCount = Animation.INFINITE
         loadingAnimation.duration = 700
@@ -281,14 +282,16 @@ class MedicationInfoActivity : AppCompatActivity() {
         }
 
         if(interactionsResponse != null && interactionsResponse!!.isNotEmpty() && rxcui != null) {
-            tabOneTitles = tabOneTitles.plus("Interactions with your linked drugs")
-            tabOneValues = tabOneValues.plus(bulletedList(
-                interactionsResponse!!.filter {
-                    it.rxcuis.contains(rxcui!!)
-                }.fold(listOf()) {acc, it ->
-                    acc.plus(it.interaction)
-                })
-            )
+            if(interactionsResponse!!.filter { it.rxcuis.contains(rxcui!!) }.count() > 0) {
+                tabOneTitles = tabOneTitles.plus("Interactions with your linked drugs")
+                tabOneValues = tabOneValues.plus(bulletedList(
+                    interactionsResponse!!.filter {
+                        it.rxcuis.contains(rxcui!!)
+                    }.fold(listOf()) {acc, it ->
+                        acc.plus(it.interaction)
+                    })
+                )
+            }
         }
 
         // Tab 2 - Warnings/Tips
@@ -373,16 +376,17 @@ class MedicationInfoActivity : AppCompatActivity() {
         // Waterfall the requests for now
         val drugSchedulesPromise = MedicationInfoRetriever.drugSchedules(drugCode)
         val interactionsPromise = MedicationInfoRetriever.interactions(allUsersRxcuis().plus(rxcui).filterNotNull())
-        val sideEffectsPromise = MedicationInfoRetriever.sideEffects(ndcCode ?: "")
-        val descriptionPromise = MedicationInfoRetriever.description(ndcCode ?: "")
-        val warningPromise = MedicationInfoRetriever.warning(ndcCode ?: "")
-        val overdosagePromise = MedicationInfoRetriever.overdosage(ndcCode ?: "")
-        val recallsPromise = MedicationInfoRetriever.recalls(ndcCode ?: "")
-        val colorPromise = MedicationInfoRetriever.color(ndcCode ?: "")
-        val shapePromise = MedicationInfoRetriever.shape(ndcCode ?: "")
-        val packageSizesPromise = MedicationInfoRetriever.packageSizes(ndcCode ?: "")
-        val interactsWithAlcoholPromise = MedicationInfoRetriever.interactsWithAlcohol(ndcCode ?: "")
-        val interactsWithCaffeinePromise = MedicationInfoRetriever.interactsWithCaffeine(ndcCode ?: "")
+        val sideEffectsPromise = MedicationInfoRetriever.sideEffects(ndcCode ?: "null")
+        val descriptionPromise = MedicationInfoRetriever.description(ndcCode ?: "null")
+        val warningPromise = MedicationInfoRetriever.warning(ndcCode ?: "null")
+        val overdosagePromise = MedicationInfoRetriever.overdosage(ndcCode ?: "null")
+        val recallsPromise = MedicationInfoRetriever.recalls(ndcCode ?: "null")
+        val colorPromise = MedicationInfoRetriever.color(ndcCode ?: "null")
+        val shapePromise = MedicationInfoRetriever.shape(ndcCode ?: "null")
+        val packageSizesPromise = MedicationInfoRetriever.packageSizes(ndcCode ?: "null")
+        val interactsWithAlcoholPromise = MedicationInfoRetriever.interactsWithAlcohol(ndcCode ?: "null")
+        val interactsWithCaffeinePromise = MedicationInfoRetriever.interactsWithCaffeine(ndcCode ?: "null")
+
 
         drugSchedulesPromise.whenComplete { result: Promise.Result<List<String>, RuntimeException> ->
             when (result) {
@@ -392,6 +396,7 @@ class MedicationInfoActivity : AppCompatActivity() {
                 }
                 is Promise.Result.Error -> Log.i("Error", result.error.message!!)
             }
+            Log.i("test", "drugSchedulesPromise")
             interactionsPromise.whenComplete { result: Promise.Result<List<InteractionResult>, RuntimeException> ->
                 when (result) {
                     is Promise.Result.Success -> {
@@ -400,6 +405,7 @@ class MedicationInfoActivity : AppCompatActivity() {
                     }
                     is Promise.Result.Error -> Log.i("Error", result.error.message!!)
                 }
+                Log.i("test", "interactionsPromise")
                 sideEffectsPromise.whenComplete { result: Promise.Result<List<SideEffectResult>, RuntimeException> ->
                     when (result) {
                         is Promise.Result.Success -> {
@@ -408,6 +414,7 @@ class MedicationInfoActivity : AppCompatActivity() {
                         }
                         is Promise.Result.Error -> Log.i("Error", result.error.message!!)
                     }
+                    Log.i("test", "sideEffectsPromise")
                     descriptionPromise.whenComplete { result: Promise.Result<String, RuntimeException> ->
                         when (result) {
                             is Promise.Result.Success -> {
@@ -416,6 +423,7 @@ class MedicationInfoActivity : AppCompatActivity() {
                             }
                             is Promise.Result.Error -> Log.i("Error", result.error.message!!)
                         }
+                        Log.i("test", "descriptionPromise")
                         warningPromise.whenComplete { result: Promise.Result<String, RuntimeException> ->
                             when (result) {
                                 is Promise.Result.Success -> {
@@ -424,6 +432,7 @@ class MedicationInfoActivity : AppCompatActivity() {
                                 }
                                 is Promise.Result.Error -> Log.i("Error", result.error.message!!)
                             }
+                            Log.i("test", "warningPromise")
                             overdosagePromise.whenComplete { result: Promise.Result<String, RuntimeException> ->
                                 when (result) {
                                     is Promise.Result.Success -> {
@@ -432,6 +441,7 @@ class MedicationInfoActivity : AppCompatActivity() {
                                     }
                                     is Promise.Result.Error -> Log.i("Error", result.error.message!!)
                                 }
+                                Log.i("test", "overdosagePromise")
                                 recallsPromise.whenComplete { result: Promise.Result<RecallsResult, RuntimeException> ->
                                     when (result) {
                                         is Promise.Result.Success -> {
@@ -440,6 +450,7 @@ class MedicationInfoActivity : AppCompatActivity() {
                                         }
                                         is Promise.Result.Error -> Log.i("Error", result.error.message!!)
                                     }
+                                    Log.i("test", "recallsPromise")
                                     colorPromise.whenComplete { result: Promise.Result<ColorResult, RuntimeException> ->
                                         when (result) {
                                             is Promise.Result.Success -> {
@@ -448,6 +459,7 @@ class MedicationInfoActivity : AppCompatActivity() {
                                             }
                                             is Promise.Result.Error -> Log.i("Error", result.error.message!!)
                                         }
+                                        Log.i("test", "colorPromise")
                                         shapePromise.whenComplete { result: Promise.Result<ShapeResult, RuntimeException> ->
                                             when (result) {
                                                 is Promise.Result.Success -> {
@@ -456,6 +468,7 @@ class MedicationInfoActivity : AppCompatActivity() {
                                                 }
                                                 is Promise.Result.Error -> Log.i("Error", result.error.message!!)
                                             }
+                                            Log.i("test", "shapePromise")
                                             packageSizesPromise.whenComplete { result: Promise.Result<List<String>, RuntimeException> ->
                                                 when (result) {
                                                     is Promise.Result.Success -> {
@@ -464,6 +477,7 @@ class MedicationInfoActivity : AppCompatActivity() {
                                                     }
                                                     is Promise.Result.Error -> Log.i("Error", result.error.message!!)
                                                 }
+                                                Log.i("test", "packageSizesPromise")
                                                 interactsWithAlcoholPromise.whenComplete { result: Promise.Result<Boolean, RuntimeException> ->
                                                     when (result) {
                                                         is Promise.Result.Success -> {
@@ -472,6 +486,7 @@ class MedicationInfoActivity : AppCompatActivity() {
                                                         }
                                                         is Promise.Result.Error -> Log.i("Error", result.error.message!!)
                                                     }
+                                                    Log.i("test", "interactsWithAlcoholPromise")
                                                     interactsWithCaffeinePromise.whenComplete { result: Promise.Result<Boolean, RuntimeException> ->
                                                         when (result) {
                                                             is Promise.Result.Success -> {
@@ -481,9 +496,11 @@ class MedicationInfoActivity : AppCompatActivity() {
                                                             is Promise.Result.Error -> Log.i("Error", result.error.message!!)
                                                         }
 
+                                                        Log.i("test", "interactsWithCaffeinePromise")
                                                         resetData = true
 
                                                         // Set new stored data
+                                                        // updateMedicationData()
                                                     }
                                                 }
                                             }
