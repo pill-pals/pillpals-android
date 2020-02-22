@@ -20,6 +20,7 @@ import android.widget.Toast
 import java.util.Calendar
 
 import androidx.appcompat.app.AppCompatActivity
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.res.ResourcesCompat
 import com.pillpals.pillpals.R
@@ -61,6 +62,8 @@ class AddDrugActivity : AppCompatActivity() {
     public lateinit var scheduleStack: LinearLayout
     public lateinit var bottomOptions: BottomOptions
     public lateinit var iconButton: MaterialButton
+    lateinit var linkedDrugText: TextView
+    lateinit var linkedTextLayout: ConstraintLayout
 
     public var scheduleRecordsSetToDelete = mutableListOf<ScheduleRecord>()
     public lateinit var scheduleIdList: ArrayList<String>
@@ -88,7 +91,10 @@ class AddDrugActivity : AppCompatActivity() {
         bottomOptions = findViewById(R.id.bottomOptions)
         bottomOptions.leftButton.text = "Save"
         bottomOptions.rightButton.text = "Cancel"
+        linkedDrugText = findViewById(R.id.linkedDrugText)
+        linkedTextLayout = findViewById(R.id.linkedTextLayout)
 
+        linkedTextLayout.visibility = View.GONE
         linkMedicationButton.visibility = View.GONE
         unlinkMedicationButton.visibility = View.GONE
 
@@ -102,6 +108,9 @@ class AddDrugActivity : AppCompatActivity() {
             }
             else {
                 unlinkMedicationButton.visibility = View.VISIBLE
+                linkedTextLayout.visibility = View.VISIBLE
+                var dpdObject = medication.dpd_object.first()
+                linkedDrugText.text = dpdObject!!.name
             }
 
             linkMedicationButton.setOnClickListener {
@@ -519,6 +528,7 @@ class AddDrugActivity : AppCompatActivity() {
                 dpdIdToLink = null
             }
             unlinkMedicationButton.visibility = View.GONE
+            linkedTextLayout.visibility = View.GONE
             linkMedicationButton.visibility = View.VISIBLE
         }
 
@@ -584,12 +594,17 @@ class AddDrugActivity : AppCompatActivity() {
                 if(responseId != 0) {
                     linkMedicationButton.visibility = View.GONE
                     unlinkMedicationButton.visibility = View.VISIBLE
+                    linkedTextLayout.visibility = View.VISIBLE
+                    linkedDrugText.text = getDPDObjectById(responseId)?.name ?: null
                 }
             } else if (requestCode == 4) { // Link with non-existing medication
                 dpdIdToLink = data.getIntExtra("dpd-id", 0)
+                val responseId = data.getIntExtra("dpd-id", 0)
                 if(dpdIdToLink != null && dpdIdToLink != 0) {
                     linkMedicationButton.visibility = View.GONE
                     unlinkMedicationButton.visibility = View.VISIBLE
+                    linkedTextLayout.visibility = View.VISIBLE
+                    linkedDrugText.text = getDPDObjectById(responseId)?.name ?: null
                 }
             }
         }
