@@ -395,6 +395,9 @@ class SearchActivity : AppCompatActivity() {
 
                                         newCard.lateText.visibility = View.VISIBLE
 
+                                        while(searchingUpcomingDrugs) {
+                                            Thread.sleep(50)
+                                        }
                                         if(multipleDrugsExistsWithName(drugProduct.brand_name, newCard.dosageString)) {
                                             drugCards[index] = null
                                             refreshCardsFlag = true
@@ -432,6 +435,7 @@ class SearchActivity : AppCompatActivity() {
                                                         val fdaResults = fdaResponse.results
 
                                                         val fdaResultWithDosage = fdaResults.filter {
+                                                            if(it.active_ingredients == null) return@filter false
                                                             val totalVal = it.active_ingredients.fold(0f) {acc, it ->
                                                                 acc + it.strength.replace("( .*)".toRegex(), "").toFloat()
                                                             }

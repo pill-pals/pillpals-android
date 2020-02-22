@@ -5,6 +5,8 @@ import android.content.Intent
 import android.content.res.ColorStateList
 import android.graphics.Color
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import android.view.ViewGroup
 import android.widget.Button
@@ -22,14 +24,21 @@ import com.pillpals.pillpals.ui.AddDrugActivity
 import io.realm.Realm
 import android.view.MenuItem
 import android.view.View
+import android.view.animation.Animation
+import android.view.animation.LinearInterpolator
+import android.view.animation.RotateAnimation
 import android.widget.ImageView
 import androidx.cardview.widget.CardView
 import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
 import com.pillpals.pillpals.data.model.DPDObjects
-import com.pillpals.pillpals.helpers.DatabaseHelper
+import com.pillpals.pillpals.data.model.Medications
+import com.pillpals.pillpals.helpers.*
+import com.shopify.promises.Promise
 import io.realm.RealmList
+import io.realm.RealmResults
 import org.w3c.dom.Text
+import java.util.*
 
 
 class MedicationInfoActivity : AppCompatActivity() {
@@ -42,6 +51,9 @@ class MedicationInfoActivity : AppCompatActivity() {
     public lateinit var nameText: TextView
     public lateinit var dosageText: TextView
     public lateinit var alreadyAdded: TextView
+    lateinit var updatingLoadingIcon: ImageView
+    lateinit var updatingText: TextView
+    lateinit var loadingAnimation: RotateAnimation
     public var drugCode: Int = 0
     public var colorString: String = "#D3D3D3"
     public var administrationRoutes = listOf<String>()
@@ -55,10 +67,25 @@ class MedicationInfoActivity : AppCompatActivity() {
     var linkingMedication: Boolean = false
     var splSetId: String? = null
 
+
+    var resetData = false
+
+    var drugSchedulesResponse: List<String>? = null // Tab 0
+    var interactionsResponse: List<InteractionResult>? = null // Tab 1
+    var sideEffectsResponse: List<SideEffectResult>? = null // Tab 1
+    var descriptionResponse: String? = null // Tab 0
+    var warningResponse: String? = null // Tab 2
+    var overdosageResponse: String? = null // Tab 2
+    var recallsResponse: RecallsResult? = null // Tab 2
+    var colorResponse: ColorResult? = null // Tab 0
+    var shapeResponse: ShapeResult? = null // Tab 0
+    var packageSizesResponse: List<String>? = null // Tab 0
+    var interactsWithAlcoholResponse: Boolean? = null // Tab 1
+    var interactsWithCaffeineResponse: Boolean? = null // Tab 1
+
     private lateinit var realm: Realm
 
     private var tabFragments: List<MedicationInfoTextFragment> = mutableListOf(
-        MedicationInfoTextFragment(),
         MedicationInfoTextFragment(),
         MedicationInfoTextFragment(),
         MedicationInfoTextFragment()
@@ -66,8 +93,7 @@ class MedicationInfoActivity : AppCompatActivity() {
     private var tabTitles: List<String> = mutableListOf(
         "Overview",
         "Side Effects",
-        "Tips",
-        "Reviews"
+        "Tips/Warnings"
     )
     private lateinit var tabPagerAdapter: TabPagerAdapter
 
@@ -84,6 +110,11 @@ class MedicationInfoActivity : AppCompatActivity() {
 
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
 
+        loadingAnimation = RotateAnimation(0f, 360f, 21f, 21f)
+        loadingAnimation.interpolator = LinearInterpolator()
+        loadingAnimation.repeatCount = Animation.INFINITE
+        loadingAnimation.duration = 700
+
         addButton = findViewById(R.id.addButton)
         alreadyAdded = findViewById(R.id.alreadyAdded)
         tabLayout = findViewById(R.id.tabLayout)
@@ -93,6 +124,11 @@ class MedicationInfoActivity : AppCompatActivity() {
         medicationIcon = findViewById(R.id.medicationIcon)
         nameText = findViewById(R.id.nameText)
         dosageText = findViewById(R.id.dosageText)
+        updatingLoadingIcon = findViewById(R.id.updatingLoadingIcon)
+        updatingText = findViewById(R.id.updatingText)
+
+        updatingLoadingIcon.visibility = View.GONE
+        updatingText.visibility = View.GONE
 
         drugCode = intent.getIntExtra("drug-code", 0)
         colorString = intent.getStringExtra("icon-color")!!
@@ -163,11 +199,129 @@ class MedicationInfoActivity : AppCompatActivity() {
             }
         }
 
+        val handler = Handler()
+        val timer = Timer()
+        val doAsynchronousTask = object : TimerTask() {
+            override fun run() {
+                handler.post {
+                    try {
+                        if(resetData) {
+                            resetData = false
+                            updatingLoadingIcon.visibility = View.GONE
+                            updatingText.visibility = View.GONE
+                            setTabFragmentData()
+                        }
+                    } catch (e: Exception) { }
+                }
+            }
+        }
+        timer.schedule(doAsynchronousTask, 0, 250)
+
         addDrugToDPDTable()
+
+        fillAPIData()
     }
 
     public fun tabFragmentLoaded() {
         setTabText(0, listOf("Active Ingredients", "Administration Routes"), listOf(bulletedList(activeIngredients), bulletedList(administrationRoutes)))
+    }
+
+    fun setTabFragmentData() {
+        // Stored non-retrieved data
+        var tabZeroTitles = listOf("Active Ingredients", "Administration Routes")
+        var tabZeroValues = listOf(bulletedList(activeIngredients), bulletedList(administrationRoutes))
+        var tabOneTitles = listOf<String>()
+        var tabOneValues = listOf<String>()
+        var tabTwoTitles = listOf<String>()
+        var tabTwoValues = listOf<String>()
+
+        // Organize extra data
+
+        // Tab 0 - Overview
+        if(descriptionResponse != null) {
+            tabZeroTitles = listOf("Description").plus(tabZeroTitles)
+            tabZeroValues = listOf(descriptionResponse!!).plus(tabZeroValues)
+        }
+
+        if(colorResponse?.colorName != null) {
+            tabZeroTitles = tabZeroTitles.plus("Color")
+            tabZeroValues = tabZeroValues.plus(colorResponse!!.colorName!!)
+        }
+
+        if(shapeResponse?.shapeName != null) {
+            tabZeroTitles = tabZeroTitles.plus("Color")
+            tabZeroValues = tabZeroValues.plus(shapeResponse!!.shapeName!!)
+        }
+
+        if(packageSizesResponse != null && packageSizesResponse!!.isNotEmpty()) {
+            tabZeroTitles = tabZeroTitles.plus("Package Sizes")
+            tabZeroValues = tabZeroValues.plus(bulletedList(packageSizesResponse!!))
+        }
+
+        if(drugSchedulesResponse != null && drugSchedulesResponse!!.isNotEmpty()) {
+            tabZeroTitles = tabZeroTitles.plus("Drug Schedules")
+            tabZeroValues = tabZeroValues.plus(bulletedList(drugSchedulesResponse!!))
+        }
+
+        // Tab 1 - Side Effects
+        if(sideEffectsResponse != null && sideEffectsResponse!!.isNotEmpty()) {
+            tabOneTitles = tabOneTitles.plus("Side Effects")
+            tabOneValues = tabOneValues.plus(bulletedList(sideEffectsResponse!!.fold(listOf()) {acc, it ->
+                acc.plus("${it.sideEffect} (${it.percent * 100f}%)")
+            }))
+        }
+
+        if(interactsWithAlcoholResponse == true) {
+            tabOneTitles = tabOneTitles.plus("Interacts with alcohol")
+            tabOneValues = tabOneValues.plus("This drug may have some degree of an interaction with alcohol")
+        }
+
+        if(interactsWithCaffeineResponse == true) {
+            tabOneTitles = tabOneTitles.plus("Interacts with caffeine")
+            tabOneValues = tabOneValues.plus("This drug may have some degree of an interaction with caffeine")
+        }
+
+        if(interactionsResponse != null && interactionsResponse!!.isNotEmpty() && rxcui != null) {
+            if(interactionsResponse!!.filter { it.rxcuis.contains(rxcui!!) }.count() > 0) {
+                tabOneTitles = tabOneTitles.plus("Interactions with your linked drugs")
+                tabOneValues = tabOneValues.plus(bulletedList(
+                    interactionsResponse!!.filter {
+                        it.rxcuis.contains(rxcui!!)
+                    }.fold(listOf()) {acc, it ->
+                        acc.plus(it.interaction)
+                    })
+                )
+            }
+        }
+
+        // Tab 2 - Warnings/Tips
+        if(warningResponse != null) {
+            tabTwoTitles = tabTwoTitles.plus("Box Warning")
+            tabTwoValues = tabTwoValues.plus(warningResponse!!)
+        }
+
+        if(overdosageResponse != null) {
+            tabTwoTitles = tabTwoTitles.plus("Overdosage Description")
+            tabTwoValues = tabTwoValues.plus(overdosageResponse!!)
+        }
+
+        if(recallsResponse != null) {
+            tabTwoTitles = tabTwoTitles.plus("Reported Recalls")
+            if(!recallsResponse!!.hasBeenRecalled) {
+                tabTwoValues = tabTwoValues.plus("No reported recalls found in the FDA database")
+            }
+            else if(recallsResponse!!.hasBeenRecalled && !recallsResponse!!.anyMandatoryRecalls) {
+                tabTwoValues = tabTwoValues.plus("This drug has been voluntarily recalled in the following quantities:\n" + bulletedList(recallsResponse!!.recallQuantities))
+            }
+            else if(recallsResponse!!.hasBeenRecalled && recallsResponse!!.anyMandatoryRecalls) {
+                tabTwoValues = tabTwoValues.plus("This drug has been recalled in the following quantities:\n" + bulletedList(recallsResponse!!.recallQuantities))
+            }
+        }
+
+        // Set tabs
+        setTabText(0, tabZeroTitles, tabZeroValues)
+        setTabText(1, tabOneTitles, tabOneValues)
+        setTabText(2, tabTwoTitles, tabTwoValues)
     }
 
     private fun bulletedList(list: List<String>): String {
@@ -207,6 +361,166 @@ class MedicationInfoActivity : AppCompatActivity() {
     private fun userTakesDrug(): Boolean {
         val dpdObject = realm.where(DPDObjects::class.java).equalTo("dpd_id", drugCode).findFirst() ?: return false
         return dpdObject.medications.filter { !it.deleted }.count() > 0
+    }
+
+    private fun fillAPIData() {
+        // Fill info from  DB to start
+        // fillStoredData()
+
+        updatingLoadingIcon.setImageResource(R.drawable.loader)
+        updatingLoadingIcon.startAnimation(loadingAnimation)
+
+        updatingLoadingIcon.visibility = View.VISIBLE
+        updatingText.visibility = View.VISIBLE
+
+        // Waterfall the requests for now
+        val drugSchedulesPromise = MedicationInfoRetriever.drugSchedules(drugCode)
+        val interactionsPromise = MedicationInfoRetriever.interactions(allUsersRxcuis().plus(rxcui).filterNotNull())
+        val sideEffectsPromise = MedicationInfoRetriever.sideEffects(ndcCode ?: "null")
+        val descriptionPromise = MedicationInfoRetriever.description(ndcCode ?: "null")
+        val warningPromise = MedicationInfoRetriever.warning(ndcCode ?: "null")
+        val overdosagePromise = MedicationInfoRetriever.overdosage(ndcCode ?: "null")
+        val recallsPromise = MedicationInfoRetriever.recalls(ndcCode ?: "null")
+        val colorPromise = MedicationInfoRetriever.color(ndcCode ?: "null")
+        val shapePromise = MedicationInfoRetriever.shape(ndcCode ?: "null")
+        val packageSizesPromise = MedicationInfoRetriever.packageSizes(ndcCode ?: "null")
+        val interactsWithAlcoholPromise = MedicationInfoRetriever.interactsWithAlcohol(ndcCode ?: "null")
+        val interactsWithCaffeinePromise = MedicationInfoRetriever.interactsWithCaffeine(ndcCode ?: "null")
+
+
+        drugSchedulesPromise.whenComplete { result: Promise.Result<List<String>, RuntimeException> ->
+            when (result) {
+                is Promise.Result.Success -> {
+                    // Use result here
+                    drugSchedulesResponse = result.value
+                }
+                is Promise.Result.Error -> Log.i("Error", result.error.message!!)
+            }
+            Log.i("test", "drugSchedulesPromise")
+            interactionsPromise.whenComplete { result: Promise.Result<List<InteractionResult>, RuntimeException> ->
+                when (result) {
+                    is Promise.Result.Success -> {
+                        // Use result here
+                        interactionsResponse = result.value
+                    }
+                    is Promise.Result.Error -> Log.i("Error", result.error.message!!)
+                }
+                Log.i("test", "interactionsPromise")
+                sideEffectsPromise.whenComplete { result: Promise.Result<List<SideEffectResult>, RuntimeException> ->
+                    when (result) {
+                        is Promise.Result.Success -> {
+                            // Use result here
+                            sideEffectsResponse = result.value
+                        }
+                        is Promise.Result.Error -> Log.i("Error", result.error.message!!)
+                    }
+                    Log.i("test", "sideEffectsPromise")
+                    descriptionPromise.whenComplete { result: Promise.Result<String, RuntimeException> ->
+                        when (result) {
+                            is Promise.Result.Success -> {
+                                // Use result here
+                                descriptionResponse = result.value
+                            }
+                            is Promise.Result.Error -> Log.i("Error", result.error.message!!)
+                        }
+                        Log.i("test", "descriptionPromise")
+                        warningPromise.whenComplete { result: Promise.Result<String, RuntimeException> ->
+                            when (result) {
+                                is Promise.Result.Success -> {
+                                    // Use result here
+                                    warningResponse = result.value
+                                }
+                                is Promise.Result.Error -> Log.i("Error", result.error.message!!)
+                            }
+                            Log.i("test", "warningPromise")
+                            overdosagePromise.whenComplete { result: Promise.Result<String, RuntimeException> ->
+                                when (result) {
+                                    is Promise.Result.Success -> {
+                                        // Use result here
+                                        overdosageResponse = result.value
+                                    }
+                                    is Promise.Result.Error -> Log.i("Error", result.error.message!!)
+                                }
+                                Log.i("test", "overdosagePromise")
+                                recallsPromise.whenComplete { result: Promise.Result<RecallsResult, RuntimeException> ->
+                                    when (result) {
+                                        is Promise.Result.Success -> {
+                                            // Use result here
+                                            recallsResponse = result.value
+                                        }
+                                        is Promise.Result.Error -> Log.i("Error", result.error.message!!)
+                                    }
+                                    Log.i("test", "recallsPromise")
+                                    colorPromise.whenComplete { result: Promise.Result<ColorResult, RuntimeException> ->
+                                        when (result) {
+                                            is Promise.Result.Success -> {
+                                                // Use result here
+                                                colorResponse = result.value
+                                            }
+                                            is Promise.Result.Error -> Log.i("Error", result.error.message!!)
+                                        }
+                                        Log.i("test", "colorPromise")
+                                        shapePromise.whenComplete { result: Promise.Result<ShapeResult, RuntimeException> ->
+                                            when (result) {
+                                                is Promise.Result.Success -> {
+                                                    // Use result here
+                                                    shapeResponse = result.value
+                                                }
+                                                is Promise.Result.Error -> Log.i("Error", result.error.message!!)
+                                            }
+                                            Log.i("test", "shapePromise")
+                                            packageSizesPromise.whenComplete { result: Promise.Result<List<String>, RuntimeException> ->
+                                                when (result) {
+                                                    is Promise.Result.Success -> {
+                                                        // Use result here
+                                                        packageSizesResponse = result.value
+                                                    }
+                                                    is Promise.Result.Error -> Log.i("Error", result.error.message!!)
+                                                }
+                                                Log.i("test", "packageSizesPromise")
+                                                interactsWithAlcoholPromise.whenComplete { result: Promise.Result<Boolean, RuntimeException> ->
+                                                    when (result) {
+                                                        is Promise.Result.Success -> {
+                                                            // Use result here
+                                                            interactsWithAlcoholResponse = result.value
+                                                        }
+                                                        is Promise.Result.Error -> Log.i("Error", result.error.message!!)
+                                                    }
+                                                    Log.i("test", "interactsWithAlcoholPromise")
+                                                    interactsWithCaffeinePromise.whenComplete { result: Promise.Result<Boolean, RuntimeException> ->
+                                                        when (result) {
+                                                            is Promise.Result.Success -> {
+                                                                // Use result here
+                                                                interactsWithCaffeineResponse = result.value
+                                                            }
+                                                            is Promise.Result.Error -> Log.i("Error", result.error.message!!)
+                                                        }
+
+                                                        Log.i("test", "interactsWithCaffeinePromise")
+                                                        resetData = true
+
+                                                        // Set new stored data
+                                                        // updateMedicationData()
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private fun allUsersMedications(): RealmResults<out Medications> {
+        return DatabaseHelper.readAllData(Medications::class.java) as RealmResults<out Medications>
+    }
+
+    private fun allUsersRxcuis(): List<String> {
+        return allUsersMedications().fold(listOf<String?>()) {acc, it -> acc.plus(it.dpd_object?.firstOrNull()?.rxcui)}.filterNotNull()
     }
 
     private fun resetText(layout: ViewGroup) {

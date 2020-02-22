@@ -5,7 +5,7 @@ package com.pillpals.pillpals.data
 data class InteractionsResponse(
     val nlmDisclaimer: String,
     val userInput: InteractionsUserInput,
-    val fullInteractionTypeGroup: List<InteractionsFullInteractionTypeGroup>
+    val fullInteractionTypeGroup: List<InteractionsFullInteractionTypeGroup>?
 )
 
 data class InteractionsUserInput(
@@ -267,7 +267,7 @@ data class OpenFDANameResult(
     val packaging: List<OpenFDANameResultPackaging>,
     val brand_name_suffix: String,
     val brand_name: String,
-    val active_ingredients: List<OpenFDANameResultActiveIngredient>,
+    val active_ingredients: List<OpenFDANameResultActiveIngredient>?,
     val finished: Boolean,
     val openfda: OpenFDANameResultOpenFDAObject,
     val listing_expiration_date: String,
