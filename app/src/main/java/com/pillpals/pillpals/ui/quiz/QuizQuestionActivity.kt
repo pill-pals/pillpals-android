@@ -6,7 +6,9 @@ import android.content.Intent
 import android.content.res.ColorStateList
 import android.graphics.Bitmap
 import android.graphics.Color
+import android.graphics.ColorFilter
 import android.graphics.drawable.BitmapDrawable
+import android.graphics.drawable.Drawable
 import android.graphics.drawable.Icon
 import android.os.Bundle
 import android.text.SpannableString
@@ -54,6 +56,7 @@ import com.pillpals.pillpals.helpers.QuizHelper
 import com.pillpals.pillpals.helpers.calculateScheduleRecords
 import io.realm.RealmObject.deleteFromRealm
 import kotlinx.android.synthetic.main.delete_prompt.view.*
+import kotlinx.android.synthetic.main.gallery_icon_card.view.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -82,8 +85,12 @@ class QuizQuestionActivity : AppCompatActivity() {
     lateinit var answer2constraint: ConstraintLayout
     lateinit var answer3constraint: ConstraintLayout
     lateinit var answer4constraint: ConstraintLayout
-    val fadeoutTime = 300.toLong()
-    val fadeinTime = 300.toLong()
+    lateinit var scrollView: ScrollView
+    private val fadeoutTime = 350.toLong()
+    private val correctAnswerShowDelay = 500.toLong()
+    private val fadeinTime = 350.toLong()
+    private val flashTime = 850.toLong()
+
     var buttonOnClickEnabled = true
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -117,6 +124,7 @@ class QuizQuestionActivity : AppCompatActivity() {
         answer2constraint = findViewById(R.id.answer2constraint)
         answer3constraint = findViewById(R.id.answer3constraint)
         answer4constraint = findViewById(R.id.answer4constraint)
+        scrollView = findViewById(R.id.scrollView)
 
         setPageContentsForQuestion(QuizHelper.getQuestionsAnswered(quiz))
     }
@@ -159,18 +167,104 @@ class QuizQuestionActivity : AppCompatActivity() {
         var debounceTimer = Timer()
         debounceTimer.schedule(timerTask {
             buttonOnClickEnabled = true
-        },fadeinTime+fadeoutTime)
+        },fadeinTime+fadeoutTime*2+correctAnswerShowDelay)
 
         if (buttonOnClickEnabled) {
             answerQuestion(question,answer)
-            animateViewOut(index)
+            animateViewOut(question,index)
+            flashColor(question, answer)
         }
 
         buttonOnClickEnabled = false
 
     }
 
-    private fun animateViewOut(index: Int) {
+    private fun flashColor(question: Questions, answer: Int) {
+        if(question.correctAnswer == answer) {
+            scrollView.setBackgroundColor(
+                ResourcesCompat.getColor(
+                    getResources(),
+                    R.color.colorLightGreen,
+                    null
+                )
+            )
+        } else {
+            scrollView.setBackgroundColor(
+                ResourcesCompat.getColor(
+                    getResources(),
+                    R.color.colorLightRed,
+                    null
+                )
+            )
+        }
+        questionTitle.animate().alpha(1f)
+            .setDuration(flashTime)
+            .setListener(object : AnimatorListenerAdapter() {
+                override fun onAnimationEnd(animation: Animator) {
+                    scrollView.setBackgroundColor(ResourcesCompat.getColor(getResources(), R.color.colorLightGrey, null))
+
+                }
+            })
+    }
+
+    private fun animateViewOut(question: Questions, index: Int) {
+        questionText.animate().alpha(0f)
+            .setDuration(fadeoutTime)
+            .setListener(object : AnimatorListenerAdapter() {
+                override fun onAnimationEnd(animation: Animator) {
+                    animateDelay(question, index)
+                }
+            })
+
+        if(question.correctAnswer != 0) {
+            answer1.animate().alpha(0f)
+                .setDuration(fadeoutTime)
+                .setListener(null)
+            answer1constraint.animate().translationXBy(-900f)
+                .setDuration(fadeoutTime)
+                .setListener(null)
+                .interpolator = DecelerateInterpolator()
+        }
+        if(question.correctAnswer != 1) {
+            answer2.animate().alpha(0f)
+                .setDuration(fadeoutTime)
+                .setListener(null)
+            answer2constraint.animate().translationXBy(900f)
+                .setDuration(fadeoutTime)
+                .setListener(null)
+                .interpolator = DecelerateInterpolator()
+        }
+        if(question.correctAnswer != 2) {
+            answer3.animate().alpha(0f)
+                .setDuration(fadeoutTime)
+                .setListener(null)
+            answer3constraint.animate().translationXBy(-900f)
+                .setDuration(fadeoutTime)
+                .setListener(null)
+                .interpolator = DecelerateInterpolator()
+        }
+        if(question.correctAnswer != 3) {
+            answer4.animate().alpha(0f)
+                .setDuration(fadeoutTime)
+                .setListener(null)
+            answer4constraint.animate().translationXBy(900f)
+                .setDuration(fadeoutTime)
+                .setListener(null)
+                .interpolator = DecelerateInterpolator()
+        }
+    }
+
+    private fun animateDelay(question: Questions, index: Int) {
+        questionText.animate().alpha(0f)
+            .setDuration(correctAnswerShowDelay)
+            .setListener(object : AnimatorListenerAdapter() {
+                override fun onAnimationEnd(animation: Animator) {
+                    animateCorrectAnswerOut(question,index)
+                }
+            })
+    }
+
+    private fun animateCorrectAnswerOut(question: Questions, index: Int) {
         questionText.animate().alpha(0f)
             .setDuration(fadeoutTime)
             .setListener(object : AnimatorListenerAdapter() {
@@ -179,34 +273,42 @@ class QuizQuestionActivity : AppCompatActivity() {
                     animateViewIn()
                 }
             })
-        answer1.animate().alpha(0f)
-            .setDuration(fadeoutTime)
-            .setListener(null)
-        answer2.animate().alpha(0f)
-            .setDuration(fadeoutTime)
-            .setListener(null)
-        answer3.animate().alpha(0f)
-            .setDuration(fadeoutTime)
-            .setListener(null)
-        answer4.animate().alpha(0f)
-            .setDuration(fadeoutTime)
-            .setListener(null)
-        answer1constraint.animate().translationXBy(-900f)
-            .setDuration(fadeoutTime)
-            .setListener(null)
-            .interpolator = DecelerateInterpolator()
-        answer2constraint.animate().translationXBy(900f)
-            .setDuration(fadeoutTime)
-            .setListener(null)
-            .interpolator = DecelerateInterpolator()
-        answer3constraint.animate().translationXBy(-900f)
-            .setDuration(fadeoutTime)
-            .setListener(null)
-            .interpolator = DecelerateInterpolator()
-        answer4constraint.animate().translationXBy(900f)
-            .setDuration(fadeoutTime)
-            .setListener(null)
-            .interpolator = DecelerateInterpolator()
+        if(question.correctAnswer == 0) {
+            answer1.animate().alpha(0f)
+                .setDuration(fadeoutTime)
+                .setListener(null)
+            answer1constraint.animate().translationXBy(-900f)
+                .setDuration(fadeoutTime)
+                .setListener(null)
+                .interpolator = DecelerateInterpolator()
+        }
+        if(question.correctAnswer == 1) {
+            answer2.animate().alpha(0f)
+                .setDuration(fadeoutTime)
+                .setListener(null)
+            answer2constraint.animate().translationXBy(900f)
+                .setDuration(fadeoutTime)
+                .setListener(null)
+                .interpolator = DecelerateInterpolator()
+        }
+        if(question.correctAnswer == 2) {
+            answer3.animate().alpha(0f)
+                .setDuration(fadeoutTime)
+                .setListener(null)
+            answer3constraint.animate().translationXBy(-900f)
+                .setDuration(fadeoutTime)
+                .setListener(null)
+                .interpolator = DecelerateInterpolator()
+        }
+        if(question.correctAnswer == 3) {
+            answer4.animate().alpha(0f)
+                .setDuration(fadeoutTime)
+                .setListener(null)
+            answer4constraint.animate().translationXBy(900f)
+                .setDuration(fadeoutTime)
+                .setListener(null)
+                .interpolator = DecelerateInterpolator()
+        }
     }
 
     private fun animateViewIn() {
