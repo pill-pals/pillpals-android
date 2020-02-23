@@ -21,6 +21,7 @@ import androidx.preference.PreferenceManager
 import com.pillpals.pillpals.helpers.DatabaseHelper.Companion.getColorStringByID
 import com.pillpals.pillpals.helpers.DatabaseHelper.Companion.getCorrectIconDrawable
 import com.pillpals.pillpals.helpers.NotificationUtils
+import com.pillpals.pillpals.ui.AlarmActivity
 import java.util.concurrent.TimeUnit
 
 
@@ -51,10 +52,6 @@ public class AlarmReceiver: BroadcastReceiver() {
                     occurrence
                 )
 
-                val mainIntent = Intent(context, MainActivity::class.java)
-
-                val pendingIntent = PendingIntent.getActivity(context, schedule.uid!!.hashCode(), mainIntent, PendingIntent.FLAG_UPDATE_CURRENT)
-
                 val drawable = getCorrectIconDrawable(context, medication)
 
                 val iconBitmap = Bitmap.createBitmap((drawable.intrinsicWidth * 1.1).toInt(), (drawable.intrinsicHeight * 1.1).toInt(), Bitmap.Config.ARGB_8888)
@@ -73,16 +70,32 @@ public class AlarmReceiver: BroadcastReceiver() {
                     .setSmallIcon(R.drawable.ic_pill_v5)
                     .setContentTitle(title)
                     .setPriority(priorityValue)
-                    .setContentIntent(pendingIntent)
                     .setLargeIcon(iconBitmap)
                     .setOngoing(true)
                     .setTicker("It's time to take your medication!")
-                    .setVisibility(NotificationCompat.VISIBILITY_PRIVATE)
+
 
                 if(medication.notes.isNotEmpty()) {
                     mBuilder.setContentText("Notes:...")
                         .setStyle(NotificationCompat.BigTextStyle()
                             .bigText("Notes: " + medication.notes))
+                }
+
+                if (sharedPreferences.getBoolean("fullscreen_notifications", true)) {
+                    var fullscreenIntent = Intent(context, AlarmActivity::class.java).apply {
+                        flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                    }
+                    fullscreenIntent.putExtras(intent.extras!!)
+                    var pendingIntent = PendingIntent.getActivity(context, -schedule.uid!!.hashCode(), fullscreenIntent, PendingIntent.FLAG_UPDATE_CURRENT)
+                    mBuilder.setContentIntent(pendingIntent)
+                    mBuilder.setFullScreenIntent(pendingIntent, true)
+                        .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+                } else {
+                    val mainIntent = Intent(context, MainActivity::class.java)
+                    mainIntent.putExtras(intent.extras!!)
+                    val pendingIntent = PendingIntent.getActivity(context, schedule.uid!!.hashCode(), mainIntent, PendingIntent.FLAG_UPDATE_CURRENT)
+                    mBuilder.setContentIntent(pendingIntent)
+                        .setVisibility(NotificationCompat.VISIBILITY_PRIVATE)
                 }
 
                 // notificationId is a unique int for each notification that you must define

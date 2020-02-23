@@ -5,29 +5,40 @@
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="com.android.alarm.permission.SET_ALARM" />
     <uses-permission android:name="android.permission.INTERNET" />
-    <uses-feature android:name="android.hardware.camera"
+    <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
+
+    <uses-feature
+        android:name="android.hardware.camera"
         android:required="false" />
 
     <application
-        android:hardwareAccelerated="true"
-        android:name="com.pillpals.pillpals.PillPalsApplication"
+        android:name=".PillPalsApplication"
         android:allowBackup="true"
+        android:hardwareAccelerated="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
+        android:networkSecurityConfig="@xml/network_security_config"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:networkSecurityConfig="@xml/network_security_config"
         android:theme="@style/AppTheme">
         <activity
-            android:name="com.pillpals.pillpals.ui.EditScheduleActivity"
+            android:name=".ui.AlarmActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:label="Medication time!"
+            android:theme="@style/FullscreenTheme"
+            android:taskAffinity=""
+            android:excludeFromRecents="true"
+            android:launchMode="singleTask"></activity>
+        <activity
+            android:name=".ui.EditScheduleActivity"
             android:label="@string/title_activity_edit_schedule"
-            android:parentActivityName="com.pillpals.pillpals.ui.AddDrugActivity"
+            android:parentActivityName=".ui.AddDrugActivity"
             android:theme="@style/AppTheme.NoActionBar">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.pillpals.pillpals.ui.AddDrugActivity" />
         </activity>
-        <activity android:name="com.pillpals.pillpals.ui.MainActivity">
+        <activity android:name=".ui.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <action android:name="android.intent.action.MAIN" />
@@ -36,12 +47,11 @@
             </intent-filter>
         </activity>
 
-
         <receiver
-            android:name="com.pillpals.pillpals.services.AlarmReceiver"
+            android:name=".services.AlarmReceiver"
             android:process=":remote" />
         <receiver
-            android:name="com.pillpals.pillpals.services.BootupReceiver"
+            android:name=".services.BootupReceiver"
             android:enabled="true"
             android:exported="true">
             <intent-filter>
@@ -50,19 +60,18 @@
             </intent-filter>
         </receiver>
 
-        <activity android:name="com.pillpals.pillpals.ui.AddDrugActivity"></activity>
-        <activity android:name="com.pillpals.pillpals.ui.quiz.QuizQuestionActivity"></activity>
-        <activity android:name="com.pillpals.pillpals.ui.quiz.QuizResultsActivity"></activity>
-        <activity android:name="com.pillpals.pillpals.ui.statistics.MedicationScoresActivity"></activity>
-        <activity android:name="com.pillpals.pillpals.ui.EditMedicationIcon"></activity>
-        <activity android:name="com.pillpals.pillpals.ui.DrugGallery"></activity>
-        <activity android:name="com.pillpals.pillpals.ui.quiz.QuizActivity"></activity>
-        <activity android:name="com.pillpals.pillpals.ui.search.SearchActivity"></activity>
-        <activity android:name="com.pillpals.pillpals.ui.SettingsActivity"
-            android:theme="@style/PreferenceTheme">
-        </activity>
-
-        <activity android:name="com.pillpals.pillpals.ui.medications.medication_info.MedicationInfoActivity">
+        <activity android:name=".ui.AddDrugActivity" />
+        <activity android:name=".ui.quiz.QuizQuestionActivity" />
+        <activity android:name=".ui.quiz.QuizResultsActivity" />
+        <activity android:name=".ui.statistics.MedicationScoresActivity" />
+        <activity android:name=".ui.EditMedicationIcon" />
+        <activity android:name=".ui.DrugGallery" />
+        <activity android:name=".ui.quiz.QuizActivity" />
+        <activity android:name=".ui.search.SearchActivity" />
+        <activity
+            android:name=".ui.SettingsActivity"
+            android:theme="@style/PreferenceTheme"></activity>
+        <activity android:name=".ui.medications.medication_info.MedicationInfoActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.pillpals.pillpals.ui.MainActivity" />

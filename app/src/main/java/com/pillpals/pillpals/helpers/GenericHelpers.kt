@@ -8,7 +8,11 @@ import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
-
+import androidx.core.app.NotificationManagerCompat
+import com.pillpals.pillpals.data.model.Logs
+import com.pillpals.pillpals.data.model.Schedules
+import io.realm.Realm
+import java.util.*
 
 
 fun View.margin(left: Float? = null, top: Float? = null, right: Float? = null, bottom: Float? = null) {
@@ -54,4 +58,25 @@ public fun drawableToBitmap(drawable: Drawable): Bitmap? {
     drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight())
     drawable.draw(canvas)
     return bitmap
+}
+
+public fun drugLogFunction(schedule: Schedules, context: Context, time: Date = Date()) {
+    val realm = Realm.getDefaultInstance()
+
+    val databaseSchedule =
+        realm.where(Schedules::class.java).equalTo("uid", schedule.uid).findFirst()!!
+
+    realm.executeTransaction {
+        var newLog = it.createObject(Logs::class.java, UUID.randomUUID().toString())
+        newLog.occurrence = time
+        newLog.due = schedule.occurrence
+        val n = databaseSchedule.repetitionCount!!
+        val u = DateHelper.getUnitByIndex(databaseSchedule.repetitionUnit!!)
+        databaseSchedule.occurrence = DateHelper.addUnitToDate(schedule.occurrence!!, n, u)
+        databaseSchedule.logs.add(newLog)
+    }
+
+    val notificationManager = NotificationManagerCompat.from(context)
+
+    notificationManager.cancel(databaseSchedule.uid.hashCode())
 }
