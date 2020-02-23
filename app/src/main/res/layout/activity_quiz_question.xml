@@ -100,8 +100,12 @@
             <TextView
                 android:id="@+id/questionText"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="70dp"
                 android:layout_marginHorizontal="16dp"
+                android:autoSizeMaxTextSize="18sp"
+                android:autoSizeMinTextSize="8sp"
+                android:autoSizeStepGranularity="2sp"
+                android:autoSizeTextType="uniform"
                 android:text="This is sample question text that should not ever appear in the application"
                 android:textSize="18sp" />
 
@@ -109,7 +113,7 @@
                 android:id="@+id/answer1constraint"
                 android:layout_width="match_parent"
                 android:layout_height="70dp"
-                android:layout_marginTop="32dp">
+                android:layout_marginTop="16dp">
 
                 <ImageButton
                     android:id="@+id/answer1btn"
@@ -126,16 +130,26 @@
 
                 <TextView
                     android:id="@+id/answer1"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_width="0dp"
+                    android:layout_height="56dp"
+                    android:layout_marginStart="32dp"
+                    android:layout_marginEnd="32dp"
+                    android:layout_marginBottom="3dp"
+                    android:autoSizeMaxTextSize="100sp"
+                    android:autoSizeMinTextSize="12sp"
+                    android:autoSizeStepGranularity="2sp"
+                    android:autoSizeTextType="uniform"
+                    android:gravity="center"
                     android:text="Answer 1"
+                    android:textAlignment="center"
                     android:textSize="30dp"
                     app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintEnd_toStartOf="@+id/cardView5"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
 
                 <androidx.cardview.widget.CardView
+                    android:id="@+id/cardView5"
                     android:layout_width="50dp"
                     android:layout_height="50dp"
                     android:layout_marginEnd="10dp"
@@ -189,16 +203,26 @@
 
                 <TextView
                     android:id="@+id/answer2"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_width="0dp"
+                    android:layout_height="56dp"
+                    android:layout_marginStart="32dp"
+                    android:layout_marginEnd="32dp"
+                    android:layout_marginBottom="3dp"
+                    android:autoSizeMaxTextSize="100sp"
+                    android:autoSizeMinTextSize="12sp"
+                    android:autoSizeStepGranularity="2sp"
+                    android:autoSizeTextType="uniform"
+                    android:gravity="center"
                     android:text="Answer 2"
+                    android:textAlignment="center"
                     android:textSize="30dp"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintStart_toEndOf="@+id/cardView6"
                     app:layout_constraintTop_toTopOf="parent" />
 
                 <androidx.cardview.widget.CardView
+                    android:id="@+id/cardView6"
                     android:layout_width="50dp"
                     android:layout_height="50dp"
                     android:layout_marginStart="10dp"
@@ -252,16 +276,26 @@
 
                 <TextView
                     android:id="@+id/answer3"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_width="0dp"
+                    android:layout_height="56dp"
+                    android:layout_marginStart="32dp"
+                    android:layout_marginEnd="32dp"
+                    android:layout_marginBottom="3dp"
+                    android:autoSizeMaxTextSize="100sp"
+                    android:autoSizeMinTextSize="12sp"
+                    android:autoSizeStepGranularity="2sp"
+                    android:autoSizeTextType="uniform"
+                    android:gravity="center"
                     android:text="Answer 3"
+                    android:textAlignment="center"
                     android:textSize="30dp"
                     app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toStartOf="@+id/cardView7"
+                    app:layout_constraintStart_toStartOf="@+id/answer3btn"
                     app:layout_constraintTop_toTopOf="parent" />
 
                 <androidx.cardview.widget.CardView
+                    android:id="@+id/cardView7"
                     android:layout_width="50dp"
                     android:layout_height="50dp"
                     android:layout_marginEnd="10dp"
@@ -315,16 +349,26 @@
 
                 <TextView
                     android:id="@+id/answer4"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_width="0dp"
+                    android:layout_height="56dp"
+                    android:layout_marginStart="32dp"
+                    android:layout_marginEnd="32dp"
+                    android:layout_marginBottom="3dp"
+                    android:autoSizeMaxTextSize="100sp"
+                    android:autoSizeMinTextSize="12sp"
+                    android:autoSizeStepGranularity="2sp"
+                    android:autoSizeTextType="uniform"
+                    android:gravity="center"
                     android:text="Answer 4"
+                    android:textAlignment="center"
                     android:textSize="30dp"
                     app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="@+id/answer4btn"
+                    app:layout_constraintStart_toEndOf="@+id/cardView8"
                     app:layout_constraintTop_toTopOf="parent" />
 
                 <androidx.cardview.widget.CardView
+                    android:id="@+id/cardView8"
                     android:layout_width="50dp"
                     android:layout_height="50dp"
                     android:layout_marginStart="10dp"
