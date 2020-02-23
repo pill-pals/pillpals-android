@@ -70,6 +70,8 @@ class QuizActivity: AppCompatActivity() {
 
         prefs = this.getPreferences(Context.MODE_PRIVATE)
 
+        QuizGenerator.tryGenerateQuiz()
+
         newStack = findViewById(R.id.newStack)
         pausedStack = findViewById(R.id.pausedStack)
         completedStack = findViewById(R.id.completedStack)
@@ -91,7 +93,7 @@ class QuizActivity: AppCompatActivity() {
             update()
         }
 
-        clearTestData()
+        //clearTestData()
 
         checkLinkedDrugs()
 
@@ -296,7 +298,7 @@ class QuizActivity: AppCompatActivity() {
     private fun createTestQuizData() {
         val quizzes = Array(3){ Quizzes() }
         val names = listOf("Test Quiz 1", "Test Quiz 2", "Test Quiz 3")
-        val dates = listOf(Date(), DateHelper.tomorrow(), DateHelper.addUnitToDate(Date(),2,Calendar.DATE))
+        val dates = listOf(Date(), DateHelper.addUnitToDate(Date(),-1,Calendar.DATE), DateHelper.addUnitToDate(Date(),-2,Calendar.DATE))
 
         realm.executeTransaction {
             for (i in quizzes.indices) {

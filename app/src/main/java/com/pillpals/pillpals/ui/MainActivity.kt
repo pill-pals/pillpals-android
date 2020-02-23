@@ -20,6 +20,7 @@ import com.pillpals.pillpals.data.model.Quizzes
 import com.pillpals.pillpals.helpers.NotificationUtils
 import com.pillpals.pillpals.helpers.QuizHelper
 import com.pillpals.pillpals.ui.quiz.QuizActivity
+import com.pillpals.pillpals.ui.quiz.QuizGenerator
 import io.realm.Realm
 import io.realm.RealmObject
 import io.realm.RealmResults
@@ -44,6 +45,7 @@ class MainActivity : AppCompatActivity() {
         setupActionBarWithNavController(navController, appBarConfiguration)
         navView.setupWithNavController(navController)
 
+        QuizGenerator.tryGenerateQuiz()
         NotificationUtils.createNotificationChannel(this)
     }
 
