@@ -30,6 +30,16 @@
             app:srcCompat="@drawable/ic_pill_v5" />
     </androidx.cardview.widget.CardView>
 
+    <ImageView
+        android:id="@+id/informationIcon"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="1dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/iconBackground"
+        app:srcCompat="@drawable/ic_info" />
+
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/updatingLayout"
         android:layout_width="0dp"

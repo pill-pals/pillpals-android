@@ -1,13 +1,18 @@
 package com.pillpals.pillpals.ui.medications.medication_info
 
 import android.app.Activity
+import android.app.AlertDialog
 import android.content.Intent
 import android.content.res.ColorStateList
 import android.graphics.Color
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.text.SpannableString
+import android.text.Spanned
+import android.text.style.ForegroundColorSpan
 import android.util.Log
+import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.LinearLayout
@@ -37,6 +42,7 @@ import com.pillpals.pillpals.helpers.*
 import com.shopify.promises.Promise
 import io.realm.RealmList
 import io.realm.RealmResults
+import kotlinx.android.synthetic.main.medication_info_prompt.view.*
 import org.w3c.dom.Text
 import java.util.*
 
@@ -54,6 +60,7 @@ class MedicationInfoActivity : AppCompatActivity() {
     lateinit var updatingLoadingIcon: ImageView
     lateinit var updatingText: TextView
     lateinit var loadingAnimation: RotateAnimation
+    lateinit var informationIcon: ImageView
     public var drugCode: Int = 0
     public var colorString: String = "#D3D3D3"
     public var administrationRoutes = listOf<String>()
@@ -66,6 +73,7 @@ class MedicationInfoActivity : AppCompatActivity() {
     var rxcui: String? = null
     var linkingMedication: Boolean = false
     var splSetId: String? = null
+    var loadedTabs = 0
 
 
     var resetData = false
@@ -126,6 +134,7 @@ class MedicationInfoActivity : AppCompatActivity() {
         dosageText = findViewById(R.id.dosageText)
         updatingLoadingIcon = findViewById(R.id.updatingLoadingIcon)
         updatingText = findViewById(R.id.updatingText)
+        informationIcon = findViewById(R.id.informationIcon)
 
         updatingLoadingIcon.visibility = View.GONE
         updatingText.visibility = View.GONE
@@ -199,6 +208,8 @@ class MedicationInfoActivity : AppCompatActivity() {
             }
         }
 
+        informationIcon.setOnClickListener {openInfoDialog()}
+
         val handler = Handler()
         val timer = Timer()
         val doAsynchronousTask = object : TimerTask() {
@@ -218,12 +229,12 @@ class MedicationInfoActivity : AppCompatActivity() {
         timer.schedule(doAsynchronousTask, 0, 250)
 
         addDrugToDPDTable()
-
-        fillAPIData()
     }
 
     public fun tabFragmentLoaded() {
         setTabText(0, listOf("Active Ingredients", "Administration Routes"), listOf(bulletedList(activeIngredients), bulletedList(administrationRoutes)))
+        loadedTabs++
+        if(loadedTabs >= tabFragments.count()) fillAPIData()
     }
 
     fun setTabFragmentData() {
@@ -318,7 +329,16 @@ class MedicationInfoActivity : AppCompatActivity() {
             }
         }
 
+        // If empty
+        if(tabZeroValues.isEmpty()) tabZeroValues = tabZeroValues.plus("No data found in online resources")
+        if(tabOneValues.isEmpty()) tabOneValues = tabOneValues.plus("No data found in online resources")
+        if(tabTwoValues.isEmpty()) tabTwoValues = tabTwoValues.plus("No data found in online resources")
+
         // Set tabs
+        setTabLoading(0, false)
+        setTabLoading(1, false)
+        setTabLoading(2, false)
+
         setTabText(0, tabZeroTitles, tabZeroValues)
         setTabText(1, tabOneTitles, tabOneValues)
         setTabText(2, tabTwoTitles, tabTwoValues)
@@ -332,10 +352,16 @@ class MedicationInfoActivity : AppCompatActivity() {
     private fun setTabText(tabIndex: Int, headers: List<String>, bodyText: List<String>) {
         val layout: LinearLayout = tabPagerAdapter.getItem(tabIndex).layout
         resetText(layout)
-        for ((index, headerText) in headers.withIndex()) {
-            addHeader(layout, headerText)
-            addBody(layout, bodyText[index])
+        for ((index, bodyText) in bodyText.withIndex()) {
+            if(headers.count() > index) {
+                addHeader(layout, headers[index])
+            }
+            addBody(layout, bodyText)
         }
+    }
+
+    private fun setTabLoading(tabIndex: Int, loading: Boolean) {
+        tabPagerAdapter.getItem(tabIndex).setTabLoading(loading)
     }
 
     private fun addDrugToDPDTable() {
@@ -372,6 +398,10 @@ class MedicationInfoActivity : AppCompatActivity() {
 
         updatingLoadingIcon.visibility = View.VISIBLE
         updatingText.visibility = View.VISIBLE
+
+        setTabLoading(0, true)
+        setTabLoading(1, true)
+        setTabLoading(2, true)
 
         // Waterfall the requests for now
         val drugSchedulesPromise = MedicationInfoRetriever.drugSchedules(drugCode)
@@ -542,6 +572,27 @@ class MedicationInfoActivity : AppCompatActivity() {
         newView.layoutParams = textParams
 
         layout.addView(newView)
+    }
+
+    private fun openInfoDialog() {
+        val gradeInfoDialog = LayoutInflater.from(this).inflate(R.layout.medication_info_prompt, null)
+
+        val title = SpannableString("Medication Info Viewer")
+        title.setSpan(
+            ForegroundColorSpan(resources.getColor(R.color.colorLightGrey)),
+            0,
+            title.length,
+            Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+        )
+        val dialogBuilder = AlertDialog.Builder(this)
+            .setView(gradeInfoDialog)
+            .setTitle(title)
+
+        val timeAlertDialog = dialogBuilder.show()
+
+        gradeInfoDialog.dialogCancelBtn.setOnClickListener {
+            timeAlertDialog.dismiss()
+        }
     }
 
     private inner class TabPagerAdapter(fm: FragmentManager) : FragmentStatePagerAdapter(fm) {

@@ -2,28 +2,32 @@
 
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
-    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
-        android:id="@+id/textLayout"
+
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingBottom="16dp"
-        android:orientation="vertical">
+        android:layout_height="0dp">
 
-        <TextView
-            android:id="@+id/header1"
+        <LinearLayout
+            android:id="@+id/textLayout"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textSize="20sp" />
+            android:layout_height="0dp"
+            android:orientation="vertical"
+            android:paddingBottom="16dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"/>
 
-        <TextView
-            android:id="@+id/text1"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:textSize="16sp" />
-
-    </LinearLayout>
+        <ImageView
+            android:id="@+id/loading"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:animateLayoutChanges="true"
+            android:src="@drawable/loader"
+            android:visibility="gone"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/textLayout"></ImageView>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 </ScrollView>
