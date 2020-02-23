@@ -62,6 +62,21 @@ class NotificationUtils {
             )
         }
 
+        fun snoozeAlarm(context: Context, schedule: Schedules) {
+            val notificationManager = NotificationManagerCompat.from(context)
+            notificationManager.cancel(schedule.uid.hashCode())
+
+            val mAlarmSender = getPendingIntent(context, schedule)
+
+            var c = Calendar.getInstance()
+            var snoozeTime = DateHelper.addUnitToDate(c.time, 2, Calendar.MINUTE) //TODO: Change snooze to 15 minutes or something
+            c.time = snoozeTime
+            val alarmTime = c.timeInMillis
+
+            val am = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+            am.setExact(AlarmManager.RTC_WAKEUP, alarmTime, mAlarmSender)
+        }
+
         fun createNotificationChannel(context: Context) {
             // Create the NotificationChannel, but only on API 26+ because
             // the NotificationChannel class is new and not in the support library

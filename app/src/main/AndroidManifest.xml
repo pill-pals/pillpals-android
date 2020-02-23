@@ -24,7 +24,6 @@
         <activity
             android:name=".ui.AlarmActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
-            android:label="Medication time!"
             android:theme="@style/FullscreenTheme"
             android:taskAffinity=""
             android:excludeFromRecents="true"
