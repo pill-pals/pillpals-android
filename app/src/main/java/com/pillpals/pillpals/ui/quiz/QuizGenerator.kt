@@ -26,7 +26,7 @@ class QuizGenerator() {
                 .and()
                 .isNotNull("date")
                 .and()
-                .greaterThanOrEqualTo("date", DateHelper.addUnitToDate(Date(),-30,Calendar.SECOND))
+                .greaterThanOrEqualTo("date", DateHelper.addUnitToDate(Date(),-3,Calendar.DATE))
                 .findAll()
 
             var newQuizExists = false
