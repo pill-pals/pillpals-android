@@ -1,13 +1,10 @@
 package com.pillpals.pillpals.ui
 
 import android.content.Intent
-import android.content.SharedPreferences
 import android.graphics.Color
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.os.Handler
 import android.view.View
-import android.view.Window
 import android.view.WindowManager
 import android.widget.Button
 import android.widget.ImageView
@@ -23,7 +20,6 @@ import com.pillpals.pillpals.helpers.DatabaseHelper.Companion.getCorrectIconDraw
 import com.pillpals.pillpals.helpers.DateHelper
 import com.pillpals.pillpals.helpers.NotificationUtils
 import com.pillpals.pillpals.helpers.drugLogFunction
-import kotlinx.android.synthetic.main.activity_alarm.*
 
 /**
  * An example full-screen activity that shows and hides the system UI (i.e.
@@ -56,38 +52,41 @@ class AlarmActivity : AppCompatActivity() {
                 WindowManager.LayoutParams.FLAG_FULLSCREEN
         )
 
-        setupViewVars()
-
         var schedule = DatabaseHelper.getScheduleByUid(
             intent.getStringExtra("schedule-uid")
         ) as Schedules
         var medication = schedule.medication!!.first() as Medications
 
-        val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(applicationContext)
-        message.text = sharedPreferences.getString("fullscreen_notification_message", "It's time to take your medication!")
+        if (intent.action == "LOG") {
+            alarmLogFunc(schedule)
+        } else if (intent.action == "SNOOZE") {
+            alarmSnoozeFunc(schedule)
+        } else {
+            setupViewVars()
 
-        alarmTime.text = DateHelper.dateToString(schedule.occurrence!!)
+            val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(applicationContext)
+            message.text = sharedPreferences.getString("fullscreen_notification_message", "It's time to take your medication!")
 
-        if (medication.notes.isNotEmpty()) {
-            alarmNote.text = medication.notes
-        }
+            alarmTime.text = DateHelper.dateToString(schedule.occurrence!!)
 
-        iconCard.setCardBackgroundColor(Color.parseColor(getColorStringByID(medication.color_id)))
-        icon.setImageDrawable(getCorrectIconDrawable(this, medication))
+            if (medication.notes.isNotEmpty()) {
+                alarmNote.text = medication.notes
+            }
 
-        logButton.setOnClickListener {
-            drugLogFunction(schedule, this)
-            finish()
-        }
+            iconCard.setCardBackgroundColor(Color.parseColor(getColorStringByID(medication.color_id)))
+            icon.setImageDrawable(getCorrectIconDrawable(this, medication))
 
-        snoozeButton.setOnClickListener {
-            NotificationUtils.snoozeAlarm(this, schedule)
-            finish()
-        }
+            logButton.setOnClickListener {
+                alarmLogFunc(schedule)
+            }
 
-        openButton.setOnClickListener {
-            var newIntent = Intent(this, MainActivity::class.java)
-            startActivity(newIntent)
+            snoozeButton.setOnClickListener {
+                alarmSnoozeFunc(schedule)
+            }
+
+            openButton.setOnClickListener {
+                alarmOpenFunc()
+            }
         }
     }
 
@@ -100,5 +99,20 @@ class AlarmActivity : AppCompatActivity() {
         logButton = findViewById(R.id.alarmLogButton)
         snoozeButton = findViewById(R.id.alarmSnoozeButton)
         openButton = findViewById(R.id.alarmOpenAppButton)
+    }
+
+    private fun alarmLogFunc(schedule: Schedules) {
+        drugLogFunction(schedule, this)
+        finish()
+    }
+
+    private fun alarmSnoozeFunc(schedule: Schedules) {
+        NotificationUtils.snoozeAlarm(this, schedule)
+        finish()
+    }
+
+    private fun alarmOpenFunc() {
+        var newIntent = Intent(this, MainActivity::class.java)
+        startActivity(newIntent)
     }
 }

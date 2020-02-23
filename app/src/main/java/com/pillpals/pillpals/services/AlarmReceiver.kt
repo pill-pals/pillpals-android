@@ -88,7 +88,7 @@ public class AlarmReceiver: BroadcastReceiver() {
                     fullscreenIntent.putExtras(intent.extras!!)
                     var pendingIntent = PendingIntent.getActivity(context, -schedule.uid!!.hashCode(), fullscreenIntent, PendingIntent.FLAG_UPDATE_CURRENT)
                     mBuilder.setContentIntent(pendingIntent)
-                    mBuilder.setFullScreenIntent(pendingIntent, true)
+                        .setFullScreenIntent(pendingIntent, true)
                         .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
                 } else {
                     val mainIntent = Intent(context, MainActivity::class.java)
@@ -97,6 +97,24 @@ public class AlarmReceiver: BroadcastReceiver() {
                     mBuilder.setContentIntent(pendingIntent)
                         .setVisibility(NotificationCompat.VISIBILITY_PRIVATE)
                 }
+
+                var logIntent = Intent(context, AlarmActivity::class.java).apply {
+                    action = "LOG"
+                    flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+                }
+                logIntent.putExtras(intent.extras!!)
+                var pendingLogIntent = PendingIntent.getActivity(context, 0, logIntent, PendingIntent.FLAG_UPDATE_CURRENT)
+                var logAction = NotificationCompat.Action(R.drawable.ic_check_32, "LOG", pendingLogIntent)
+                mBuilder.addAction(logAction)
+
+                var snoozeIntent = Intent(context, AlarmActivity::class.java).apply {
+                    action = "SNOOZE"
+                    flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+                }
+                snoozeIntent.putExtras(intent.extras!!)
+                var pendingSnoozeIntent = PendingIntent.getActivity(context, 0, snoozeIntent, PendingIntent.FLAG_UPDATE_CURRENT)
+                var snoozeAction = NotificationCompat.Action(R.drawable.ic_clock_32, "SNOOZE", pendingSnoozeIntent)
+                mBuilder.addAction(snoozeAction)
 
                 // notificationId is a unique int for each notification that you must define
                 notificationManager.notify(schedule.uid!!.hashCode(), mBuilder.build())
