@@ -17,6 +17,8 @@ import com.google.android.material.internal.NavigationMenu
 import com.pillpals.pillpals.R
 import com.pillpals.pillpals.data.model.Medications
 import com.pillpals.pillpals.data.model.Quizzes
+import com.pillpals.pillpals.data.model.Schedules
+import com.pillpals.pillpals.helpers.DatabaseHelper
 import com.pillpals.pillpals.helpers.NotificationUtils
 import com.pillpals.pillpals.helpers.QuizHelper
 import com.pillpals.pillpals.ui.quiz.QuizActivity
@@ -47,6 +49,12 @@ class MainActivity : AppCompatActivity() {
 
         QuizGenerator.tryGenerateQuiz()
         NotificationUtils.createNotificationChannel(this)
+
+        val schedules = readAllData(Schedules::class.java) as RealmResults<out Schedules>
+        schedules.forEach {
+            if(it.medication?.firstOrNull() == null) DatabaseHelper.obliterateSchedule(it)
+        }
+
     }
 
     override fun onOptionsItemSelected(item: MenuItem) = when (item.itemId) {

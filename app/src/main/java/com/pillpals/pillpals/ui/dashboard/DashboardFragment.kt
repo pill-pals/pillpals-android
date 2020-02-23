@@ -466,11 +466,7 @@ class DashboardFragment : Fragment() {
 
     fun setUpSchedules(schedules: RealmResults<out Schedules>, addCards: Boolean) {
         for (databaseSchedule in schedules) {
-            if (databaseSchedule.medication.isNullOrEmpty()) {
-                obliterateSchedule(databaseSchedule)
-                continue
-            }
-            else if (databaseSchedule.deleted || databaseSchedule.medication!!.first()!!.deleted) {
+            if (databaseSchedule.deleted || databaseSchedule.medication!!.first()!!.deleted) {
                 continue
             }
 
@@ -666,6 +662,12 @@ class DashboardFragment : Fragment() {
 
     override fun onActivityResult(requestCode:Int, resultCode:Int, data:Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
+
+        val schedules = readAllData(Schedules::class.java) as RealmResults<out Schedules>
+        schedules.forEach {
+            if(it.medication?.firstOrNull() == null) obliterateSchedule(it)
+        }
+
         update()
     }
 
