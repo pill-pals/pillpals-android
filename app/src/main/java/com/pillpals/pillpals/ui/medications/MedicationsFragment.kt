@@ -37,6 +37,7 @@ import com.pillpals.pillpals.ui.ScheduleRecord
 import com.pillpals.pillpals.ui.medications.medication_info.MedicationInfoActivity
 import com.pillpals.pillpals.ui.search.SearchActivity
 import io.realm.RealmResults
+import kotlinx.android.synthetic.main.add_medication_prompt.view.*
 import kotlinx.android.synthetic.main.delete_prompt.view.*
 import kotlinx.android.synthetic.main.drug_card.view.*
 
@@ -65,8 +66,39 @@ class MedicationsFragment : Fragment() {
         getActivity()!!.invalidateOptionsMenu()
 
         drugButton.setOnClickListener {
-            val intent = Intent(context, AddDrugActivity::class.java)
-            startActivityForResult(intent, 1)
+            val addPrompt = LayoutInflater.from(this.context).inflate(R.layout.add_medication_prompt, null)
+
+            val title = SpannableString("Add medication")
+            title.setSpan(
+                ForegroundColorSpan(this!!.resources.getColor(R.color.colorLightGrey)),
+                0,
+                title.length,
+                Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+            )
+            val dialogBuilder = androidx.appcompat.app.AlertDialog.Builder(context!!)
+                .setView(addPrompt)
+                .setTitle(title)
+
+            val alertDialog = dialogBuilder.show()
+            addPrompt.dialogScanBtn.setOnClickListener {
+                alertDialog.dismiss()
+                Log.i("scan", "in progress")
+            }
+
+            addPrompt.dialogSearchBtn.setOnClickListener {
+                alertDialog.dismiss()
+                val intent = Intent(context, SearchActivity::class.java)
+                startActivityForResult(intent, 2)
+            }
+
+            addPrompt.dialogManualBtn.setOnClickListener {
+                alertDialog.dismiss()
+                val intent = Intent(context, AddDrugActivity::class.java)
+                startActivityForResult(intent, 1)
+            }
+
+
+
         }
 
         updateMedicationList()
@@ -172,7 +204,7 @@ class MedicationsFragment : Fragment() {
             intent.putStringArrayListExtra("active-ingredients",  ArrayList(dpdObject.activeIngredients))
             intent.putExtra("dosage-string", dpdObject.dosageString)
             intent.putExtra("name-text", dpdObject.name)
-            startActivityForResult(intent, 2)
+            startActivityForResult(intent, 4)
         }
 
         newCard.button.setOnClickListener {
@@ -249,6 +281,11 @@ class MedicationsFragment : Fragment() {
 
     override fun onActivityResult(requestCode:Int, resultCode:Int, data:Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
+
+        // 1 -> add drug
+        // 2 -> view drug info
+        // 3 -> link drug
+        // 4 -> search for drug
 
         val schedules = readAllData(Schedules::class.java) as RealmResults<out Schedules>
         schedules.forEach {
