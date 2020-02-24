@@ -26,14 +26,17 @@ import android.widget.*
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.children
 import com.pillpals.pillpals.data.model.DPDObjects
+import com.pillpals.pillpals.data.model.Schedules
 import com.pillpals.pillpals.helpers.DatabaseHelper
 import com.pillpals.pillpals.helpers.DatabaseHelper.Companion.getColorStringByID
 import com.pillpals.pillpals.helpers.DatabaseHelper.Companion.getCorrectIconDrawable
 import com.pillpals.pillpals.helpers.FileWriter
+import com.pillpals.pillpals.helpers.DatabaseHelper.Companion.readAllData
 import com.pillpals.pillpals.helpers.calculateScheduleRecords
 import com.pillpals.pillpals.ui.ScheduleRecord
 import com.pillpals.pillpals.ui.medications.medication_info.MedicationInfoActivity
 import com.pillpals.pillpals.ui.search.SearchActivity
+import io.realm.RealmResults
 import kotlinx.android.synthetic.main.delete_prompt.view.*
 import kotlinx.android.synthetic.main.drug_card.view.*
 
@@ -76,6 +79,7 @@ class MedicationsFragment : Fragment() {
         getActivity()!!.invalidateOptionsMenu()
         FileWriter.createJSONStringFromData(context!!)
     }
+
     private fun popoverMenuMedication(v: View, medication: Medications) {
         val popup = PopupMenu(context, v.overflowMenu)
         val inflater: MenuInflater = popup.menuInflater
@@ -245,6 +249,12 @@ class MedicationsFragment : Fragment() {
 
     override fun onActivityResult(requestCode:Int, resultCode:Int, data:Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
+
+        val schedules = readAllData(Schedules::class.java) as RealmResults<out Schedules>
+        schedules.forEach {
+            if(it.medication?.firstOrNull() == null) DatabaseHelper.obliterateSchedule(it)
+        }
+
         updateMedicationList()
     }
 }
