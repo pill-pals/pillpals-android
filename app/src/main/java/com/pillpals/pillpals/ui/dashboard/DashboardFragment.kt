@@ -32,6 +32,7 @@ import android.content.SharedPreferences
 import android.content.res.ColorStateList
 import android.graphics.*
 import android.graphics.drawable.AnimatedVectorDrawable
+import android.provider.Settings
 import android.util.Log
 import androidx.cardview.widget.CardView
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -70,6 +71,7 @@ class DashboardFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         super.onCreateView(inflater, container, savedInstanceState)
+        FileWriter.createJSONStringFromData(context!!)
         val view = inflater!!.inflate(R.layout.fragment_dashboard, container, false)
 
         prefs = activity!!.getPreferences(Context.MODE_PRIVATE)
@@ -78,11 +80,11 @@ class DashboardFragment : Fragment() {
         realm = Realm.getDefaultInstance()
 
         currentStack = view!!.findViewById(R.id.currentStack)
-        upcomingStack = view!!.findViewById(R.id.upcomingStack)
-        completedStack = view!!.findViewById(R.id.completedStack)
-        moodIconList = view!!.findViewById(R.id.moodIconList)
-        upcomingCollapseBtn = view!!.findViewById(R.id.upcomingCollapseBtn)
-        completedCollapseBtn = view!!.findViewById(R.id.completedCollapseBtn)
+        upcomingStack = view.findViewById(R.id.upcomingStack)
+        completedStack = view.findViewById(R.id.completedStack)
+        moodIconList = view.findViewById(R.id.moodIconList)
+        upcomingCollapseBtn = view.findViewById(R.id.upcomingCollapseBtn)
+        completedCollapseBtn = view.findViewById(R.id.completedCollapseBtn)
         dashboardParent = view.findViewById(R.id.dashboardParent)
 
         //region
@@ -113,15 +115,9 @@ class DashboardFragment : Fragment() {
         }
         timer.schedule(doAsynchronousTask, 0, 60000)
 
-        MedicationInfoRetriever.recalls("54092-189").whenComplete { result: Promise.Result<RecallsResult, RuntimeException> ->
-            when (result) {
-                is Promise.Result.Success -> {
-                    // Use result here
-                    Log.i("Success", result.value.toString())
-                }
-                is Promise.Result.Error -> Log.i("Error", result.error.message!!)
-            }
-        }
+        val id = Settings.Secure.getString(context!!.contentResolver, Settings.Secure.ANDROID_ID)
+
+        //FileWriter.readFileOnInternalStorage(context!!)
 
         return view
     }
@@ -129,6 +125,7 @@ class DashboardFragment : Fragment() {
     override fun onResume() {
         super.onResume()
         getActivity()!!.invalidateOptionsMenu()
+        FileWriter.createJSONStringFromData(context!!)
     }
 
     //Mood tracker

@@ -16,6 +16,14 @@
     </PreferenceCategory>
 
     <PreferenceCategory
+        android:key="pin_category"
+        android:title="Tester Pin">
+        <EditTextPreference
+            android:key="pin"
+            android:title="Enter tester pin"/>
+    </PreferenceCategory>
+
+    <PreferenceCategory
         android:key="help_category"
         android:title="Help">
 
