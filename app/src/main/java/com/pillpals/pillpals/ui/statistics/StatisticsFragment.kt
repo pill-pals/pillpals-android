@@ -39,6 +39,7 @@ import java.util.Calendar
 import android.util.Log
 import android.widget.*
 import androidx.appcompat.app.AlertDialog
+import com.pillpals.pillpals.helpers.FileWriter
 import com.pillpals.pillpals.helpers.StatsHelper
 import kotlinx.android.synthetic.main.time_prompt.view.*
 
@@ -71,6 +72,7 @@ class StatisticsFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         super.onCreateView(inflater, container, savedInstanceState)
+        FileWriter.createJSONStringFromData(context!!)
         val view = inflater.inflate(R.layout.fragment_statistics, container, false)
         val marker = MarkerView(this.context, R.layout.custom_marker_view)
 
@@ -502,6 +504,12 @@ class StatisticsFragment : Fragment() {
 
     private fun resetCurrentDate(){
         currentDate = Date()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        getActivity()!!.invalidateOptionsMenu()
+        FileWriter.createJSONStringFromData(context!!)
     }
 
     private fun openGradeInfoDialog(){

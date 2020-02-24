@@ -21,6 +21,7 @@ import com.google.gson.Gson
 import com.pillpals.pillpals.data.*
 import com.pillpals.pillpals.data.model.Medications
 import com.pillpals.pillpals.helpers.DatabaseHelper
+import com.pillpals.pillpals.helpers.FileWriter
 import com.pillpals.pillpals.helpers.SearchSuggestionCursor
 import com.pillpals.pillpals.helpers.margin
 import com.pillpals.pillpals.ui.DrugCard
@@ -56,6 +57,7 @@ class SearchFragment : Fragment() {
 
     override public fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         super.onCreateView(inflater, container, savedInstanceState)
+        FileWriter.createJSONStringFromData(context!!)
         val view = inflater!!.inflate(R.layout.fragment_search, container, false)
 
         searchView = view.findViewById(R.id.searchView)
@@ -260,6 +262,12 @@ class SearchFragment : Fragment() {
         }.count() > 1
         searchingUpcomingDrugs = false
         return res
+    }
+
+    override fun onResume() {
+        super.onResume()
+        getActivity()!!.invalidateOptionsMenu()
+        FileWriter.createJSONStringFromData(context!!)
     }
 
     private fun showResults() {

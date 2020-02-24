@@ -29,6 +29,7 @@ import com.pillpals.pillpals.data.model.DPDObjects
 import com.pillpals.pillpals.helpers.DatabaseHelper
 import com.pillpals.pillpals.helpers.DatabaseHelper.Companion.getColorStringByID
 import com.pillpals.pillpals.helpers.DatabaseHelper.Companion.getCorrectIconDrawable
+import com.pillpals.pillpals.helpers.FileWriter
 import com.pillpals.pillpals.helpers.calculateScheduleRecords
 import com.pillpals.pillpals.ui.ScheduleRecord
 import com.pillpals.pillpals.ui.medications.medication_info.MedicationInfoActivity
@@ -47,6 +48,7 @@ class MedicationsFragment : Fragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         super.onCreateView(inflater, container, savedInstanceState)
+        FileWriter.createJSONStringFromData(context!!)
         val view = inflater!!.inflate(R.layout.fragment_medications, container,false)
 
         realm = Realm.getDefaultInstance()
@@ -72,8 +74,8 @@ class MedicationsFragment : Fragment() {
     override fun onResume() {
         super.onResume()
         getActivity()!!.invalidateOptionsMenu()
+        FileWriter.createJSONStringFromData(context!!)
     }
-
     private fun popoverMenuMedication(v: View, medication: Medications) {
         val popup = PopupMenu(context, v.overflowMenu)
         val inflater: MenuInflater = popup.menuInflater
