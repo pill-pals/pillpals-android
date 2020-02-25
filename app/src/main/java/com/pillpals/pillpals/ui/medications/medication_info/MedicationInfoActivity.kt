@@ -230,6 +230,8 @@ class MedicationInfoActivity : AppCompatActivity() {
         timer.schedule(doAsynchronousTask, 0, 250)
 
         addDrugToDPDTable()
+
+        DatabaseHelper.logVisit("MedicationInfoActivity")
     }
 
     public fun tabFragmentLoaded() {

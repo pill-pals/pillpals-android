@@ -129,5 +129,13 @@ class DatabaseHelper {
 
             return allLogsForMedication.isNotEmpty()
         }
+        fun logVisit(page: String) {
+            Realm.getDefaultInstance().executeTransaction{
+                val visitLog = it.createObject(VisitLogs::class.java, UUID.randomUUID().toString())
+                visitLog.page = page
+                visitLog.date = Date()
+                //Log.i("visit","Visited: " + page + " on " + Date())
+            }
+        }
     }
 }

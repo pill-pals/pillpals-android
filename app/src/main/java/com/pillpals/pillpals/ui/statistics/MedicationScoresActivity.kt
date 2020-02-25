@@ -63,7 +63,9 @@ class MedicationScoresActivity : AppCompatActivity() {
 
             addDrugCard(drug)
         }
-        Log.i("text",stack.toString())
+        Log.i("text",stack.toString() )
+
+        DatabaseHelper.logVisit("MedicationScoresActivity")
     }
 
     private fun addDrugCard(medication: Medications) {

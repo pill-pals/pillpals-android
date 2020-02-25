@@ -104,6 +104,9 @@ class QuizActivity: AppCompatActivity() {
         setUpCollapsing()
 
         hideEmptyStacks()
+
+        DatabaseHelper.logVisit("QuizActivity")
+
     }
 
     private fun setUpQuizCards(quizzes: RealmResults<out Quizzes>) {
