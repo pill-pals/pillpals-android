@@ -459,7 +459,7 @@ class MedicationsFragment : Fragment() {
                                                     if(fdaResponse.error == null) {
                                                         val fdaResults = fdaResponse.results
 
-                                                        val fdaResultWithDosage = fdaResults.filter {
+                                                        val fdaResultWithDosage = fdaResults?.filter {
                                                             if(it.active_ingredients == null) return@filter false
                                                             val totalVal = it.active_ingredients.fold(0f) {acc, it ->
                                                                 acc + it.strength.replace("( .*)".toRegex(), "").toFloat()
@@ -467,9 +467,9 @@ class MedicationsFragment : Fragment() {
                                                             it.active_ingredients.any {
                                                                 it.strength.contains("${dosageValues.first()} ${dosageUnits.firstOrNull()?.toLowerCase()}")
                                                             } || dosageValues.firstOrNull()?.toFloat() == totalVal
-                                                        }.firstOrNull()
+                                                        }?.firstOrNull()
 
-                                                        val firstFdaResult = fdaResults.firstOrNull()
+                                                        val firstFdaResult = fdaResults?.firstOrNull()
 
                                                         // SET FDA IDS
 
