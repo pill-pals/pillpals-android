@@ -157,7 +157,7 @@ class MedicationInfoActivity : AppCompatActivity() {
             iconResourceString = "ic_pill_v5"
         }
 
-        alreadyAdded.visibility = View.INVISIBLE
+        alreadyAdded.visibility = View.GONE
         if(linkingMedication) {
             addButton.text = "+ Link"
         }
@@ -230,6 +230,8 @@ class MedicationInfoActivity : AppCompatActivity() {
         timer.schedule(doAsynchronousTask, 0, 250)
 
         addDrugToDPDTable()
+
+        DatabaseHelper.logVisit("MedicationInfoActivity")
     }
 
     public fun tabFragmentLoaded() {
@@ -346,7 +348,7 @@ class MedicationInfoActivity : AppCompatActivity() {
     }
 
     private fun bulletedList(list: List<String>): String {
-        return "• " + list.joinToString("\n• ")
+        return " • " + list.joinToString("\n• ")
     }
 
     //Assumes that the headers and bodyText lists are ordered and have indices that correspond with each other 1:1
@@ -355,9 +357,9 @@ class MedicationInfoActivity : AppCompatActivity() {
         resetText(layout)
         for ((index, bodyText) in bodyText.withIndex()) {
             if(headers.count() > index) {
-                addHeader(layout, headers[index])
+                appendText(layout, headers[index], "header")
             }
-            addBody(layout, bodyText)
+            appendText(layout, bodyText, "body")
         }
     }
 
@@ -558,19 +560,18 @@ class MedicationInfoActivity : AppCompatActivity() {
         layout.removeAllViews()
     }
 
-    private fun addHeader(layout: ViewGroup, text: String) {
-        appendText(layout, text, headerSize)
-    }
-
-    private fun addBody(layout: ViewGroup, text: String) {
-        appendText(layout, text, bodySize)
-    }
-
-    private fun appendText(layout: ViewGroup, text: String, fontSize: Float) {
+    private fun appendText(layout: ViewGroup, text: String, style: String) {
         var newView = TextView(this)
         newView.text = text
-        newView.textSize = fontSize
         newView.layoutParams = textParams
+
+        if (style == "header"){
+            newView.textSize = headerSize
+        }
+        else if (style == "body") {
+            newView.textSize = bodySize
+        }
+
 
         layout.addView(newView)
     }

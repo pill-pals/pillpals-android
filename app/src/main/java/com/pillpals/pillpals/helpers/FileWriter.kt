@@ -115,6 +115,15 @@ class FileWriter {
                     ))
                 }
 
+            val visitLogsOutputList = (DatabaseHelper.readAllData(VisitLogs::class.java) as RealmResults<out VisitLogs>)
+                .fold(listOf<VisitLogsOutput>()) { acc, it ->
+                    acc.plus(VisitLogsOutput(
+                        it.uid,
+                        it.page,
+                        it.date
+                    ))
+                }
+
             val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
             val settingsPin = sharedPreferences.getString("pin", "")
 
@@ -125,6 +134,7 @@ class FileWriter {
                 medications = medicationOutputList,
                 quizzes = quizzesOutputList,
                 questions = questionsOutputList,
+                visit_logs = visitLogsOutputList,
                 pin = settingsPin
             )
 
@@ -184,6 +194,12 @@ data class QuestionsOutput(
     val quiz_uid: String?
 )
 
+data class VisitLogsOutput(
+    val uid: String,
+    val page: String,
+    val date: Date?
+)
+
 data class FileOutput(
     val medications: List<MedicationOutput>,
     val schedules: List<ScheduleOutput>,
@@ -191,6 +207,6 @@ data class FileOutput(
     val logs: List<LogsOutput>,
     val quizzes: List<QuizzesOutput>,
     val questions: List<QuestionsOutput>,
+    val visit_logs: List<VisitLogsOutput>,
     val pin: String?
 )
-

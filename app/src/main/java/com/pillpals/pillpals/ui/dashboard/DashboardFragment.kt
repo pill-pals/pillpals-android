@@ -631,9 +631,16 @@ class DashboardFragment : Fragment() {
         }
 
         newCard.icon.setOnClickListener {
-            val intent = Intent(context, AddDrugActivity::class.java)
-            intent.putExtra("medication-uid", medication.uid)
-            startActivityForResult(intent, 1)
+            val dpdObject = medication.dpd_object?.firstOrNull() ?: return@setOnClickListener
+
+            val intent = Intent(context, MedicationInfoActivity::class.java)
+            intent.putExtra("drug-code", dpdObject.dpd_id)
+            intent.putExtra("icon-color", getColorStringByID(medication.color_id))
+            intent.putStringArrayListExtra("administration-routes", ArrayList(dpdObject.administrationRoutes))
+            intent.putStringArrayListExtra("active-ingredients",  ArrayList(dpdObject.activeIngredients))
+            intent.putExtra("dosage-string", dpdObject.dosageString)
+            intent.putExtra("name-text", dpdObject.name)
+            startActivityForResult(intent, 2)
         }
 
         // MARK: Select stack and colour

@@ -39,6 +39,7 @@ import java.util.Calendar
 import android.util.Log
 import android.widget.*
 import androidx.appcompat.app.AlertDialog
+import com.pillpals.pillpals.data.model.VisitLogs
 import com.pillpals.pillpals.helpers.FileWriter
 import com.pillpals.pillpals.helpers.StatsHelper
 import kotlinx.android.synthetic.main.time_prompt.view.*
@@ -112,6 +113,8 @@ class StatisticsFragment : Fragment() {
         determineRepeatingColors()
         populateLegendStack()
         renderBarChart()
+
+        DatabaseHelper.logVisit("StatisticsFragment")
 
         return view
     }
