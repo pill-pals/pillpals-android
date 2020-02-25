@@ -406,14 +406,16 @@ class SearchActivity : AppCompatActivity() {
 
                                         newCard.lateText.visibility = View.VISIBLE
 
-//                                        while(searchingUpcomingDrugs) {
-//                                            Thread.sleep(50)
-//                                        }
-//                                        if(multipleDrugsExistsWithName(drugProduct.brand_name, newCard.dosageString)) {
-//                                            drugCards[index] = null
-//                                            refreshCardsFlag = true
-//                                            return
-//                                        }
+                                        while(searchingUpcomingDrugs) {
+                                            Thread.sleep(50)
+                                        }
+                                        upcomingDrugCards.add(newCard)
+
+                                        if(multipleDrugsExistsWithName(drugProduct.brand_name, newCard.dosageString)) {
+                                            drugCards[index] = null
+                                            refreshCardsFlag = true
+                                            return
+                                        }
 
                                         newCard.activeIngredients = ingredientNameList
 
