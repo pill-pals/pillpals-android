@@ -387,7 +387,7 @@ class MedicationInfoRetriever {
 
                             label ?: return resolve("")
 
-                            val description = label.description.firstOrNull()
+                            val description: String? = label.description.firstOrNull()
 
                             description ?: return resolve("")
 

@@ -348,7 +348,7 @@ class MedicationInfoActivity : AppCompatActivity() {
     }
 
     private fun bulletedList(list: List<String>): String {
-        return "• " + list.joinToString("\n• ")
+        return " • " + list.joinToString("\n• ")
     }
 
     //Assumes that the headers and bodyText lists are ordered and have indices that correspond with each other 1:1
