@@ -157,7 +157,7 @@ class MedicationInfoActivity : AppCompatActivity() {
             iconResourceString = "ic_pill_v5"
         }
 
-        alreadyAdded.visibility = View.INVISIBLE
+        alreadyAdded.visibility = View.GONE
         if(linkingMedication) {
             addButton.text = "+ Link"
         }
