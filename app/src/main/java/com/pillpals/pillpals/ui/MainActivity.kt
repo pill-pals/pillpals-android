@@ -1,10 +1,14 @@
 package com.pillpals.pillpals.ui
 
+import android.app.AlarmManager
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.app.PendingIntent
+import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import com.google.android.material.bottomnavigation.BottomNavigationView
@@ -49,6 +53,8 @@ class MainActivity : AppCompatActivity() {
 
         QuizGenerator.tryGenerateQuiz()
         NotificationUtils.createNotificationChannel(this)
+
+        NotificationUtils.createQuizNotifications(applicationContext)
 
         val schedules = readAllData(Schedules::class.java) as RealmResults<out Schedules>
         schedules.forEach {

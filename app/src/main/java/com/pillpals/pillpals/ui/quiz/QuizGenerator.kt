@@ -18,7 +18,7 @@ class QuizGenerator() {
     companion object {
         val realm = Realm.getDefaultInstance()
 
-        fun tryGenerateQuiz() {
+        fun tryGenerateQuiz():Int {
             //Only generates a new quiz if no new quizzes exist and the last quiz was generated over 3 days ago
             Log.i("quiz", "tryGenerateQuiz() has been run")
             val allQuizzes = realm.where(Quizzes::class.java).findAll()
@@ -40,10 +40,16 @@ class QuizGenerator() {
                 }
                 catch (e: IOException) {
                     Log.i("quiz", "Quiz generation failed")
+                    return 4
                 }
                 Log.i("quiz", "New quiz generated")
-            } else {
+                return 1
+            } else if(!newQuizExists && !quizzesInTimeFrame.isEmpty()){
+                Log.i("quiz", "Quiz in time frame")
+                return 2
+            }else{
                 Log.i("quiz", "Quiz generation not attempted")
+                return 3
             }
         }
 
