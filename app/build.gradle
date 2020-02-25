@@ -48,4 +48,7 @@ dependencies {
     implementation "androidx.legacy:legacy-preference-v14:1.0.0"
     implementation 'androidx.preference:preference:1.0.0'
     implementation 'com.shopify.promises:promises:0.0.8'
+    implementation 'com.google.android.gms:play-services-vision:15.0.0'
+    implementation 'androidx.legacy:legacy-support-v4:1.0.0'
+    implementation 'com.google.android.material:material:1.0.0'
 }

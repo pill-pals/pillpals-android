@@ -619,7 +619,7 @@ class SearchActivity : AppCompatActivity() {
         }
     }
 
-    private fun administrationRouteToIconString(route: String): String {
+    public fun administrationRouteToIconString(route: String): String {
         return when(true) {
             route.startsWith("Intra") -> "ic_syringe"
             route.startsWith("Oral") -> "ic_pill_v5"

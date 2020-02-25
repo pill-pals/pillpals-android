@@ -19,12 +19,18 @@ import android.graphics.Color
 import android.graphics.drawable.AnimatedVectorDrawable
 import android.text.SpannableString
 import android.text.Spanned
+import android.text.TextUtils
 import android.text.style.ForegroundColorSpan
 import android.util.Log
 import android.view.MenuInflater
 import android.widget.*
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.children
+import com.google.gson.Gson
+import com.pillpals.pillpals.data.ActiveIngredient
+import com.pillpals.pillpals.data.AdministrationRoute
+import com.pillpals.pillpals.data.DrugProduct
+import com.pillpals.pillpals.data.OpenFDANameResponse
 import com.pillpals.pillpals.data.model.DPDObjects
 import com.pillpals.pillpals.data.model.Schedules
 import com.pillpals.pillpals.helpers.DatabaseHelper
@@ -33,6 +39,9 @@ import com.pillpals.pillpals.helpers.DatabaseHelper.Companion.getCorrectIconDraw
 import com.pillpals.pillpals.helpers.FileWriter
 import com.pillpals.pillpals.helpers.DatabaseHelper.Companion.readAllData
 import com.pillpals.pillpals.helpers.calculateScheduleRecords
+import com.pillpals.pillpals.helpers.margin
+import com.pillpals.pillpals.ocrreader.OcrCaptureActivity
+import com.pillpals.pillpals.ui.MainActivity
 import com.pillpals.pillpals.ui.ScheduleRecord
 import com.pillpals.pillpals.ui.medications.medication_info.MedicationInfoActivity
 import com.pillpals.pillpals.ui.search.SearchActivity
@@ -40,6 +49,10 @@ import io.realm.RealmResults
 import kotlinx.android.synthetic.main.add_medication_prompt.view.*
 import kotlinx.android.synthetic.main.delete_prompt.view.*
 import kotlinx.android.synthetic.main.drug_card.view.*
+import kotlinx.android.synthetic.main.scan_prompt.view.*
+import okhttp3.*
+import okio.IOException
+import java.util.concurrent.TimeUnit
 
 class MedicationsFragment : Fragment() {
 
@@ -65,6 +78,8 @@ class MedicationsFragment : Fragment() {
         drugButton = view!!.findViewById(R.id.drugButton)
         getActivity()!!.invalidateOptionsMenu()
 
+        val outerContext = this.context!!
+
         drugButton.setOnClickListener {
             val addPrompt = LayoutInflater.from(this.context).inflate(R.layout.add_medication_prompt, null)
 
@@ -75,14 +90,38 @@ class MedicationsFragment : Fragment() {
                 title.length,
                 Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
             )
-            val dialogBuilder = androidx.appcompat.app.AlertDialog.Builder(context!!)
+            val dialogBuilder = androidx.appcompat.app.AlertDialog.Builder(this.context!!)
                 .setView(addPrompt)
                 .setTitle(title)
 
             val alertDialog = dialogBuilder.show()
+
             addPrompt.dialogScanBtn.setOnClickListener {
                 alertDialog.dismiss()
-                Log.i("scan", "in progress")
+                val scanPrompt = LayoutInflater.from(this.context).inflate(R.layout.scan_prompt, null)
+
+                val scanTitle = SpannableString("Scan medication")
+                scanTitle.setSpan(
+                    ForegroundColorSpan(this!!.resources.getColor(R.color.colorLightGrey)),
+                    0,
+                    scanTitle.length,
+                    Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+                )
+                val scanDialogBuilder = androidx.appcompat.app.AlertDialog.Builder(outerContext)
+                    .setView(scanPrompt)
+                    .setTitle(scanTitle)
+
+                val scanAlertDialog = scanDialogBuilder.show()
+
+                scanPrompt.dialogStartScanBtn.setOnClickListener {
+                    scanAlertDialog.dismiss()
+                    val intent = Intent(context, OcrCaptureActivity::class.java)
+                    startActivityForResult(intent, 5)
+                }
+
+                scanPrompt.dialogCancelScanBtn.setOnClickListener {
+                    scanAlertDialog.dismiss()
+                }
             }
 
             addPrompt.dialogSearchBtn.setOnClickListener {
@@ -97,7 +136,9 @@ class MedicationsFragment : Fragment() {
                 startActivityForResult(intent, 1)
             }
 
-
+            addPrompt.dialogCancelAddBtn.setOnClickListener {
+                alertDialog.dismiss()
+            }
 
         }
 
@@ -286,6 +327,17 @@ class MedicationsFragment : Fragment() {
         // 2 -> view drug info
         // 3 -> link drug
         // 4 -> search for drug
+        // 5 -> scanner
+        // 6 -> medication info for scanned drug
+
+        if(data != null) {
+            if(requestCode == 5) {
+                if(data.hasExtra("din")) {
+                    val din = data.getStringExtra("din")
+                    if(din != null) getFromDin(din)
+                }
+            }
+        }
 
         val schedules = readAllData(Schedules::class.java) as RealmResults<out Schedules>
         schedules.forEach {
@@ -293,5 +345,211 @@ class MedicationsFragment : Fragment() {
         }
 
         updateMedicationList()
+    }
+
+    fun getFromDin(din: String) {
+        val url = "https://health-products.canada.ca/api/drug/drugproduct/?din=${din}"
+
+        val client = OkHttpClient
+            .Builder()
+            .connectTimeout(20, TimeUnit.SECONDS)
+            .readTimeout(20, TimeUnit.SECONDS)
+            .build()
+
+        val request = Request.Builder().url(url).build()
+
+        var ingredientNameList = listOf<String>()
+        var dosageString = ""
+        var ndcCode: String? = ""
+        var rxcui: String? = ""
+        var splSetId: String? = ""
+
+        client.newCall(request).enqueue(object : Callback {
+            override fun onFailure(call: Call, e: IOException) {
+                e.printStackTrace()
+            }
+
+            override fun onResponse(call: Call, response: Response) {
+                response.use {
+                    if (!response.isSuccessful) throw IOException("Unexpected code $response")
+
+                    val jsonString = response.body!!.string()
+                    val gson = Gson()
+                    val drugProducts = gson.fromJson(jsonString, Array<DrugProduct>::class.java).toList()
+
+                    val uniquelyNamedDrugs = drugProducts.fold(listOf<DrugProduct>()) { acc, drugProduct ->
+                        if(acc.filter { it.brand_name == drugProduct.brand_name }.count() == 0) {
+                            acc.plus(drugProduct)
+                        }
+                        else {
+                            acc
+                        }
+                    }
+
+                    // First for now
+                    val firstDrugProduct = drugProducts.firstOrNull()
+
+                    if (firstDrugProduct == null) {
+                        return
+                    }
+
+                    drugProducts.forEachIndexed {namedIndex, drugProduct ->
+                        val url = "https://health-products.canada.ca/api/drug/activeingredient/?id=${drugProduct.drug_code}"
+
+                        val request = Request.Builder().url(url).build()
+
+                        client.newCall(request).enqueue(object : Callback {
+                            override fun onFailure(call: Call, e: IOException) {
+                                e.printStackTrace()
+                            }
+
+                            override fun onResponse(call: Call, response: Response) {
+                                response.use {
+                                    if (!response.isSuccessful) throw IOException("Unexpected code $response")
+
+                                    val jsonString = response.body!!.string()
+                                    val gson = Gson()
+                                    val activeIngredients = gson.fromJson(jsonString, Array<ActiveIngredient>::class.java).toList()
+
+                                    ingredientNameList = activeIngredients.fold(listOf<String>()) { acc, it ->
+                                        acc.plus(it.ingredient_name)
+                                    }
+
+                                    val dosageValues = activeIngredients.fold(listOf<String>()) { acc, it ->
+                                        acc.plus(it.strength)
+                                    }
+
+                                    val dosageUnits = activeIngredients.fold(listOf<String>()) { acc, it ->
+                                        if(acc.contains(it.strength_unit)) acc
+                                        else acc.plus(it.strength_unit)
+                                    }
+
+                                    dosageString = "${dosageValues.joinToString("/")} ${dosageUnits.joinToString("/")}"
+
+                                    // Get other ID's from FDA
+                                    val url = "https://api.fda.gov/drug/ndc.json?limit=100&search=brand_name:${drugProduct.brand_name.replace("( .*)".toRegex(), "")}"
+
+                                    val request = Request.Builder().url(url).build()
+
+                                    client.newCall(request).enqueue(object : Callback {
+                                        override fun onFailure(call: Call, e: IOException) {
+                                            e.printStackTrace()
+                                        }
+
+                                        override fun onResponse(call: Call, response: Response) {
+                                            response.use {
+                                                if (!response.isSuccessful) throw IOException("Unexpected code $response")
+
+                                                val jsonString = response.body!!.string()
+                                                val gson = Gson()
+                                                val fdaResponse = gson.fromJson(jsonString, OpenFDANameResponse::class.java)
+
+                                                if(fdaResponse.error == null) {
+                                                    val fdaResults = fdaResponse.results
+
+                                                    val fdaResultWithDosage = fdaResults.filter {
+                                                        if(it.active_ingredients == null) return@filter false
+                                                        val totalVal = it.active_ingredients.fold(0f) {acc, it ->
+                                                            acc + it.strength.replace("( .*)".toRegex(), "").toFloat()
+                                                        }
+                                                        it.active_ingredients.any {
+                                                            it.strength.contains("${dosageValues.first()} ${dosageUnits.firstOrNull()?.toLowerCase()}")
+                                                        } || dosageValues.firstOrNull()?.toFloat() == totalVal
+                                                    }.firstOrNull()
+
+                                                    val firstFdaResult = fdaResults.firstOrNull()
+
+                                                    // SET FDA IDS
+
+                                                    if(fdaResultWithDosage != null) {
+                                                        ndcCode = fdaResultWithDosage.product_ndc
+                                                        rxcui = fdaResultWithDosage.openfda.rxcui?.firstOrNull()
+                                                        splSetId = fdaResultWithDosage.openfda.spl_set_id?.firstOrNull()
+                                                    }
+                                                    else if(firstFdaResult != null) {
+                                                        ndcCode = firstFdaResult.product_ndc
+                                                        rxcui = firstFdaResult.openfda.rxcui?.firstOrNull()
+                                                        splSetId = firstFdaResult.openfda.spl_set_id?.firstOrNull()
+                                                    }
+                                                }
+
+                                                val url = "https://health-products.canada.ca/api/drug/route/?id=${drugProduct.drug_code}"
+
+                                                val request = Request.Builder().url(url).build()
+
+                                                client.newCall(request).enqueue(object :
+                                                    Callback {
+                                                    override fun onFailure(call: Call, e: IOException) {
+                                                        e.printStackTrace()
+                                                    }
+
+                                                    override fun onResponse(call: Call, response: Response) {
+                                                        response.use {
+                                                            if (!response.isSuccessful) return
+
+                                                            val jsonString = response.body!!.string()
+                                                            val gson = Gson()
+                                                            val administrationRoutes = gson.fromJson(jsonString, Array<AdministrationRoute>::class.java).toList()
+
+                                                            var colorString =
+                                                                DatabaseHelper.getRandomColorString()
+                                                            while(colorString == "#000000") { // Let's not let black be selected randomly
+                                                                colorString = DatabaseHelper.getRandomColorString()
+                                                            }
+
+                                                            var administrationRoutesList = listOf<String>()
+
+                                                            val firstRoute = administrationRoutes.firstOrNull()
+                                                            if(firstRoute != null) {
+
+                                                                administrationRoutesList = administrationRoutes.fold(listOf<String>()) { acc, it ->
+                                                                    acc.plus(it.route_of_administration_name)
+                                                                }
+                                                            }
+
+                                                            val infoIntent = Intent(context, MedicationInfoActivity::class.java)
+
+
+                                                            infoIntent.putExtra("link-medication", false)
+
+
+                                                            infoIntent.putExtra("drug-code", drugProduct.drug_code)
+                                                            infoIntent.putExtra("icon-color", colorString)
+                                                            infoIntent.putStringArrayListExtra("administration-routes", ArrayList(administrationRoutesList))
+                                                            infoIntent.putStringArrayListExtra("active-ingredients", ArrayList(ingredientNameList))
+                                                            infoIntent.putExtra("dosage-string", dosageString)
+                                                            infoIntent.putExtra("name-text", drugProduct.brand_name)
+                                                            if(firstRoute != null) {
+                                                                infoIntent.putExtra("icon-resource", administrationRouteToIconString(firstRoute.route_of_administration_name))
+                                                            }
+
+                                                            infoIntent.putExtra("ndc-code", ndcCode)
+                                                            infoIntent.putExtra("rxcui", rxcui)
+                                                            infoIntent.putExtra("spl-set-id", splSetId)
+
+                                                            startActivityForResult(infoIntent, 6)
+                                                        }
+                                                    }
+                                                })
+                                            }
+                                        }
+                                    })
+                                }
+                            }
+                        })
+                    }
+                }
+            }
+        })
+    }
+
+    fun administrationRouteToIconString(route: String): String {
+        return when(true) {
+            route.startsWith("Intra") -> "ic_syringe"
+            route.startsWith("Oral") -> "ic_pill_v5"
+            route.startsWith("Rectal") -> "ic_tablet"
+            route.startsWith("Inhalation") -> "ic_inhaler"
+            else -> "ic_dropper"
+        }
     }
 }
