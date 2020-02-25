@@ -80,7 +80,7 @@ class NotificationUtils {
             val mAlarmSender = getPendingIntent(context, schedule)
 
             var c = Calendar.getInstance()
-            var snoozeTime = DateHelper.addUnitToDate(c.time, 2, Calendar.MINUTE) //TODO: Make snooze time editable
+            var snoozeTime = DateHelper.addUnitToDate(c.time, 15, Calendar.MINUTE) //TODO: Make snooze time editable
             c.time = snoozeTime
             val alarmTime = c.timeInMillis
 
