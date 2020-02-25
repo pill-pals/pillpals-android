@@ -55,6 +55,11 @@
                 <action android:name="android.intent.action.QUICKBOOT_POWERON" />
             </intent-filter>
         </receiver>
+        <receiver
+            android:name="com.pillpals.pillpals.services.QuizReceiver"
+            android:process=":remote"
+            android:exported="true">
+        </receiver>
 
         <activity android:name="com.pillpals.pillpals.ui.AddDrugActivity"></activity>
         <activity android:name="com.pillpals.pillpals.ui.quiz.QuizQuestionActivity"></activity>

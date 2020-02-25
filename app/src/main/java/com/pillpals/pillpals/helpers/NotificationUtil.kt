@@ -7,11 +7,14 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.os.Build
+import android.util.Log
 import androidx.core.app.NotificationManagerCompat
 import com.pillpals.pillpals.R
 import com.pillpals.pillpals.data.model.Schedules
 import java.util.*
 import com.pillpals.pillpals.services.AlarmReceiver
+import com.pillpals.pillpals.services.QuizReceiver
+import com.pillpals.pillpals.ui.quiz.QuizGenerator
 import io.realm.RealmResults
 import java.util.concurrent.TimeUnit
 
@@ -76,6 +79,17 @@ class NotificationUtils {
                 val notificationManager = context.getSystemService(NotificationManager::class.java)
                 notificationManager!!.createNotificationChannel(channel)
             }
+        }
+
+        fun createQuizNotifications(context: Context){
+            val mIntent = Intent(context, QuizReceiver::class.java)
+            val mPendingIntent = PendingIntent.getBroadcast(context, 0, mIntent, 0)
+            val mAlarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+            mAlarmManager.setRepeating(
+                AlarmManager.RTC_WAKEUP, System.currentTimeMillis(),
+                1000*60*60, mPendingIntent
+            )
+            Log.i("quiz", "Quiz Receiver Initiated")
         }
     }
 }
