@@ -324,7 +324,7 @@ class MedicationInfoRetriever {
 
                             val termObjects = adverseEffectResults.results
 
-                            if(termObjects.isEmpty()) return resolve(res)
+                            if(termObjects == null || termObjects.isEmpty()) return resolve(res)
 
                             val totalCount = termObjects.fold(0) {acc, it -> acc + it.count}.toFloat()
                             Log.i("here", "test")
@@ -383,11 +383,11 @@ class MedicationInfoRetriever {
 
                             if(labelResult.error != null) return resolve("")
 
-                            val label = labelResult.results.firstOrNull()
+                            val label = labelResult.results?.firstOrNull()
 
                             label ?: return resolve("")
 
-                            val description = label.description.firstOrNull()
+                            val description = label.description?.firstOrNull()
 
                             description ?: return resolve("")
 
@@ -444,7 +444,7 @@ class MedicationInfoRetriever {
 
                             if(labelResult.error != null) return resolve("")
 
-                            val label = labelResult.results.firstOrNull()
+                            val label = labelResult.results?.firstOrNull()
 
                             label ?: return resolve("")
 
@@ -521,11 +521,11 @@ class MedicationInfoRetriever {
 
                             if(labelResult.error != null) return resolve("")
 
-                            val label = labelResult.results.firstOrNull()
+                            val label = labelResult.results?.firstOrNull()
 
                             label ?: return resolve("")
 
-                            val overdosage = label.overdosage.firstOrNull()
+                            val overdosage = label.overdosage?.firstOrNull()
 
                             overdosage ?: return resolve("")
 
@@ -584,7 +584,7 @@ class MedicationInfoRetriever {
 
                             val recalls = recallsResult.results
 
-                            if(recalls.isEmpty()) return resolve(RecallsResult(false, false, listOf()))
+                            if(recalls == null || recalls.isEmpty()) return resolve(RecallsResult(false, false, listOf()))
 
                             var mandated = false
 
@@ -861,7 +861,7 @@ class MedicationInfoRetriever {
 
                             if(labelResult.error != null) return resolve(false)
 
-                            val label = labelResult.results.firstOrNull()
+                            val label = labelResult.results?.firstOrNull()
 
                             label ?: return resolve(false)
 
@@ -933,7 +933,7 @@ class MedicationInfoRetriever {
 
                             if(labelResult.error != null) return resolve(false)
 
-                            val label = labelResult.results.firstOrNull()
+                            val label = labelResult.results?.firstOrNull()
 
                             label ?: return resolve(false)
 
