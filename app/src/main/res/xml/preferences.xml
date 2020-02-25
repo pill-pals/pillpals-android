@@ -1,4 +1,4 @@
-<androidx.preference.PreferenceScreen
+<androidx.preference.PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:android="http://schemas.android.com/apk/res/android">
 
     <PreferenceCategory
@@ -12,6 +12,17 @@
         <SwitchPreferenceCompat
             android:key="notifications_silent"
             android:title="Silence schedule notifications"/>
+
+        <SwitchPreferenceCompat
+            android:key="fullscreen_notifications"
+            android:title="Use rich alarms"
+            app:defaultValue="true" />
+        <EditTextPreference
+            android:key="fullscreen_notification_message"
+            android:selectAllOnFocus="true"
+            android:singleLine="true"
+            android:title="Edit rich alarm message"
+            android:defaultValue="It's time to take your medication!"/>
 
     </PreferenceCategory>
 

@@ -1,10 +1,14 @@
 <resources>
     <string name="app_name">PillPals</string>
-    <string name="channel_name">PillPalls Notifications</string>
-    <string name="channel_description">Notifications for PillPals alarms</string>
-    <string name="channel_id">PillPalsChannel0</string>
+    <string name="channel_name_soft">Soft Notifications</string>
+    <string name="channel_description_soft">Non-rich, single-beep notifications</string>
+    <string name="channel_id_soft">PillPalsChannel0</string>
+    <string name="channel_name_rich">Rich Alarms</string>
+    <string name="channel_description_rich">Fullscreen and continuous alarms</string>
+    <string name="channel_id_rich">PillPalsChannel1</string>
     <string name="title_activity_edit_schedule">Edit Schedule</string>
     <string name="medication_search_hint">Search medications</string>
+    <string name="alarm_service_description">Manages sounds and vibrations for rich alarms</string>
     <string-array name="time_intervals">
         <item>Hours</item>
         <item>Days</item>

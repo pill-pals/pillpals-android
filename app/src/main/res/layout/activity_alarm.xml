@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/colorLightGrey"
+    tools:context=".ui.AlarmActivity">
+
+    <!-- The primary full-screen view. This can be replaced with whatever view
+         is needed to present your content, e.g. VideoView, SurfaceView,
+         TextureView, etc. -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/alarmLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <TextView
+            android:id="@+id/alarmMessage"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_marginTop="32dp"
+            android:gravity="center"
+            android:keepScreenOn="true"
+            android:text="It's time to take your medication!"
+            android:textColor="@color/colorDarkGrey"
+            android:textSize="40sp"
+            android:textStyle="bold"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/alarmIconBackground"
+            android:layout_width="160dp"
+            android:layout_height="160dp"
+            android:layout_marginTop="80dp"
+            app:cardBackgroundColor="@android:color/holo_blue_bright"
+            app:cardCornerRadius="16dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/alarmMessage">
+
+            <ImageView
+                android:id="@+id/alarmIcon"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginLeft="8dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginRight="8dp"
+                android:layout_marginBottom="8dp"
+                app:srcCompat="@drawable/ic_pill_v5" />
+        </androidx.cardview.widget.CardView>
+
+        <TextView
+            android:id="@+id/alarmTime"
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            android:layout_marginTop="32dp"
+            android:text="12:00 PM"
+            android:textColor="@color/colorDarkGrey"
+            android:textSize="40sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/alarmIconBackground" />
+
+        <TextView
+            android:id="@+id/alarmNote"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:textSize="20sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/alarmTime" />
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/alarmControls"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintBottom_toBottomOf="parent">
+
+            <Button
+                android:id="@+id/alarmLogButton"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="4dp"
+                android:layout_marginEnd="4dp"
+                android:text="LOG"
+                android:textSize="32sp"
+                app:layout_constraintBottom_toTopOf="@+id/alarmBottomButtons"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent" />
+
+            <LinearLayout
+                android:id="@+id/alarmBottomButtons"
+                style="?metaButtonBarStyle"
+                android:layout_width="0dp"
+                android:layout_height="48dp"
+                android:orientation="horizontal"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                tools:ignore="UselessParent">
+
+                <Button
+                    android:id="@+id/alarmSnoozeButton"
+                    style="@style/Widget.MaterialComponents.Button.TextButton"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:backgroundTint="@color/colorPrimary"
+                    android:insetLeft="4dp"
+                    android:text="Snooze"
+                    android:textColor="@color/colorGrey"
+                    android:textSize="20sp" />
+
+                <View
+                    android:id="@+id/alarmButtonSeparator"
+                    android:layout_width="4dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="0" />
+
+                <Button
+                    android:id="@+id/alarmOpenAppButton"
+                    style="@style/Widget.MaterialComponents.Button.TextButton"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:backgroundTint="@color/colorPrimary"
+                    android:insetRight="4dp"
+                    android:text="Open PillPals"
+                    android:textColor="@color/colorGrey"
+                    android:textSize="20sp" />
+
+            </LinearLayout>
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <!-- This FrameLayout insets its children based on system windows using
+         android:fitsSystemWindows. -->
+
+</FrameLayout>

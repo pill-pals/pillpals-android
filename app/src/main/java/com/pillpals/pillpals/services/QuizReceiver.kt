@@ -30,7 +30,7 @@ class QuizReceiver: BroadcastReceiver() {
 
             if (quizStatus == 1) {
                 val mBuilder =
-                    NotificationCompat.Builder(context, context.getString(R.string.channel_id))
+                    NotificationCompat.Builder(context, context.getString(R.string.channel_id_soft))
                         .setSmallIcon(R.drawable.ic_pill_v5)
                         .setContentTitle("New quiz available!")
                         .setPriority(priorityValue)
@@ -43,7 +43,7 @@ class QuizReceiver: BroadcastReceiver() {
 
             }else if(quizStatus == 2){
                 val mBuilder =
-                    NotificationCompat.Builder(context, context.getString(R.string.channel_id))
+                    NotificationCompat.Builder(context, context.getString(R.string.channel_id_soft))
                         .setSmallIcon(R.drawable.ic_pill_v5)
                         .setContentTitle("New quiz available!")
                         .setPriority(priorityValue)

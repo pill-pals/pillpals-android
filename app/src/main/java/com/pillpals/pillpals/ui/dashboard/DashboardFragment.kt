@@ -220,6 +220,7 @@ class DashboardFragment : Fragment() {
         super.onResume()
         getActivity()!!.invalidateOptionsMenu()
         FileWriter.createJSONStringFromData(context!!)
+        update()
     }
 
     //Mood tracker
@@ -377,7 +378,7 @@ class DashboardFragment : Fragment() {
                         cal.set(Calendar.MINUTE, simpleTimePicker.minute)
                         cal.set(Calendar.HOUR_OF_DAY, simpleTimePicker.hour)
 
-                        drugLogFunction(schedule, cal.time)
+                        drugLogFunction(schedule, context!!, cal.time)
                         update()
                     }
 
@@ -447,7 +448,7 @@ class DashboardFragment : Fragment() {
                         cal.set(Calendar.MINUTE, simpleTimePicker.minute)
                         cal.set(Calendar.HOUR_OF_DAY, simpleTimePicker.hour)
 
-                        drugLogFunction(schedule, cal.time)
+                        drugLogFunction(schedule, context!!, cal.time)
                         update()
                     }
 
@@ -519,7 +520,7 @@ class DashboardFragment : Fragment() {
                         cal.set(Calendar.MINUTE, simpleTimePicker.minute)
                         cal.set(Calendar.HOUR_OF_DAY, simpleTimePicker.hour)
 
-                        drugLogFunction(schedule, cal.time)
+                        drugLogFunction(schedule, context!!, cal.time)
                         update()
                     }
 
@@ -625,7 +626,7 @@ class DashboardFragment : Fragment() {
 
 
         newCard.button.setOnClickListener {
-            drugLogFunction(schedule)
+            drugLogFunction(schedule, context!!)
             update()
         }
 
@@ -687,25 +688,6 @@ class DashboardFragment : Fragment() {
 
     private fun readAllData(realmClass: Class<out RealmObject>): RealmResults<out RealmObject> {
         return realm.where(realmClass).findAll()
-    }
-
-    private fun drugLogFunction(schedule: Schedules, time: Date = Date()) {
-        val databaseSchedule =
-            realm.where(Schedules::class.java).equalTo("uid", schedule.uid).findFirst()!!
-
-        realm.executeTransaction {
-            var newLog = it.createObject(Logs::class.java, UUID.randomUUID().toString())
-            newLog.occurrence = time
-            newLog.due = schedule.occurrence
-            val n = databaseSchedule.repetitionCount!!
-            val u = DateHelper.getUnitByIndex(databaseSchedule.repetitionUnit!!)
-            databaseSchedule.occurrence = DateHelper.addUnitToDate(schedule.occurrence!!, n, u)
-            databaseSchedule.logs.add(newLog)
-        }
-
-        val notificationManager = NotificationManagerCompat.from(context!!)
-
-        notificationManager.cancel(databaseSchedule.uid.hashCode())
     }
 
     private fun undoLog(log: Logs) {

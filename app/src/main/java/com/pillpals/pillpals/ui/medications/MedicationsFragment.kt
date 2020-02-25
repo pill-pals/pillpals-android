@@ -35,13 +35,10 @@ import com.pillpals.pillpals.data.DrugProduct
 import com.pillpals.pillpals.data.OpenFDANameResponse
 import com.pillpals.pillpals.data.model.DPDObjects
 import com.pillpals.pillpals.data.model.Schedules
-import com.pillpals.pillpals.helpers.DatabaseHelper
+import com.pillpals.pillpals.helpers.*
 import com.pillpals.pillpals.helpers.DatabaseHelper.Companion.getColorStringByID
 import com.pillpals.pillpals.helpers.DatabaseHelper.Companion.getCorrectIconDrawable
-import com.pillpals.pillpals.helpers.FileWriter
 import com.pillpals.pillpals.helpers.DatabaseHelper.Companion.readAllData
-import com.pillpals.pillpals.helpers.calculateScheduleRecords
-import com.pillpals.pillpals.helpers.margin
 import com.pillpals.pillpals.ocrreader.OcrCaptureActivity
 import com.pillpals.pillpals.ui.MainActivity
 import com.pillpals.pillpals.ui.ScheduleRecord
@@ -188,6 +185,7 @@ class MedicationsFragment : Fragment() {
                         deleteAlertDialog.dismiss()
                         deleteMedication(medication)
                         updateMedicationList()
+                        NotificationUtils.updateAlarms(context!!)
                     }
 
                     deleteDialog.dialogCancelBtn.setOnClickListener {
