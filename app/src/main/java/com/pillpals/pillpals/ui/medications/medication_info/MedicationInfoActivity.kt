@@ -44,6 +44,7 @@ import io.realm.RealmList
 import io.realm.RealmResults
 import kotlinx.android.synthetic.main.medication_info_prompt.view.*
 import org.w3c.dom.Text
+import java.io.IOException
 import java.util.*
 
 
@@ -222,7 +223,7 @@ class MedicationInfoActivity : AppCompatActivity() {
                             updatingText.visibility = View.GONE
                             setTabFragmentData()
                         }
-                    } catch (e: Exception) { }
+                    } catch (e: IOException) { }
                 }
             }
         }

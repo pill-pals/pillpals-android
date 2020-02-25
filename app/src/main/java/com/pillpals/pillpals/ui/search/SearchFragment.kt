@@ -10,6 +10,7 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import com.pillpals.pillpals.R
 import android.os.*
+import android.text.TextUtils
 import android.util.Log
 import android.view.View.GONE
 import android.view.animation.Animation
@@ -142,29 +143,35 @@ class SearchFragment : Fragment() {
 
                 if(query.isNotEmpty()) {
                     showSearchLoading()
-                    val url = "http://mapi-us.iterar.co/api/autocomplete?query=${query}"
+                    if(TextUtils.isDigitsOnly(query)) {
+                        lastQuery = query
+                        showResultsFlag = true
+                    }
+                    else {
+                        val url = "http://mapi-us.iterar.co/api/autocomplete?query=${query}"
 
-                    val request = Request.Builder().url(url).build()
+                        val request = Request.Builder().url(url).build()
 
-                    client.newCall(request).enqueue(object : Callback {
-                        override fun onFailure(call: Call, e: IOException) {
-                            e.printStackTrace()
-                        }
-
-                        override fun onResponse(call: Call, response: Response) {
-                            response.use {
-                                if (!response.isSuccessful) throw IOException("Unexpected code $response")
-
-                                val jsonString = response.body!!.string()
-                                val gson = Gson()
-                                val autocomplete = gson.fromJson(jsonString, Autocomplete::class.java)
-
-                                suggestions = autocomplete.suggestions
-                                lastQuery = query
-                                showResultsFlag = true
+                        client.newCall(request).enqueue(object : Callback {
+                            override fun onFailure(call: Call, e: IOException) {
+                                e.printStackTrace()
                             }
-                        }
-                    })
+
+                            override fun onResponse(call: Call, response: Response) {
+                                response.use {
+                                    if (!response.isSuccessful) throw IOException("Unexpected code $response")
+
+                                    val jsonString = response.body!!.string()
+                                    val gson = Gson()
+                                    val autocomplete = gson.fromJson(jsonString, Autocomplete::class.java)
+
+                                    suggestions = autocomplete.suggestions
+                                    lastQuery = query
+                                    showResultsFlag = true
+                                }
+                            }
+                        })
+                    }
                 }
                 else {
                     clearQueriesFlag = true
@@ -203,7 +210,7 @@ class SearchFragment : Fragment() {
                         }
                         else {
                             showResultsCounter++
-                            if(showResultsCounter > 39) {
+                            if(showResultsCounter > 19) {
                                 hideSearchLoading()
                                 showResultsCounter = 0
                             }
@@ -278,14 +285,10 @@ class SearchFragment : Fragment() {
         }
         upcomingDrugCards = mutableListOf()
 
-        val dispatcher = Dispatcher()
-        dispatcher.maxRequests = suggestions.count() * 3
-
         val client = OkHttpClient
             .Builder()
             .connectTimeout(20, TimeUnit.SECONDS)
             .readTimeout(20, TimeUnit.SECONDS)
-            .dispatcher(dispatcher)
             .build()
 
         val drugsToSearch = suggestions
@@ -296,8 +299,15 @@ class SearchFragment : Fragment() {
 
         drugsToSearch.forEachIndexed {index, suggestion ->
             drugCards.add(addDrugCard(suggestion))
-            val re = Regex("[^A-Za-z ]")
-            val url = "https://health-products.canada.ca/api/drug/drugproduct/?brandname=${re.replace(suggestion, "")}"
+
+            var url = ""
+            if(TextUtils.isDigitsOnly(suggestion)) {
+                url = "https://health-products.canada.ca/api/drug/drugproduct/?din=${suggestion.padStart(8, '0')}"
+            }
+            else {
+                val re = Regex("[^A-Za-z ]")
+                url = "https://health-products.canada.ca/api/drug/drugproduct/?brandname=${re.replace(suggestion, "")}"
+            }
 
             val request = Request.Builder().url(url).build()
 
@@ -568,10 +578,12 @@ class SearchFragment : Fragment() {
 
     private fun showSearchLoading() {
         searchLoading.startAnimation(loadingAnimation)
+        searchLoading.setImageResource(R.drawable.loader)
         searchLoading.visibility = View.VISIBLE
     }
 
     private fun hideSearchLoading() {
+        searchLoading.setImageDrawable(null)
         searchLoading.visibility = GONE
         searchLoading.startAnimation(loadingAnimation)
     }
