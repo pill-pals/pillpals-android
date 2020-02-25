@@ -5,7 +5,7 @@ package com.pillpals.pillpals.data
 data class InteractionsResponse(
     val nlmDisclaimer: String,
     val userInput: InteractionsUserInput,
-    val fullInteractionTypeGroup: List<InteractionsFullInteractionTypeGroup>
+    val fullInteractionTypeGroup: List<InteractionsFullInteractionTypeGroup>?
 )
 
 data class InteractionsUserInput(
@@ -235,7 +235,7 @@ data class OpenFDAMeta(
     val terms: String,
     val license: String,
     val last_updated: String,
-    val results: OpenFDAMetaResults
+    val results: OpenFDAMetaResults?
 )
 
 data class OpenFDANameResultPackaging(
@@ -267,7 +267,7 @@ data class OpenFDANameResult(
     val packaging: List<OpenFDANameResultPackaging>,
     val brand_name_suffix: String,
     val brand_name: String,
-    val active_ingredients: List<OpenFDANameResultActiveIngredient>,
+    val active_ingredients: List<OpenFDANameResultActiveIngredient>?,
     val finished: Boolean,
     val openfda: OpenFDANameResultOpenFDAObject,
     val listing_expiration_date: String,
@@ -286,7 +286,7 @@ data class OpenFDANameResult(
 data class OpenFDANameResponse(
     val error: OpenFDARecallsError?,
     val meta: OpenFDAMeta,
-    val results: List<OpenFDANameResult>
+    val results: List<OpenFDANameResult>?
 )
 
 data class OpenFDAAdverseEffectsAggregateResult(
@@ -296,7 +296,7 @@ data class OpenFDAAdverseEffectsAggregateResult(
 
 data class OpenFDAAdverseEffectsAggregateResponse(
     val meta: OpenFDAMeta,
-    val results: List<OpenFDAAdverseEffectsAggregateResult>,
+    val results: List<OpenFDAAdverseEffectsAggregateResult>?,
     val error: OpenFDARecallsError?
 )
 
@@ -319,58 +319,58 @@ data class OpenFDALabelOpenFDAObject(
 )
 
 data class OpenFDALabelResult(
-    val effective_time: String,
-    val drug_interactions: List<String>,
-    val recent_major_changes: List<String>,
-    val geriatric_use: List<String>,
-    val abuse: List<String>,
-    val pharmacodynamics: List<String>,
-    val description: List<String>,
-    val nonclinical_toxicology: List<String>,
-    val dosage_forms_and_strengths: List<String>,
-    val storage_and_handling: List<String>,
-    val mechanism_of_action: List<String>,
-    val pharmacokinetics: List<String>,
-    val indications_and_usage: List<String>,
-    val dependence: List<String>,
-    val set_id: String,
-    val id: String,
-    val description_table: List<String>,
-    val pediatric_use: List<String>,
-    val contraindications: List<String>,
-    val drug_interactions_table: List<String>,
-    val drug_abuse_and_dependence: List<String>,
-    val pregnancy: List<String>,
-    val spl_product_data_elements: List<String>,
+    val effective_time: String?,
+    val drug_interactions: List<String>?,
+    val recent_major_changes: List<String>?,
+    val geriatric_use: List<String>?,
+    val abuse: List<String>?,
+    val pharmacodynamics: List<String>?,
+    val description: List<String>?,
+    val nonclinical_toxicology: List<String>?,
+    val dosage_forms_and_strengths: List<String>?,
+    val storage_and_handling: List<String>?,
+    val mechanism_of_action: List<String>?,
+    val pharmacokinetics: List<String>?,
+    val indications_and_usage: List<String>?,
+    val dependence: List<String>?,
+    val set_id: String?,
+    val id: String?,
+    val description_table: List<String>?,
+    val pediatric_use: List<String>?,
+    val contraindications: List<String>?,
+    val drug_interactions_table: List<String>?,
+    val drug_abuse_and_dependence: List<String>?,
+    val pregnancy: List<String>?,
+    val spl_product_data_elements: List<String>?,
     val boxed_warning: List<String>?,
     val warnings: List<String>?,
-    val adverse_reactions_table: List<String>,
+    val adverse_reactions_table: List<String>?,
     val warnings_and_cautions: List<String>?,
-    val openfda: OpenFDALabelOpenFDAObject,
-    val controlled_substance: List<String>,
-    val version: String,
-    val recent_major_changes_table: List<String>,
-    val dosage_and_administration: List<String>,
-    val adverse_reactions: List<String>,
-    val animal_pharmacology_and_or_toxicology: List<String>,
-    val spl_unclassified_section: List<String>,
-    val use_in_specific_populations: List<String>,
-    val how_supplied: List<String>,
-    val information_for_patients: List<String>,
-    val package_label_principal_display_panel: List<String>,
-    val clinical_studies: List<String>,
-    val spl_medguide: List<String>,
-    val clinical_pharmacology: List<String>,
-    val carcinogenesis_and_mutagenesis_and_impairment_of_fertility: List<String>,
-    val spl_medguide_table: List<String>,
-    val overdosage: List<String>,
-    val instructions_for_use: List<String>
+    val openfda: OpenFDALabelOpenFDAObject?,
+    val controlled_substance: List<String>?,
+    val version: String?,
+    val recent_major_changes_table: List<String>?,
+    val dosage_and_administration: List<String>?,
+    val adverse_reactions: List<String>?,
+    val animal_pharmacology_and_or_toxicology: List<String>?,
+    val spl_unclassified_section: List<String>?,
+    val use_in_specific_populations: List<String>?,
+    val how_supplied: List<String>?,
+    val information_for_patients: List<String>?,
+    val package_label_principal_display_panel: List<String>?,
+    val clinical_studies: List<String>?,
+    val spl_medguide: List<String>?,
+    val clinical_pharmacology: List<String>?,
+    val carcinogenesis_and_mutagenesis_and_impairment_of_fertility: List<String>?,
+    val spl_medguide_table: List<String>?,
+    val overdosage: List<String>?,
+    val instructions_for_use: List<String>?
 )
 
 data class OpenFDALabelResponse(
     val error: OpenFDARecallsError?,
     val meta: OpenFDAMeta,
-    val results: List<OpenFDALabelResult>
+    val results: List<OpenFDALabelResult>?
 )
 
 data class OpenFDARecallsError(
@@ -408,7 +408,7 @@ data class OpenFDARecallsResult(
 
 data class OpenFDARecallsResponse(
     val meta: OpenFDAMeta,
-    val results: List<OpenFDARecallsResult>,
+    val results: List<OpenFDARecallsResult>?,
     val error: OpenFDARecallsError?
 )
 

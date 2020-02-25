@@ -10,11 +10,14 @@ import android.media.AudioAttributes
 import android.media.RingtoneManager
 import android.net.Uri
 import android.os.Build
+import android.util.Log
 import androidx.core.app.NotificationManagerCompat
 import com.pillpals.pillpals.R
 import com.pillpals.pillpals.data.model.Schedules
 import java.util.*
 import com.pillpals.pillpals.services.AlarmReceiver
+import com.pillpals.pillpals.services.QuizReceiver
+import com.pillpals.pillpals.ui.quiz.QuizGenerator
 import io.realm.RealmResults
 import java.util.concurrent.TimeUnit
 
@@ -24,12 +27,17 @@ class NotificationUtils {
             val mAlarmSender = getPendingIntent(context, schedule)
 
             val c = Calendar.getInstance()
-            var scheduleTime = schedule.occurrence
-            var now = Calendar.getInstance()
-            var lowerNotifBound = DateHelper.addUnitToDate(now.time, -10, Calendar.MINUTE)
-            while (scheduleTime!! < lowerNotifBound) {
+            var scheduleTime = schedule.occurrence!!
+//            var now = Calendar.getInstance()
+//            var lowerNotifBound = DateHelper.addUnitToDate(now.time, -10, Calendar.MINUTE)
+//            while (DateHelper.addUnitToDate(scheduleTime, schedule.repetitionCount!!, schedule.repetitionUnit!!) < now.time) {
+//                scheduleTime = DateHelper.addUnitToDate(scheduleTime, schedule.repetitionCount!!, schedule.repetitionUnit!!)
+//            }
+
+            while (scheduleTime!! < DateHelper.yesterdayAt12pm()) {
                 scheduleTime = DateHelper.addUnitToDate(scheduleTime, schedule.repetitionCount!!, schedule.repetitionUnit!!)
             }
+
             c.time = scheduleTime
             val firstTime = c.timeInMillis
 
@@ -45,9 +53,7 @@ class NotificationUtils {
                 Schedules::class.java
             ) as RealmResults<out Schedules>
             for (schedule in schedules) {
-                val am = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-                am.cancel(getPendingIntent(context, schedule))
-                startAlarm(context, schedule)
+                if(!schedule.deleted) startAlarm(context, schedule)
             }
         }
 
@@ -72,7 +78,7 @@ class NotificationUtils {
             val mAlarmSender = getPendingIntent(context, schedule)
 
             var c = Calendar.getInstance()
-            var snoozeTime = DateHelper.addUnitToDate(c.time, 15, Calendar.MINUTE) //TODO: Make snooze time editable
+            var snoozeTime = DateHelper.addUnitToDate(c.time, 2, Calendar.MINUTE) //TODO: Make snooze time editable
             c.time = snoozeTime
             val alarmTime = c.timeInMillis
 
@@ -112,6 +118,17 @@ class NotificationUtils {
 
                 notificationManager!!.createNotificationChannel(channel)
             }
+        }
+
+        fun createQuizNotifications(context: Context){
+            val mIntent = Intent(context, QuizReceiver::class.java)
+            val mPendingIntent = PendingIntent.getBroadcast(context, 0, mIntent, 0)
+            val mAlarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+            mAlarmManager.setRepeating(
+                AlarmManager.RTC_WAKEUP, System.currentTimeMillis(),
+                1000*60*60, mPendingIntent
+            )
+            Log.i("quiz", "Quiz Receiver Initiated")
         }
     }
 }

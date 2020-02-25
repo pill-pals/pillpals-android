@@ -5,7 +5,7 @@ import android.app.Notification
 import android.app.PendingIntent
 import android.content.*
 import android.graphics.*
-import android.os.IBinder
+import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import com.pillpals.pillpals.R

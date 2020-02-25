@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/scan_root"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical"
+    android:gravity="center">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp"
+        android:gravity="center">
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="200dp"
+            app:srcCompat="@drawable/label_din_circled"
+            android:layout_marginBottom="16dp"/>
+
+        <TextView
+            android:id="@+id/textView12"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Step 1: Find DIN number on your medication container. It will either be an 8 digit number with leading 0's, or a number following the word DIN."
+            android:textColor="@color/colorLightGrey"
+            android:layout_marginBottom="8dp"
+            android:textSize="18sp" />
+
+        <TextView
+            android:id="@+id/textView13"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Step 2: Tap on highlighted DIN number to select it."
+            android:textColor="@color/colorLightGrey"
+            android:textSize="18sp" />
+
+        <Button
+            android:id="@+id/dialogStartScanBtn"
+            android:text="Start scan"
+            android:layout_marginTop="16dp"
+            style="@style/Base.Widget.AppCompat.Button.Colored"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+        <Button
+            android:id="@+id/dialogCancelScanBtn"
+            android:text="Cancel"
+            style="@style/Base.Widget.AppCompat.Button.Colored"
+            android:backgroundTint="@color/colorDarkGrey"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+    </LinearLayout>
+
+
+
+</ScrollView>

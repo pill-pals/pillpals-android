@@ -9,6 +9,8 @@ import kotlin.math.abs
 import android.util.Log
 import com.pillpals.pillpals.data.model.*
 import com.pillpals.pillpals.helpers.DateHelper
+import com.pillpals.pillpals.helpers.QuizHelper
+import io.realm.Sort
 import io.realm.kotlin.createObject
 import java.io.IOException
 
@@ -16,10 +18,45 @@ class QuizGenerator() {
     companion object {
         val realm = Realm.getDefaultInstance()
 
+        fun tryGenerateQuiz():Int {
+            //Only generates a new quiz if no new quizzes exist and the last quiz was generated over 3 days ago
+            Log.i("quiz", "tryGenerateQuiz() has been run")
+            val allQuizzes = realm.where(Quizzes::class.java).findAll()
+            val quizzesInTimeFrame = realm.where(Quizzes::class.java)
+                .and()
+                .isNotNull("date")
+                .and()
+                .greaterThanOrEqualTo("date", DateHelper.addUnitToDate(Date(),-3,Calendar.DATE))
+                .findAll()
+
+            var newQuizExists = false
+            allQuizzes.forEach {
+                if (QuizHelper.getQuestionsAnswered(it) == 0) newQuizExists = true
+            }
+
+            if (!newQuizExists && quizzesInTimeFrame.isEmpty()) {
+                try{
+                generateQuiz()
+                }
+                catch (e: IOException) {
+                    Log.i("quiz", "Quiz generation failed")
+                    return 4
+                }
+                Log.i("quiz", "New quiz generated")
+                return 1
+            } else if(!newQuizExists && !quizzesInTimeFrame.isEmpty()){
+                Log.i("quiz", "Quiz in time frame")
+                return 2
+            }else{
+                Log.i("quiz", "Quiz generation not attempted")
+                return 3
+            }
+        }
+
         fun generateQuiz() {
             realm.executeTransaction {
                 var quiz = it.createObject(Quizzes::class.java, UUID.randomUUID().toString())
-                quiz.date = DateHelper.today()
+                quiz.date = Date()
                 quiz.name = generateQuizName()
 
                 var attemptedTemplates = mutableListOf<QuestionTemplates>()
@@ -66,9 +103,7 @@ class QuizGenerator() {
                 query.notEqualTo("id",it.id)
             }
             var unattemptedTemplates = query.findAll()
-            if (unattemptedTemplates.size == 0) {
-                throw IOException("Quiz Generator ran out of unattempted templates")
-            }
+            if (unattemptedTemplates.isEmpty()) throw IOException("Quiz Generation Failed: ran out of usable question templates")
             return unattemptedTemplates.random()
         }
 
@@ -78,8 +113,9 @@ class QuizGenerator() {
             if(!template.canUseOnNonLinkedMedications) {
                query.and().isNotEmpty("dpd_object")
             }
-
-            return query.findAll().random()
+            var usableMedications = query.findAll()
+            if (usableMedications.isEmpty()) throw IOException("Quiz Generation Failed: no medications")
+            return usableMedications.random()
         }
     }
 }

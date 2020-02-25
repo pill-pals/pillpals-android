@@ -64,7 +64,10 @@ class MedicationInfoRetriever {
 
                     override fun onResponse(call: Call, response: Response) {
                         response.use {
-                            if (!response.isSuccessful) throw IOException("Unexpected code $response")
+                            if (!response.isSuccessful) {
+                                reject(RuntimeException("Failed"))
+                                throw IOException("Unexpected code $response")
+                            }
 
                             val jsonString = response.body!!.string()
                             val gson = Gson()
@@ -126,7 +129,10 @@ class MedicationInfoRetriever {
 
                     override fun onResponse(call: Call, response: Response) {
                         response.use {
-                            if (!response.isSuccessful) throw IOException("Unexpected code $response")
+                            if (!response.isSuccessful) {
+                                reject(RuntimeException("Failed"))
+                                throw IOException("Unexpected code $response")
+                            }
 
                             val jsonString = response.body!!.string()
                             val gson = Gson()
@@ -178,7 +184,10 @@ class MedicationInfoRetriever {
 
                     override fun onResponse(call: Call, response: Response) {
                         response.use {
-                            if (!response.isSuccessful) throw IOException("Unexpected code $response")
+                            if (!response.isSuccessful) {
+                                reject(RuntimeException("Failed"))
+                                throw IOException("Unexpected code $response")
+                            }
 
                             val jsonString = response.body!!.string()
                             val gson = Gson()
@@ -230,7 +239,10 @@ class MedicationInfoRetriever {
 
                     override fun onResponse(call: Call, response: Response) {
                         response.use {
-                            if (!response.isSuccessful) throw IOException("Unexpected code $response")
+                            if (!response.isSuccessful) {
+                                reject(RuntimeException("Failed"))
+                                throw IOException("Unexpected code $response")
+                            }
 
                             val jsonString = response.body!!.string()
                             val gson = Gson()
@@ -239,9 +251,9 @@ class MedicationInfoRetriever {
                             var res: List<InteractionResult> = listOf()
 
                             // Use first source I guess. Might specify to try for DrugBank later
-                            val source = interactionsResponse.fullInteractionTypeGroup.firstOrNull()
+                            val source = interactionsResponse.fullInteractionTypeGroup?.firstOrNull()
 
-                            source ?: return resolve(res)
+                            source ?: return@onResponse resolve(res)
 
                             source.fullInteractionType.forEach { fullInteractionType ->
                                 fullInteractionType.interactionPair.forEach { interactionPair ->
@@ -275,11 +287,13 @@ class MedicationInfoRetriever {
             return Promise {
                 val client = OkHttpClient
                     .Builder()
-                    .connectTimeout(20, TimeUnit.SECONDS)
-                    .readTimeout(20, TimeUnit.SECONDS)
+                    .connectTimeout(10, TimeUnit.SECONDS)
+                    .readTimeout(10, TimeUnit.SECONDS)
                     .build()
 
                 val url = "https://api.fda.gov/drug/event.json?search=patient.drug.openfda.product_ndc:\"${ndcId}\"&count=patient.reaction.reactionmeddrapt.exact"
+
+                Log.i("here", url)
 
                 val request = Request.Builder().url(url).build()
 
@@ -295,7 +309,10 @@ class MedicationInfoRetriever {
 
                     override fun onResponse(call: Call, response: Response) {
                         response.use {
-                            if (!response.isSuccessful) throw IOException("Unexpected code $response")
+                            if (!response.isSuccessful) {
+                                reject(RuntimeException("Failed"))
+                                throw IOException("Unexpected code $response")
+                            }
 
                             val jsonString = response.body!!.string()
                             val gson = Gson()
@@ -307,12 +324,10 @@ class MedicationInfoRetriever {
 
                             val termObjects = adverseEffectResults.results
 
-                            Log.i("test", termObjects.toString())
-
-                            if(termObjects.isEmpty()) return resolve(res)
+                            if(termObjects == null || termObjects.isEmpty()) return resolve(res)
 
                             val totalCount = termObjects.fold(0) {acc, it -> acc + it.count}.toFloat()
-
+                            Log.i("here", "test")
                             res = termObjects.fold(listOf<SideEffectResult>()) {acc, it -> acc.plus(SideEffectResult(it.term, it.count, it.count.toFloat() / totalCount))}
 
                             resolve(res)
@@ -357,7 +372,10 @@ class MedicationInfoRetriever {
 
                     override fun onResponse(call: Call, response: Response) {
                         response.use {
-                            if (!response.isSuccessful) throw IOException("Unexpected code $response")
+                            if (!response.isSuccessful) {
+                                reject(RuntimeException("Failed"))
+                                throw IOException("Unexpected code $response")
+                            }
 
                             val jsonString = response.body!!.string()
                             val gson = Gson()
@@ -365,11 +383,11 @@ class MedicationInfoRetriever {
 
                             if(labelResult.error != null) return resolve("")
 
-                            val label = labelResult.results.firstOrNull()
+                            val label = labelResult.results?.firstOrNull()
 
                             label ?: return resolve("")
 
-                            val description = label.description.firstOrNull()
+                            val description = label.description?.firstOrNull()
 
                             description ?: return resolve("")
 
@@ -415,7 +433,10 @@ class MedicationInfoRetriever {
 
                     override fun onResponse(call: Call, response: Response) {
                         response.use {
-                            if (!response.isSuccessful) throw IOException("Unexpected code $response")
+                            if (!response.isSuccessful) {
+                                reject(RuntimeException("Failed"))
+                                throw IOException("Unexpected code $response")
+                            }
 
                             val jsonString = response.body!!.string()
                             val gson = Gson()
@@ -423,7 +444,7 @@ class MedicationInfoRetriever {
 
                             if(labelResult.error != null) return resolve("")
 
-                            val label = labelResult.results.firstOrNull()
+                            val label = labelResult.results?.firstOrNull()
 
                             label ?: return resolve("")
 
@@ -489,7 +510,10 @@ class MedicationInfoRetriever {
 
                     override fun onResponse(call: Call, response: Response) {
                         response.use {
-                            if (!response.isSuccessful) throw IOException("Unexpected code $response")
+                            if (!response.isSuccessful) {
+                                reject(RuntimeException("Failed"))
+                                throw IOException("Unexpected code $response")
+                            }
 
                             val jsonString = response.body!!.string()
                             val gson = Gson()
@@ -497,11 +521,11 @@ class MedicationInfoRetriever {
 
                             if(labelResult.error != null) return resolve("")
 
-                            val label = labelResult.results.firstOrNull()
+                            val label = labelResult.results?.firstOrNull()
 
                             label ?: return resolve("")
 
-                            val overdosage = label.overdosage.firstOrNull()
+                            val overdosage = label.overdosage?.firstOrNull()
 
                             overdosage ?: return resolve("")
 
@@ -547,7 +571,10 @@ class MedicationInfoRetriever {
 
                     override fun onResponse(call: Call, response: Response) {
                         response.use {
-                            if (!response.isSuccessful) throw IOException("Unexpected code $response")
+                            if (!response.isSuccessful) {
+                                reject(RuntimeException("Failed"))
+                                throw IOException("Unexpected code $response")
+                            }
 
                             val jsonString = response.body!!.string()
                             val gson = Gson()
@@ -557,7 +584,7 @@ class MedicationInfoRetriever {
 
                             val recalls = recallsResult.results
 
-                            if(recalls.isEmpty()) return resolve(RecallsResult(false, false, listOf()))
+                            if(recalls == null || recalls.isEmpty()) return resolve(RecallsResult(false, false, listOf()))
 
                             var mandated = false
 
@@ -608,7 +635,10 @@ class MedicationInfoRetriever {
 
                     override fun onResponse(call: Call, response: Response) {
                         response.use {
-                            if (!response.isSuccessful) throw IOException("Unexpected code $response")
+                            if (!response.isSuccessful) {
+                                reject(RuntimeException("Failed"))
+                                throw IOException("Unexpected code $response")
+                            }
 
                             val jsonString = response.body!!.string()
                             val gson = Gson()
@@ -644,7 +674,10 @@ class MedicationInfoRetriever {
 //                                }
 //
 //                                    response.use {
-//                                        if (!response.isSuccessful) throw IOException("Unexpected code $response")
+//                                        if (!response.isSuccessful) {
+//                                reject(RuntimeException("Failed"))
+//                                throw IOException("Unexpected code $response")
+//                            }
 //
 //                                        val jsonString = response.body!!.string()
 //                                        val gson = Gson()
@@ -699,7 +732,10 @@ class MedicationInfoRetriever {
 
                     override fun onResponse(call: Call, response: Response) {
                         response.use {
-                            if (!response.isSuccessful) throw IOException("Unexpected code $response")
+                            if (!response.isSuccessful) {
+                                reject(RuntimeException("Failed"))
+                                throw IOException("Unexpected code $response")
+                            }
 
                             val jsonString = response.body!!.string()
                             val gson = Gson()
@@ -757,7 +793,10 @@ class MedicationInfoRetriever {
 
                     override fun onResponse(call: Call, response: Response) {
                         response.use {
-                            if (!response.isSuccessful) throw IOException("Unexpected code $response")
+                            if (!response.isSuccessful) {
+                                reject(RuntimeException("Failed"))
+                                throw IOException("Unexpected code $response")
+                            }
 
                             val jsonString = response.body!!.string()
                             val gson = Gson()
@@ -811,7 +850,10 @@ class MedicationInfoRetriever {
 
                     override fun onResponse(call: Call, response: Response) {
                         response.use {
-                            if (!response.isSuccessful) throw IOException("Unexpected code $response")
+                            if (!response.isSuccessful) {
+                                reject(RuntimeException("Failed"))
+                                throw IOException("Unexpected code $response")
+                            }
 
                             val jsonString = response.body!!.string()
                             val gson = Gson()
@@ -819,7 +861,7 @@ class MedicationInfoRetriever {
 
                             if(labelResult.error != null) return resolve(false)
 
-                            val label = labelResult.results.firstOrNull()
+                            val label = labelResult.results?.firstOrNull()
 
                             label ?: return resolve(false)
 
@@ -880,7 +922,10 @@ class MedicationInfoRetriever {
 
                     override fun onResponse(call: Call, response: Response) {
                         response.use {
-                            if (!response.isSuccessful) throw IOException("Unexpected code $response")
+                            if (!response.isSuccessful) {
+                                reject(RuntimeException("Failed"))
+                                throw IOException("Unexpected code $response")
+                            }
 
                             val jsonString = response.body!!.string()
                             val gson = Gson()
@@ -888,7 +933,7 @@ class MedicationInfoRetriever {
 
                             if(labelResult.error != null) return resolve(false)
 
-                            val label = labelResult.results.firstOrNull()
+                            val label = labelResult.results?.firstOrNull()
 
                             label ?: return resolve(false)
 

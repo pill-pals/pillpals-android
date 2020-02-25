@@ -10,6 +10,7 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import com.pillpals.pillpals.R
 import android.os.*
+import android.text.TextUtils
 import android.util.Log
 import android.view.View.GONE
 import android.view.animation.Animation
@@ -21,6 +22,7 @@ import com.google.gson.Gson
 import com.pillpals.pillpals.data.*
 import com.pillpals.pillpals.data.model.Medications
 import com.pillpals.pillpals.helpers.DatabaseHelper
+import com.pillpals.pillpals.helpers.FileWriter
 import com.pillpals.pillpals.helpers.SearchSuggestionCursor
 import com.pillpals.pillpals.helpers.margin
 import com.pillpals.pillpals.ui.DrugCard
@@ -56,6 +58,7 @@ class SearchFragment : Fragment() {
 
     override public fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         super.onCreateView(inflater, container, savedInstanceState)
+        FileWriter.createJSONStringFromData(context!!)
         val view = inflater!!.inflate(R.layout.fragment_search, container, false)
 
         searchView = view.findViewById(R.id.searchView)
@@ -140,29 +143,35 @@ class SearchFragment : Fragment() {
 
                 if(query.isNotEmpty()) {
                     showSearchLoading()
-                    val url = "http://mapi-us.iterar.co/api/autocomplete?query=${query}"
+                    if(TextUtils.isDigitsOnly(query)) {
+                        lastQuery = query
+                        showResultsFlag = true
+                    }
+                    else {
+                        val url = "http://mapi-us.iterar.co/api/autocomplete?query=${query}"
 
-                    val request = Request.Builder().url(url).build()
+                        val request = Request.Builder().url(url).build()
 
-                    client.newCall(request).enqueue(object : Callback {
-                        override fun onFailure(call: Call, e: IOException) {
-                            e.printStackTrace()
-                        }
-
-                        override fun onResponse(call: Call, response: Response) {
-                            response.use {
-                                if (!response.isSuccessful) throw IOException("Unexpected code $response")
-
-                                val jsonString = response.body!!.string()
-                                val gson = Gson()
-                                val autocomplete = gson.fromJson(jsonString, Autocomplete::class.java)
-
-                                suggestions = autocomplete.suggestions
-                                lastQuery = query
-                                showResultsFlag = true
+                        client.newCall(request).enqueue(object : Callback {
+                            override fun onFailure(call: Call, e: IOException) {
+                                e.printStackTrace()
                             }
-                        }
-                    })
+
+                            override fun onResponse(call: Call, response: Response) {
+                                response.use {
+                                    if (!response.isSuccessful) throw IOException("Unexpected code $response")
+
+                                    val jsonString = response.body!!.string()
+                                    val gson = Gson()
+                                    val autocomplete = gson.fromJson(jsonString, Autocomplete::class.java)
+
+                                    suggestions = autocomplete.suggestions
+                                    lastQuery = query
+                                    showResultsFlag = true
+                                }
+                            }
+                        })
+                    }
                 }
                 else {
                     clearQueriesFlag = true
@@ -201,7 +210,7 @@ class SearchFragment : Fragment() {
                         }
                         else {
                             showResultsCounter++
-                            if(showResultsCounter > 39) {
+                            if(showResultsCounter > 19) {
                                 hideSearchLoading()
                                 showResultsCounter = 0
                             }
@@ -256,10 +265,16 @@ class SearchFragment : Fragment() {
     private fun multipleDrugsExistsWithName(name: String, dosage: String): Boolean {
         searchingUpcomingDrugs = true
         val res = upcomingDrugCards.filter {
-            it?.nameText?.text.toString() == name && it?.lateText?.text.toString() == dosage
+            it?.nameText?.text.toString() == name && it?.dosageString == dosage
         }.count() > 1
         searchingUpcomingDrugs = false
         return res
+    }
+
+    override fun onResume() {
+        super.onResume()
+        getActivity()!!.invalidateOptionsMenu()
+        FileWriter.createJSONStringFromData(context!!)
     }
 
     private fun showResults() {
@@ -270,14 +285,10 @@ class SearchFragment : Fragment() {
         }
         upcomingDrugCards = mutableListOf()
 
-        val dispatcher = Dispatcher()
-        dispatcher.maxRequests = suggestions.count() * 3
-
         val client = OkHttpClient
             .Builder()
             .connectTimeout(20, TimeUnit.SECONDS)
             .readTimeout(20, TimeUnit.SECONDS)
-            .dispatcher(dispatcher)
             .build()
 
         val drugsToSearch = suggestions
@@ -288,8 +299,15 @@ class SearchFragment : Fragment() {
 
         drugsToSearch.forEachIndexed {index, suggestion ->
             drugCards.add(addDrugCard(suggestion))
-            val re = Regex("[^A-Za-z ]")
-            val url = "https://health-products.canada.ca/api/drug/drugproduct/?brandname=${re.replace(suggestion, "")}"
+
+            var url = ""
+            if(TextUtils.isDigitsOnly(suggestion)) {
+                url = "https://health-products.canada.ca/api/drug/drugproduct/?din=${suggestion.padStart(8, '0')}"
+            }
+            else {
+                val re = Regex("[^A-Za-z ]")
+                url = "https://health-products.canada.ca/api/drug/drugproduct/?brandname=${re.replace(suggestion, "")}"
+            }
 
             val request = Request.Builder().url(url).build()
 
@@ -329,7 +347,7 @@ class SearchFragment : Fragment() {
                             return
                         }
 
-                        drugProducts.forEachIndexed {namedIndex, drugProduct ->
+                        drugProducts.take(100).forEachIndexed {namedIndex, drugProduct ->
                             // gather info and set to card
                             val newCard = DrugCard(outerContext.context!!)
                             newCard.nameText.text = drugProduct.brand_name
@@ -340,11 +358,6 @@ class SearchFragment : Fragment() {
                             newCard.button.margin(right = 0F)
 
                             newCard.drugCode = drugProduct.drug_code
-
-                            while(searchingUpcomingDrugs) {
-                                Thread.sleep(50)
-                            }
-                            upcomingDrugCards.add(newCard)
 
                             val url = "https://health-products.canada.ca/api/drug/activeingredient/?id=${drugProduct.drug_code}"
 
@@ -381,13 +394,20 @@ class SearchFragment : Fragment() {
                                             else acc.plus(it.strength_unit)
                                         }
 
-                                        newCard.dosageString = "${dosageValues.joinToString("/")} ${dosageUnits.joinToString("/")}"
+                                        val dosageString = "${dosageValues.joinToString("/")} ${dosageUnits.joinToString("/")}"
 
-                                        newCard.lateText.text = newCard.dosageString
+                                        newCard.dosageString = dosageString
+
+                                        newCard.lateText.text = dosageString
 
                                         newCard.lateText.visibility = View.VISIBLE
 
-                                        if(multipleDrugsExistsWithName(drugProduct.brand_name, newCard.dosageString)) {
+                                        while(searchingUpcomingDrugs) {
+                                            Thread.sleep(50)
+                                        }
+                                        upcomingDrugCards.add(newCard)
+
+                                        if(multipleDrugsExistsWithName(drugProduct.brand_name, dosageString)) {
                                             drugCards[index] = null
                                             refreshCardsFlag = true
                                             return
@@ -423,16 +443,19 @@ class SearchFragment : Fragment() {
                                                     if(fdaResponse.error == null) {
                                                         val fdaResults = fdaResponse.results
 
-                                                        val fdaResultWithDosage = fdaResults.filter {
-                                                            val totalVal = it.active_ingredients.fold(0f) {acc, it ->
-                                                                acc + it.strength.replace("( .*)".toRegex(), "").toFloat()
+                                                        val fdaResultWithDosage = fdaResults?.filter {
+                                                            if(it.active_ingredients == null) false
+                                                            else {
+                                                                val totalVal = it.active_ingredients.fold(0f) {acc, it ->
+                                                                    acc + it.strength.replace("( .*)".toRegex(), "").toFloat()
+                                                                }
+                                                                it.active_ingredients.any {
+                                                                    it.strength.contains("${dosageValues.first()} ${dosageUnits.firstOrNull()?.toLowerCase()}")
+                                                                } || (dosageValues.firstOrNull() != null && dosageValues.firstOrNull()!!.isNotEmpty() && dosageValues.firstOrNull()?.toFloat() == totalVal)
                                                             }
-                                                            it.active_ingredients.any {
-                                                                it.strength.contains("${dosageValues.first()} ${dosageUnits.firstOrNull()?.toLowerCase()}")
-                                                            } || dosageValues.firstOrNull()?.toFloat() == totalVal
-                                                        }.firstOrNull()
+                                                        }?.firstOrNull()
 
-                                                        val firstFdaResult = fdaResults.firstOrNull()
+                                                        val firstFdaResult = fdaResults?.firstOrNull()
 
                                                         // SET FDA IDS
                                                         if(fdaResultWithDosage != null) {
@@ -555,10 +578,12 @@ class SearchFragment : Fragment() {
 
     private fun showSearchLoading() {
         searchLoading.startAnimation(loadingAnimation)
+        searchLoading.setImageResource(R.drawable.loader)
         searchLoading.visibility = View.VISIBLE
     }
 
     private fun hideSearchLoading() {
+        searchLoading.setImageDrawable(null)
         searchLoading.visibility = GONE
         searchLoading.startAnimation(loadingAnimation)
     }

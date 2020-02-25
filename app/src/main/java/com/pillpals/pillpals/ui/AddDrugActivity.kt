@@ -205,6 +205,7 @@ class AddDrugActivity : AppCompatActivity() {
                         )
                         finish()
                     }
+                    NotificationUtils.updateAlarms(applicationContext)
                 } else{
                     Toast.makeText(applicationContext, "Please set a name and dosage", Toast.LENGTH_SHORT).show()
                 }
