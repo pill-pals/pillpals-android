@@ -51,7 +51,7 @@ public class OcrDetectorProcessor implements Detector.Processor<TextBlock> {
         for (int i = 0; i < items.size(); ++i) {
             TextBlock item = items.valueAt(i);
             if (item != null && item.getValue() != null
-                    && (item.getValue().toLowerCase().startsWith("din") || TextUtils.isDigitsOnly(item.getValue()))) {
+                    && (item.getValue().toLowerCase().contains("din") || TextUtils.isDigitsOnly(item.getValue()) || item.getValue().replaceAll("\\D+","").length() > 5)) {
                 found++;
                 sinceLastFound = 0;
                 Log.d("OcrDetectorProcessor", "Text detected! " + item.getValue());

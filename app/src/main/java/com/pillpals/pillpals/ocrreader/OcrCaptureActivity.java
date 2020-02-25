@@ -370,7 +370,7 @@ public final class OcrCaptureActivity extends AppCompatActivity {
         if (graphic != null) {
             text = graphic.getTextBlock();
             if (text != null && text.getValue() != null &&
-                    (text.getValue().toLowerCase().startsWith("din") || TextUtils.isDigitsOnly(text.getValue()))) {
+                    (text.getValue().toLowerCase().startsWith("din") || TextUtils.isDigitsOnly(text.getValue()) || text.getValue().replaceAll("\\D+","").length() > 5)) {
                 Log.d(TAG, "text data is being spoken! " + text.getValue());
                 // Speak the string.
                 //tts.speak(text.getValue(), TextToSpeech.QUEUE_ADD, null, "DEFAULT");

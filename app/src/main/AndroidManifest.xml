@@ -31,6 +31,7 @@
         android:theme="@style/AppTheme">
         <activity
             android:name=".ui.AlarmActivity"
+            android:screenOrientation="portrait"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:theme="@style/FullscreenTheme"
             android:taskAffinity=""
@@ -39,6 +40,7 @@
             android:process=":remote"></activity>
         <activity
             android:name=".ui.EditScheduleActivity"
+            android:screenOrientation="portrait"
             android:label="@string/title_activity_edit_schedule"
             android:parentActivityName=".ui.AddDrugActivity"
             android:theme="@style/AppTheme.NoActionBar">
@@ -46,7 +48,9 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.pillpals.pillpals.ui.AddDrugActivity" />
         </activity>
-        <activity android:name=".ui.MainActivity">
+        <activity
+            android:name=".ui.MainActivity"
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <action android:name="android.intent.action.MAIN" />
@@ -73,18 +77,20 @@
             android:exported="true">
         </receiver>
 
-        <activity android:name=".ui.AddDrugActivity" />
-        <activity android:name=".ui.quiz.QuizQuestionActivity" />
-        <activity android:name=".ui.quiz.QuizResultsActivity" />
-        <activity android:name=".ui.statistics.MedicationScoresActivity" />
-        <activity android:name=".ui.EditMedicationIcon" />
-        <activity android:name=".ui.DrugGallery" />
-        <activity android:name=".ui.quiz.QuizActivity" />
-        <activity android:name=".ui.search.SearchActivity" />
+        <activity android:name=".ui.AddDrugActivity" android:screenOrientation="portrait"  />
+        <activity android:name=".ui.quiz.QuizQuestionActivity" android:screenOrientation="portrait"  />
+        <activity android:name=".ui.quiz.QuizResultsActivity" android:screenOrientation="portrait"  />
+        <activity android:name=".ui.statistics.MedicationScoresActivity" android:screenOrientation="portrait"  />
+        <activity android:name=".ui.EditMedicationIcon" android:screenOrientation="portrait"  />
+        <activity android:name=".ui.DrugGallery" android:screenOrientation="portrait"  />
+        <activity android:name=".ui.quiz.QuizActivity" android:screenOrientation="portrait"  />
+        <activity android:name=".ui.search.SearchActivity" android:screenOrientation="portrait"  />
         <activity
             android:name=".ui.SettingsActivity"
+            android:screenOrientation="portrait"
             android:theme="@style/PreferenceTheme"></activity>
-        <activity android:name=".ui.medications.medication_info.MedicationInfoActivity">
+        <activity android:name=".ui.medications.medication_info.MedicationInfoActivity"
+            android:screenOrientation="portrait" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.pillpals.pillpals.ui.MainActivity" />
@@ -95,6 +101,7 @@
             android:value="ocr" />
 
         <activity android:name="com.pillpals.pillpals.ocrreader.OcrCaptureActivity"
+            android:screenOrientation="portrait"
             android:label="Label Scanner">
         </activity>
     </application>
