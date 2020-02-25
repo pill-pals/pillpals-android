@@ -319,6 +319,9 @@ class MedicationsFragment : Fragment() {
             // medication is copied from realm, not the real object
             val databaseDrug = realm.where(Medications::class.java).equalTo("uid", medication.uid).findFirst()!!
             databaseDrug.deleted = true
+            for (schedule in databaseDrug.schedules) {
+                schedule.deleted = true
+            }
         }
     }
 
