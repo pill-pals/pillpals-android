@@ -8,7 +8,9 @@ import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
-
+import android.os.Handler
+import android.os.Looper
+import android.widget.Toast
 
 
 fun View.margin(left: Float? = null, top: Float? = null, right: Float? = null, bottom: Float? = null) {
@@ -17,6 +19,26 @@ fun View.margin(left: Float? = null, top: Float? = null, right: Float? = null, b
         top?.run { topMargin = dpToPx(this) }
         right?.run { rightMargin = dpToPx(this) }
         bottom?.run { bottomMargin = dpToPx(this) }
+    }
+}
+
+fun backgroundThreadToast(context: Context, msg: String, length: Int) {
+    if (context != null && msg != null) {
+        Handler(Looper.getMainLooper()).post(object: Runnable {
+            override fun run() {
+                Toast.makeText(context, msg, length).show()
+            }
+        });
+    }
+}
+
+fun administrationRouteToIconString(route: String): String {
+    return when(true) {
+        route.startsWith("Intra") -> "ic_syringe"
+        route.startsWith("Oral") -> "ic_pill_v5"
+        route.startsWith("Rectal") -> "ic_tablet"
+        route.startsWith("Inhalation") -> "ic_inhaler"
+        else -> "ic_dropper"
     }
 }
 
