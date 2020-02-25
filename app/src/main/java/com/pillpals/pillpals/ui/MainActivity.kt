@@ -1,24 +1,22 @@
 package com.pillpals.pillpals.ui
 
-import android.app.NotificationChannel
-import android.app.NotificationManager
 import android.content.Intent
-import android.os.Build
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.Fragment
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
-import com.google.android.material.internal.NavigationMenu
 import com.pillpals.pillpals.R
 import com.pillpals.pillpals.data.model.Medications
 import com.pillpals.pillpals.data.model.Quizzes
 import com.pillpals.pillpals.helpers.NotificationUtils
 import com.pillpals.pillpals.helpers.QuizHelper
+import com.pillpals.pillpals.ui.dashboard.DashboardFragment
 import com.pillpals.pillpals.ui.quiz.QuizActivity
 import io.realm.Realm
 import io.realm.RealmObject
@@ -28,6 +26,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         Realm.init(this)
 
         setContentView(R.layout.activity_main)
@@ -44,7 +43,7 @@ class MainActivity : AppCompatActivity() {
         setupActionBarWithNavController(navController, appBarConfiguration)
         navView.setupWithNavController(navController)
 
-        NotificationUtils.createNotificationChannel(this)
+        NotificationUtils.createNotificationChannels(this)
     }
 
     override fun onOptionsItemSelected(item: MenuItem) = when (item.itemId) {

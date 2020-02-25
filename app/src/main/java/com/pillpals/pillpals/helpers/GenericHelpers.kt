@@ -1,6 +1,7 @@
 package com.pillpals.pillpals.helpers
 
 import android.content.Context
+import android.content.Intent
 import android.util.TypedValue
 import android.view.View
 import android.view.ViewGroup
@@ -9,8 +10,10 @@ import android.graphics.Canvas
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import androidx.core.app.NotificationManagerCompat
+import com.pillpals.pillpals.PillPalsApplication
 import com.pillpals.pillpals.data.model.Logs
 import com.pillpals.pillpals.data.model.Schedules
+import com.pillpals.pillpals.services.AlarmReceiver
 import io.realm.Realm
 import java.util.*
 
@@ -79,4 +82,8 @@ public fun drugLogFunction(schedule: Schedules, context: Context, time: Date = D
     val notificationManager = NotificationManagerCompat.from(context)
 
     notificationManager.cancel(databaseSchedule.uid.hashCode())
+
+    var intent = Intent(context, AlarmReceiver::class.java)
+    intent.putExtra("stop-noise", true)
+    context.sendBroadcast(intent)
 }

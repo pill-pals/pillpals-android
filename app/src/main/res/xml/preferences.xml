@@ -15,13 +15,13 @@
 
         <SwitchPreferenceCompat
             android:key="fullscreen_notifications"
-            android:title="Use fullscreen alarms"
+            android:title="Use rich alarms"
             app:defaultValue="true" />
         <EditTextPreference
             android:key="fullscreen_notification_message"
             android:selectAllOnFocus="true"
             android:singleLine="true"
-            android:title="Edit fullscreen alarm message"
+            android:title="Edit rich alarm message"
             android:defaultValue="It's time to take your medication!"/>
 
     </PreferenceCategory>

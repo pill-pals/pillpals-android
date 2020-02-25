@@ -1,11 +1,11 @@
 package com.pillpals.pillpals.services
 
 import android.app.AlarmManager
+import android.app.Notification
 import android.app.PendingIntent
-import android.content.BroadcastReceiver
-import android.content.Context
-import android.content.Intent
+import android.content.*
 import android.graphics.*
+import android.os.IBinder
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import com.pillpals.pillpals.R
@@ -18,11 +18,11 @@ import com.pillpals.pillpals.ui.MainActivity
 import java.time.LocalDateTime
 import java.time.ZoneId
 import androidx.preference.PreferenceManager
+import com.pillpals.pillpals.PillPalsApplication
+import com.pillpals.pillpals.helpers.AlarmNoiseHelper
 import com.pillpals.pillpals.helpers.DatabaseHelper.Companion.getColorStringByID
 import com.pillpals.pillpals.helpers.DatabaseHelper.Companion.getCorrectIconDrawable
-import com.pillpals.pillpals.helpers.NotificationUtils
 import com.pillpals.pillpals.ui.AlarmActivity
-import java.util.concurrent.TimeUnit
 
 
 public class AlarmReceiver: BroadcastReceiver() {
@@ -34,7 +34,15 @@ public class AlarmReceiver: BroadcastReceiver() {
             intent.getStringExtra("schedule-uid")
         ) as Schedules
 
-        if (intent.getBooleanExtra("cancel", false)) {
+        val now = Calendar.getInstance()
+        if (schedule.occurrence!! > now.time) {
+            return //Don't generate a notification for a schedule that's already been logged
+        }
+
+        if (intent.getBooleanExtra("stop-noise", false)) { //Need to be able to do this on :remote from elsewhere
+            PillPalsApplication.alarmNoiseHelper.stopNoise()
+            return
+        } else if (intent.getBooleanExtra("cancel", false)) {
             notificationManager.cancel(schedule.uid!!.hashCode())
         } else {
             val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
@@ -66,12 +74,11 @@ public class AlarmReceiver: BroadcastReceiver() {
                 drawable.draw(iconCanvas)
 
                 // Set the notification content
-                val mBuilder = NotificationCompat.Builder(context, context.getString(R.string.channel_id))
+                val mBuilder = NotificationCompat.Builder(context, context.getString(R.string.channel_id_rich))
                     .setSmallIcon(R.drawable.ic_pill_v5)
                     .setContentTitle(title)
                     .setPriority(priorityValue)
                     .setLargeIcon(iconBitmap)
-                    .setOngoing(true)
                     .setTicker("It's time to take your medication!")
 
 
@@ -90,12 +97,15 @@ public class AlarmReceiver: BroadcastReceiver() {
                     mBuilder.setContentIntent(pendingIntent)
                         .setFullScreenIntent(pendingIntent, true)
                         .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+
+                    PillPalsApplication.alarmNoiseHelper.startNoise()
                 } else {
                     val mainIntent = Intent(context, MainActivity::class.java)
                     mainIntent.putExtras(intent.extras!!)
                     val pendingIntent = PendingIntent.getActivity(context, schedule.uid!!.hashCode(), mainIntent, PendingIntent.FLAG_UPDATE_CURRENT)
                     mBuilder.setContentIntent(pendingIntent)
                         .setVisibility(NotificationCompat.VISIBILITY_PRIVATE)
+                        .setChannelId(context.getString(R.string.channel_id_soft))
                 }
 
                 var logIntent = Intent(context, AlarmActivity::class.java).apply {
@@ -116,15 +126,21 @@ public class AlarmReceiver: BroadcastReceiver() {
                 var snoozeAction = NotificationCompat.Action(R.drawable.ic_clock_32, "SNOOZE", pendingSnoozeIntent)
                 mBuilder.addAction(snoozeAction)
 
+
+                var notification = mBuilder.build()
+                if (sharedPreferences.getBoolean("fullscreen_notifications", true)) {
+                    notification.flags = notification.flags or Notification.FLAG_INSISTENT
+                }
+
                 // notificationId is a unique int for each notification that you must define
                 notificationManager.notify(schedule.uid!!.hashCode(), mBuilder.build())
 
-                //setupAutoCancel(context, intent, schedule)
+                //setupAutoCancel(context, intent, schedule, 15, Calendar.MINUTE) //TODO: Refine this end time
             }
         }
     }
 
-    private fun setupAutoCancel(context: Context, intent: Intent, schedule: Schedules) {
+    private fun setupAutoCancel(context: Context, intent: Intent, schedule: Schedules, time: Int, unit: Int) {
         val am = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
         val cancelIntent = Intent(intent)
         cancelIntent.putExtra("cancel", true)
@@ -137,8 +153,9 @@ public class AlarmReceiver: BroadcastReceiver() {
         )
 
         val now = Calendar.getInstance()
-        val cancelDate = DateHelper.addUnitToDate(now.time, 10, Calendar.MINUTE) //TODO: Refine this end time
+        val cancelDate = DateHelper.addUnitToDate(now.time, time, unit)
 
         am.setExact(AlarmManager.RTC, cancelDate.time, cancelAlarmSender)
+        //TODO: Add an additional, softer notification if time expires on primary alarm
     }
 }

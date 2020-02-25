@@ -1,9 +1,13 @@
 package com.pillpals.pillpals.ui
 
+import android.content.ComponentName
+import android.content.Context
 import android.content.Intent
+import android.content.ServiceConnection
 import android.graphics.Color
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.os.IBinder
 import android.view.View
 import android.view.WindowManager
 import android.widget.Button
@@ -11,15 +15,14 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.cardview.widget.CardView
 import androidx.preference.PreferenceManager
+import com.pillpals.pillpals.PillPalsApplication
 import com.pillpals.pillpals.R
 import com.pillpals.pillpals.data.model.Medications
 import com.pillpals.pillpals.data.model.Schedules
-import com.pillpals.pillpals.helpers.DatabaseHelper
+import com.pillpals.pillpals.helpers.*
 import com.pillpals.pillpals.helpers.DatabaseHelper.Companion.getColorStringByID
 import com.pillpals.pillpals.helpers.DatabaseHelper.Companion.getCorrectIconDrawable
-import com.pillpals.pillpals.helpers.DateHelper
-import com.pillpals.pillpals.helpers.NotificationUtils
-import com.pillpals.pillpals.helpers.drugLogFunction
+import com.pillpals.pillpals.helpers.AlarmNoiseHelper
 
 /**
  * An example full-screen activity that shows and hides the system UI (i.e.
@@ -38,19 +41,6 @@ class AlarmActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_alarm)
-
-        window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_FULLSCREEN or
-                View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or
-                View.SYSTEM_UI_FLAG_HIDE_NAVIGATION or
-                View.SYSTEM_UI_FLAG_LAYOUT_STABLE or
-                View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
-
-        window.addFlags(WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON or
-                WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED or
-                WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON or
-                WindowManager.LayoutParams.FLAG_FULLSCREEN
-        )
 
         var schedule = DatabaseHelper.getScheduleByUid(
             intent.getStringExtra("schedule-uid")
@@ -62,6 +52,20 @@ class AlarmActivity : AppCompatActivity() {
         } else if (intent.action == "SNOOZE") {
             alarmSnoozeFunc(schedule)
         } else {
+            setContentView(R.layout.activity_alarm)
+
+            window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_FULLSCREEN or
+                    View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or
+                    View.SYSTEM_UI_FLAG_HIDE_NAVIGATION or
+                    View.SYSTEM_UI_FLAG_LAYOUT_STABLE or
+                    View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+
+            window.addFlags(WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON or
+                    WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED or
+                    WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON or
+                    WindowManager.LayoutParams.FLAG_FULLSCREEN
+            )
+
             setupViewVars()
 
             val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(applicationContext)
@@ -85,6 +89,7 @@ class AlarmActivity : AppCompatActivity() {
             }
 
             openButton.setOnClickListener {
+                alarmSnoozeFunc(schedule)
                 alarmOpenFunc()
             }
         }
@@ -103,11 +108,13 @@ class AlarmActivity : AppCompatActivity() {
 
     private fun alarmLogFunc(schedule: Schedules) {
         drugLogFunction(schedule, this)
+        PillPalsApplication.alarmNoiseHelper.stopNoise()
         finish()
     }
 
     private fun alarmSnoozeFunc(schedule: Schedules) {
         NotificationUtils.snoozeAlarm(this, schedule)
+        PillPalsApplication.alarmNoiseHelper.stopNoise()
         finish()
     }
 

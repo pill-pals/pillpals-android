@@ -15,7 +15,7 @@ public class BootupReceiver: BroadcastReceiver() {
             Schedules::class.java
         ) as RealmResults<out Schedules>
         DashboardFragment().setUpSchedules(schedules, false)
-        NotificationUtils.createNotificationChannel(context)
+        NotificationUtils.createNotificationChannels(context)
         NotificationUtils.updateAlarms(context)
     }
 }
