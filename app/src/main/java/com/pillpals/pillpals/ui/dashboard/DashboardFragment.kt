@@ -220,6 +220,7 @@ class DashboardFragment : Fragment() {
         super.onResume()
         getActivity()!!.invalidateOptionsMenu()
         FileWriter.createJSONStringFromData(context!!)
+        update()
     }
 
     //Mood tracker
