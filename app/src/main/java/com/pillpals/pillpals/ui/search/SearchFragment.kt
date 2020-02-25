@@ -407,11 +407,11 @@ class SearchFragment : Fragment() {
                                         }
                                         upcomingDrugCards.add(newCard)
 
-                                        if(multipleDrugsExistsWithName(drugProduct.brand_name, dosageString)) {
-                                            drugCards[index] = null
-                                            refreshCardsFlag = true
-                                            return
-                                        }
+//                                        if(multipleDrugsExistsWithName(drugProduct.brand_name, dosageString)) {
+//                                            drugCards[index] = null
+//                                            refreshCardsFlag = true
+//                                            return
+//                                        }
 
                                         newCard.activeIngredients = ingredientNameList
 
