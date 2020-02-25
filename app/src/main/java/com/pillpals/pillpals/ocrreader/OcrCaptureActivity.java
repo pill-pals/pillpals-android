@@ -48,6 +48,7 @@ import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
+import com.google.android.gms.flags.impl.DataUtils;
 import com.google.android.material.snackbar.Snackbar;
 import com.pillpals.pillpals.R;
 import com.pillpals.pillpals.ocrreader.ui.camera.CameraSource;
@@ -57,6 +58,7 @@ import com.google.android.gms.vision.text.TextBlock;
 import com.google.android.gms.vision.text.TextRecognizer;
 
 import java.io.IOException;
+import java.text.DecimalFormat;
 import java.util.Locale;
 
 /**
@@ -349,8 +351,10 @@ public final class OcrCaptureActivity extends AppCompatActivity {
         }
     }
 
-    public static String LPad(String str, Integer length, char car) {
-        return (str + String.format("%" + length + "s", "").replace(" ", String.valueOf(car))).substring(0, length);
+    public String padStr(String str, String pad, int len) {
+        while (str.length() < len)
+            str = pad + str;
+        return str;
     }
 
     /**
@@ -369,11 +373,12 @@ public final class OcrCaptureActivity extends AppCompatActivity {
                     (text.getValue().toLowerCase().startsWith("din") || TextUtils.isDigitsOnly(text.getValue()))) {
                 Log.d(TAG, "text data is being spoken! " + text.getValue());
                 // Speak the string.
-                tts.speak(text.getValue(), TextToSpeech.QUEUE_ADD, null, "DEFAULT");
+                //tts.speak(text.getValue(), TextToSpeech.QUEUE_ADD, null, "DEFAULT");
 
                 //intent
                 Intent intent = new Intent(this, OcrCaptureActivity.class);
-                String din = LPad(text.getValue().replaceAll("\\D+",""), 8, '0');
+                String din = padStr(text.getValue().replaceAll("\\D+",""), "0", 8);
+                Log.i("din", din);
                 intent.putExtra("din", din);
                 setResult(Activity.RESULT_OK, intent);
                 finish();

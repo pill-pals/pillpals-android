@@ -17,6 +17,8 @@ import android.content.Intent
 import android.content.SharedPreferences
 import android.graphics.Color
 import android.graphics.drawable.AnimatedVectorDrawable
+import android.os.Handler
+import android.os.Looper
 import android.text.SpannableString
 import android.text.Spanned
 import android.text.TextUtils
@@ -347,6 +349,16 @@ class MedicationsFragment : Fragment() {
         updateMedicationList()
     }
 
+    fun backgroundThreadToast(context: Context, msg: String, length: Int) {
+        if (context != null && msg != null) {
+            Handler(Looper.getMainLooper()).post(object: Runnable {
+                override fun run() {
+                    Toast.makeText(context, msg, length).show()
+                }
+            });
+        }
+    }
+
     fun getFromDin(din: String) {
         val url = "https://health-products.canada.ca/api/drug/drugproduct/?din=${din}"
 
@@ -364,34 +376,30 @@ class MedicationsFragment : Fragment() {
         var rxcui: String? = ""
         var splSetId: String? = ""
 
+
         client.newCall(request).enqueue(object : Callback {
             override fun onFailure(call: Call, e: IOException) {
+                backgroundThreadToast(context!!, "API Error. Please try again.", Toast.LENGTH_SHORT)
                 e.printStackTrace()
             }
 
             override fun onResponse(call: Call, response: Response) {
                 response.use {
-                    if (!response.isSuccessful) throw IOException("Unexpected code $response")
+                    if (!response.isSuccessful) {
+                        backgroundThreadToast(context!!, "API Error. Please try again.", Toast.LENGTH_SHORT)
+                        return
+                    }
 
                     val jsonString = response.body!!.string()
                     val gson = Gson()
                     val drugProducts = gson.fromJson(jsonString, Array<DrugProduct>::class.java).toList()
 
-                    val uniquelyNamedDrugs = drugProducts.fold(listOf<DrugProduct>()) { acc, drugProduct ->
-                        if(acc.filter { it.brand_name == drugProduct.brand_name }.count() == 0) {
-                            acc.plus(drugProduct)
-                        }
-                        else {
-                            acc
-                        }
-                    }
-
                     // First for now
                     val firstDrugProduct = drugProducts.firstOrNull()
 
-                    if (firstDrugProduct == null) {
-                        return
-                    }
+                    firstDrugProduct ?: return backgroundThreadToast(context!!, "Drug not found with din $din. Please try again.", Toast.LENGTH_LONG)
+
+                    backgroundThreadToast(context!!, "Drug found: ${firstDrugProduct.brand_name}. Loading...", Toast.LENGTH_LONG)
 
                     drugProducts.forEachIndexed {namedIndex, drugProduct ->
                         val url = "https://health-products.canada.ca/api/drug/activeingredient/?id=${drugProduct.drug_code}"
@@ -400,12 +408,16 @@ class MedicationsFragment : Fragment() {
 
                         client.newCall(request).enqueue(object : Callback {
                             override fun onFailure(call: Call, e: IOException) {
+                                backgroundThreadToast(context!!, "API Error. Please try again.", Toast.LENGTH_SHORT)
                                 e.printStackTrace()
                             }
 
                             override fun onResponse(call: Call, response: Response) {
                                 response.use {
-                                    if (!response.isSuccessful) throw IOException("Unexpected code $response")
+                                    if (!response.isSuccessful) {
+                                        backgroundThreadToast(context!!, "API Error. Please try again.", Toast.LENGTH_SHORT)
+                                        return
+                                    }
 
                                     val jsonString = response.body!!.string()
                                     val gson = Gson()
@@ -433,45 +445,48 @@ class MedicationsFragment : Fragment() {
 
                                     client.newCall(request).enqueue(object : Callback {
                                         override fun onFailure(call: Call, e: IOException) {
+                                            backgroundThreadToast(context!!, "API Error. Please try again.", Toast.LENGTH_SHORT)
                                             e.printStackTrace()
                                         }
 
                                         override fun onResponse(call: Call, response: Response) {
                                             response.use {
-                                                if (!response.isSuccessful) throw IOException("Unexpected code $response")
+                                                if (response.isSuccessful) {
+                                                    val jsonString = response.body!!.string()
+                                                    val gson = Gson()
+                                                    val fdaResponse = gson.fromJson(jsonString, OpenFDANameResponse::class.java)
 
-                                                val jsonString = response.body!!.string()
-                                                val gson = Gson()
-                                                val fdaResponse = gson.fromJson(jsonString, OpenFDANameResponse::class.java)
+                                                    if(fdaResponse.error == null) {
+                                                        val fdaResults = fdaResponse.results
 
-                                                if(fdaResponse.error == null) {
-                                                    val fdaResults = fdaResponse.results
+                                                        val fdaResultWithDosage = fdaResults.filter {
+                                                            if(it.active_ingredients == null) return@filter false
+                                                            val totalVal = it.active_ingredients.fold(0f) {acc, it ->
+                                                                acc + it.strength.replace("( .*)".toRegex(), "").toFloat()
+                                                            }
+                                                            it.active_ingredients.any {
+                                                                it.strength.contains("${dosageValues.first()} ${dosageUnits.firstOrNull()?.toLowerCase()}")
+                                                            } || dosageValues.firstOrNull()?.toFloat() == totalVal
+                                                        }.firstOrNull()
 
-                                                    val fdaResultWithDosage = fdaResults.filter {
-                                                        if(it.active_ingredients == null) return@filter false
-                                                        val totalVal = it.active_ingredients.fold(0f) {acc, it ->
-                                                            acc + it.strength.replace("( .*)".toRegex(), "").toFloat()
+                                                        val firstFdaResult = fdaResults.firstOrNull()
+
+                                                        // SET FDA IDS
+
+                                                        if(fdaResultWithDosage != null) {
+                                                            ndcCode = fdaResultWithDosage.product_ndc
+                                                            rxcui = fdaResultWithDosage.openfda.rxcui?.firstOrNull()
+                                                            splSetId = fdaResultWithDosage.openfda.spl_set_id?.firstOrNull()
                                                         }
-                                                        it.active_ingredients.any {
-                                                            it.strength.contains("${dosageValues.first()} ${dosageUnits.firstOrNull()?.toLowerCase()}")
-                                                        } || dosageValues.firstOrNull()?.toFloat() == totalVal
-                                                    }.firstOrNull()
-
-                                                    val firstFdaResult = fdaResults.firstOrNull()
-
-                                                    // SET FDA IDS
-
-                                                    if(fdaResultWithDosage != null) {
-                                                        ndcCode = fdaResultWithDosage.product_ndc
-                                                        rxcui = fdaResultWithDosage.openfda.rxcui?.firstOrNull()
-                                                        splSetId = fdaResultWithDosage.openfda.spl_set_id?.firstOrNull()
-                                                    }
-                                                    else if(firstFdaResult != null) {
-                                                        ndcCode = firstFdaResult.product_ndc
-                                                        rxcui = firstFdaResult.openfda.rxcui?.firstOrNull()
-                                                        splSetId = firstFdaResult.openfda.spl_set_id?.firstOrNull()
+                                                        else if(firstFdaResult != null) {
+                                                            ndcCode = firstFdaResult.product_ndc
+                                                            rxcui = firstFdaResult.openfda.rxcui?.firstOrNull()
+                                                            splSetId = firstFdaResult.openfda.spl_set_id?.firstOrNull()
+                                                        }
                                                     }
                                                 }
+
+
 
                                                 val url = "https://health-products.canada.ca/api/drug/route/?id=${drugProduct.drug_code}"
 
@@ -480,12 +495,16 @@ class MedicationsFragment : Fragment() {
                                                 client.newCall(request).enqueue(object :
                                                     Callback {
                                                     override fun onFailure(call: Call, e: IOException) {
+                                                        backgroundThreadToast(context!!, "API Error. Please try again.", Toast.LENGTH_SHORT)
                                                         e.printStackTrace()
                                                     }
 
                                                     override fun onResponse(call: Call, response: Response) {
                                                         response.use {
-                                                            if (!response.isSuccessful) return
+                                                            if (!response.isSuccessful) {
+                                                                backgroundThreadToast(context!!, "API Error. Please try again.", Toast.LENGTH_SHORT)
+                                                                return
+                                                            }
 
                                                             val jsonString = response.body!!.string()
                                                             val gson = Gson()
