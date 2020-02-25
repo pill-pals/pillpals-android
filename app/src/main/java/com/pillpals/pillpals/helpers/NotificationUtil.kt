@@ -7,6 +7,7 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.os.Build
+import android.util.Log
 import androidx.core.app.NotificationManagerCompat
 import com.pillpals.pillpals.R
 import com.pillpals.pillpals.data.model.Schedules
@@ -21,12 +22,17 @@ class NotificationUtils {
             val mAlarmSender = getPendingIntent(context, schedule)
 
             val c = Calendar.getInstance()
-            var scheduleTime = schedule.occurrence
-            var now = Calendar.getInstance()
-            var lowerNotifBound = DateHelper.addUnitToDate(now.time, -10, Calendar.MINUTE)
-            while (scheduleTime!! < lowerNotifBound) {
+            var scheduleTime = schedule.occurrence!!
+//            var now = Calendar.getInstance()
+//            var lowerNotifBound = DateHelper.addUnitToDate(now.time, -10, Calendar.MINUTE)
+//            while (DateHelper.addUnitToDate(scheduleTime, schedule.repetitionCount!!, schedule.repetitionUnit!!) < now.time) {
+//                scheduleTime = DateHelper.addUnitToDate(scheduleTime, schedule.repetitionCount!!, schedule.repetitionUnit!!)
+//            }
+
+            while (scheduleTime!! < DateHelper.yesterdayAt12pm()) {
                 scheduleTime = DateHelper.addUnitToDate(scheduleTime, schedule.repetitionCount!!, schedule.repetitionUnit!!)
             }
+
             c.time = scheduleTime
             val firstTime = c.timeInMillis
 
@@ -42,9 +48,7 @@ class NotificationUtils {
                 Schedules::class.java
             ) as RealmResults<out Schedules>
             for (schedule in schedules) {
-                val am = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-                am.cancel(getPendingIntent(context, schedule))
-                startAlarm(context, schedule)
+                if(!schedule.deleted) startAlarm(context, schedule)
             }
         }
 

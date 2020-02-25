@@ -409,6 +409,8 @@ class SearchActivity : AppCompatActivity() {
                                         while(searchingUpcomingDrugs) {
                                             Thread.sleep(50)
                                         }
+                                        upcomingDrugCards.add(newCard)
+
                                         if(multipleDrugsExistsWithName(drugProduct.brand_name, newCard.dosageString)) {
                                             drugCards[index] = null
                                             refreshCardsFlag = true
