@@ -141,7 +141,6 @@ class MedicationsFragment : Fragment() {
             addPrompt.dialogCancelAddBtn.setOnClickListener {
                 alertDialog.dismiss()
             }
-
         }
 
         updateMedicationList()
