@@ -77,7 +77,7 @@ class QuizGenerator() {
                 var counter = 0
                 while (counter <= 9) {
                     var template = getRandomTemplate(attemptedTemplates)
-                    var question: Questions? = try {generateQuestion(template.id,getRandomMedication(template))} catch(e: IOException) {null}
+                    var question: Questions? = try {generateQuestion(template.id, getRandomMedication(template))} catch(e: IOException) {null}
                     attemptedTemplates.add(template)
 
                     if (question != null) {
@@ -111,7 +111,7 @@ class QuizGenerator() {
             var query = realm.where(QuestionTemplates::class.java)
 
             attemptedTemplates.forEach{
-                query.notEqualTo("id",it.id)
+                query.notEqualTo("id", it.id)
             }
             var unattemptedTemplates = query.findAll()
             if (unattemptedTemplates.isEmpty()) throw IOException("Quiz Generation Failed: ran out of usable question templates")
