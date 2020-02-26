@@ -53,7 +53,7 @@ fun generateQuestion(id: Int, medication: Medications):Questions {
                         // Use result here
                         interactsWithAlcoholResponse = result.value
                     }
-                    is Promise.Result.Error -> Log.i("Error", result.error.message!!)
+                    is Promise.Result.Error -> interactsWithAlcoholResponse = false
                 }
                 interactsWithCaffeinePromise.whenComplete { result: Promise.Result<Boolean, RuntimeException> ->
                     when (result) {
@@ -61,7 +61,7 @@ fun generateQuestion(id: Int, medication: Medications):Questions {
                             // Use result here
                             interactsWithCaffeineResponse = result.value
                         }
-                        is Promise.Result.Error -> Log.i("Error", result.error.message!!)
+                        is Promise.Result.Error -> interactsWithCaffeineResponse = false
                     }
 
                     when (true) {
@@ -213,7 +213,7 @@ fun generateQuestion(id: Int, medication: Medications):Questions {
     while(waitingForResponse) {
         Thread.sleep(50)
     }
-
+    
     //if there are more than 3 incorrect answers, remove some
     incorrectAnswers.shuffle()
     incorrectAnswers = incorrectAnswers.take(3) as MutableList<String>
