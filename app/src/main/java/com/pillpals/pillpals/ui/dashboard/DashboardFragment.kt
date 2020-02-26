@@ -207,7 +207,6 @@ class DashboardFragment : Fragment() {
             }
         }
         timer.schedule(doAsynchronousTask, 0, 60000)
-        timer.schedule(doAsynchronousTask, 0, 60000)
 
         return view
     }
