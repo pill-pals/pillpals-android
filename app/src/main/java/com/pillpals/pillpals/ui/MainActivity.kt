@@ -65,9 +65,9 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onOptionsItemSelected(item: MenuItem) = when (item.itemId) {
-        R.id.action_profile -> {
+        /*R.id.action_profile -> {
             true
-        }
+        }*/
 
         R.id.action_stars -> {
             val allMedications = DatabaseHelper.readAllData(Medications::class.java) as RealmResults<out Medications>

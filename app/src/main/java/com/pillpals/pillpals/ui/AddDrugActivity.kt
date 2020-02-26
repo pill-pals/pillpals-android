@@ -221,13 +221,14 @@ class AddDrugActivity : AppCompatActivity() {
             iconButton.icon = resources.getDrawable(DatabaseHelper.getDrawableIconById(this, getIconIDByString(imageDrawable)), theme)
 
 
-
-            if(dpdIdToLink == null || dpdIdToLink == 0) {
-
+            if(intent.hasExtra("dpd-id")){
+                linkMedicationButton.visibility = View.GONE
+            }
+            else if(dpdIdToLink == null || dpdIdToLink == 0) {
                 linkMedicationButton.visibility = View.VISIBLE
             }
             else {
-
+                linkMedicationButton.visibility = View.GONE
             }
 
             linkMedicationButton.setOnClickListener {
