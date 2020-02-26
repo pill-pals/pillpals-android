@@ -81,6 +81,10 @@ public class AlarmReceiver: BroadcastReceiver() {
                 drawable.setBounds((drawable.intrinsicWidth * 0.1).toInt(), (drawable.intrinsicWidth * 0.1).toInt(), iconCanvas.width - (drawable.intrinsicWidth * 0.1).toInt(), iconCanvas.height - (drawable.intrinsicWidth * 0.1).toInt())
                 drawable.draw(iconCanvas)
 
+                var stopNoiseIntent = Intent(context, this::class.java)
+                stopNoiseIntent.putExtra("stop-noise", true)
+                var pendingStopNoiseIntent = PendingIntent.getBroadcast(context, -2, stopNoiseIntent, 0)
+
                 // Set the notification content
                 val mBuilder = NotificationCompat.Builder(context, context.getString(R.string.channel_id_rich))
                     .setSmallIcon(getDrawable(privateMode))
@@ -88,6 +92,7 @@ public class AlarmReceiver: BroadcastReceiver() {
                     .setPriority(priorityValue)
                     .setLargeIcon(iconBitmap)
                     .setTicker(getTickerString(privateMode, sharedPreferences))
+                    .setDeleteIntent(pendingStopNoiseIntent)
 
 
                 if(medication.notes.isNotEmpty() && !privateMode) {

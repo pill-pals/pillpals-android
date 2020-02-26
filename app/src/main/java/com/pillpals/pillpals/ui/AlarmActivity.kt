@@ -107,6 +107,12 @@ class AlarmActivity : AppCompatActivity() {
         }
     }
 
+    override fun onBackPressed() {
+        PillPalsApplication.alarmNoiseHelper.stopNoise()
+
+        super.onBackPressed()
+    }
+
     private fun setupViewVars() {
         message = findViewById(R.id.alarmMessage)
         iconCard = findViewById(R.id.alarmIconBackground)
