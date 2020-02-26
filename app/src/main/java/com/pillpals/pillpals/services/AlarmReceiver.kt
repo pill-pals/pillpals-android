@@ -5,9 +5,11 @@ import android.app.Notification
 import android.app.PendingIntent
 import android.content.*
 import android.graphics.*
+import android.graphics.drawable.Drawable
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+import androidx.core.content.ContextCompat
 import com.pillpals.pillpals.R
 import com.pillpals.pillpals.data.model.Schedules
 import com.pillpals.pillpals.data.model.Medications
@@ -48,6 +50,7 @@ public class AlarmReceiver: BroadcastReceiver() {
             notificationManager.cancel(schedule.uid!!.hashCode())
         } else {
             val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
+            val privateMode = sharedPreferences.getBoolean("private_notifications",false)
             val priorityValue = if(sharedPreferences.getBoolean("notifications_silent", false) == false) {
                 NotificationCompat.PRIORITY_MAX
             } else {
@@ -58,11 +61,14 @@ public class AlarmReceiver: BroadcastReceiver() {
                 val occurrenceLocal = LocalDateTime.parse(intent.getStringExtra("schedule-occurrence"))
                 val occurrence = Date.from(occurrenceLocal.atZone(ZoneId.systemDefault()).toInstant())
 
-                val title = medication.name + " due at " + DateHelper.dateToString(
-                    occurrence
-                )
+                val title = getTitleString(medication, privateMode, occurrence, sharedPreferences)
 
-                val drawable = getCorrectIconDrawable(context, medication)
+                val drawable = if (privateMode) {
+                    ContextCompat.getDrawable(context, context.getResources()
+                        .getIdentifier("drawable/ic_clock", null, context.packageName))!!
+                } else {
+                    getCorrectIconDrawable(context, medication)
+                }
 
                 val iconBitmap = Bitmap.createBitmap((drawable.intrinsicWidth * 1.1).toInt(), (drawable.intrinsicHeight * 1.1).toInt(), Bitmap.Config.ARGB_8888)
 
@@ -77,14 +83,14 @@ public class AlarmReceiver: BroadcastReceiver() {
 
                 // Set the notification content
                 val mBuilder = NotificationCompat.Builder(context, context.getString(R.string.channel_id_rich))
-                    .setSmallIcon(R.drawable.ic_pill_v5)
+                    .setSmallIcon(getDrawable(privateMode))
                     .setContentTitle(title)
                     .setPriority(priorityValue)
                     .setLargeIcon(iconBitmap)
-                    .setTicker("It's time to take your medication!")
+                    .setTicker(getTickerString(privateMode, sharedPreferences))
 
 
-                if(medication.notes.isNotEmpty()) {
+                if(medication.notes.isNotEmpty() && !privateMode) {
                     mBuilder.setContentText("Notes:...")
                         .setStyle(NotificationCompat.BigTextStyle()
                             .bigText("Notes: " + medication.notes))
@@ -159,5 +165,31 @@ public class AlarmReceiver: BroadcastReceiver() {
 
         am.setExact(AlarmManager.RTC, cancelDate.time, cancelAlarmSender)
         //TODO: Add an additional, softer notification if time expires on primary alarm
+    }
+
+    private fun getTitleString (medication: Medications, privateMode: Boolean, occurrence: Date, preferences: SharedPreferences):String {
+        return if (privateMode) {
+            preferences.getString("private_notification_message","You have a notification")?: "You have a notification"
+        } else {
+            medication.name + " due at " + DateHelper.dateToString(
+                occurrence
+            )
+        }
+    }
+
+    private fun getTickerString (privateMode: Boolean, preferences: SharedPreferences):String {
+        return if (privateMode) {
+            preferences.getString("private_notification_message","You have a notification")?: "You have a notification"
+        } else {
+            "Time to take your medication!"
+        }
+    }
+
+    private fun getDrawable (privateMode: Boolean):Int {
+        if (privateMode) {
+            return R.drawable.ic_clock
+        } else {
+            return R.drawable.ic_pill_v5
+        }
     }
 }
