@@ -126,7 +126,7 @@ public class AlarmReceiver: BroadcastReceiver() {
                     flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
                 }
                 logIntent.putExtras(intent.extras!!)
-                var pendingLogIntent = PendingIntent.getActivity(context, 0, logIntent, PendingIntent.FLAG_UPDATE_CURRENT)
+                var pendingLogIntent = PendingIntent.getActivity(context, (schedule.uid!! + "LOG").hashCode(), logIntent, PendingIntent.FLAG_UPDATE_CURRENT)
                 var logAction = NotificationCompat.Action(R.drawable.ic_check_32, "LOG", pendingLogIntent)
                 mBuilder.addAction(logAction)
 
@@ -135,7 +135,7 @@ public class AlarmReceiver: BroadcastReceiver() {
                     flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
                 }
                 snoozeIntent.putExtras(intent.extras!!)
-                var pendingSnoozeIntent = PendingIntent.getActivity(context, 0, snoozeIntent, PendingIntent.FLAG_UPDATE_CURRENT)
+                var pendingSnoozeIntent = PendingIntent.getActivity(context, (schedule.uid!! + "SNOOZE").hashCode(), snoozeIntent, PendingIntent.FLAG_UPDATE_CURRENT)
                 var snoozeAction = NotificationCompat.Action(R.drawable.ic_clock_32, "SNOOZE", pendingSnoozeIntent)
                 mBuilder.addAction(snoozeAction)
 
