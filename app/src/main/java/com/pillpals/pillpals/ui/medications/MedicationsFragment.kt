@@ -202,6 +202,9 @@ class MedicationsFragment : Fragment() {
                     intent.putStringArrayListExtra("active-ingredients",  ArrayList(dpdObject.activeIngredients))
                     intent.putExtra("dosage-string", dpdObject.dosageString)
                     intent.putExtra("name-text", dpdObject.name)
+                    intent.putExtra("ndc-code", dpdObject.ndc_id)
+                    intent.putExtra("rxcui", dpdObject.rxcui)
+                    intent.putExtra("spl-set-id", dpdObject.spl_set_id)
                     startActivityForResult(intent, 2)
                 }
                 R.id.linkMedication -> {
@@ -244,6 +247,9 @@ class MedicationsFragment : Fragment() {
             intent.putStringArrayListExtra("active-ingredients",  ArrayList(dpdObject.activeIngredients))
             intent.putExtra("dosage-string", dpdObject.dosageString)
             intent.putExtra("name-text", dpdObject.name)
+            intent.putExtra("ndc-code", dpdObject.ndc_id)
+            intent.putExtra("rxcui", dpdObject.rxcui)
+            intent.putExtra("spl-set-id", dpdObject.spl_set_id)
             startActivityForResult(intent, 4)
         }
 
