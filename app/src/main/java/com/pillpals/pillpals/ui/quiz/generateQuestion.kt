@@ -1,11 +1,14 @@
 package com.pillpals.pillpals.ui.quiz
 
+import android.util.Log
 import com.pillpals.pillpals.data.model.Medications
 import com.pillpals.pillpals.data.model.MoodLogs
 import com.pillpals.pillpals.data.model.Questions
 import com.pillpals.pillpals.helpers.DatabaseHelper
 import com.pillpals.pillpals.helpers.DateHelper
+import com.pillpals.pillpals.helpers.MedicationInfoRetriever
 import com.pillpals.pillpals.helpers.StatsHelper
+import com.shopify.promises.Promise
 import io.realm.Realm
 import io.realm.RealmList
 import io.realm.RealmResults
@@ -21,16 +24,78 @@ fun generateQuestion(id: Int, medication: Medications):Questions {
     var correctAnswerString = ""
     var incorrectAnswers = mutableListOf<String>()
 
+    var waitingForResponse = false
+
     when (id) {
         //----  Questions with a medication that requires a linked database drug  ----//
-        //Placeholder
         1-> {
+            val dpd_object = medication.dpd_object?.firstOrNull()
 
-            correctAnswerString = "Correct"
-            incorrectAnswers.add("Incorrect 1")
-            incorrectAnswers.add("Incorrect 2")
-            incorrectAnswers.add("Incorrect 3")
-            question.question = "This question is asking about " + medication.name + " using template 1"
+            dpd_object ?: return question
+
+            val bothString = "Alcohol and Caffeine"
+            val justAlcString = "Just Alcohol"
+            val justCafString = "Just Caffeine"
+            val neitherString = "Neither Alcohol nor Caffeine"
+            val questionString = "Which does ${medication.name} have some degree of interaction with?"
+
+            val interactsWithAlcoholPromise = MedicationInfoRetriever.interactsWithAlcohol(dpd_object.ndc_id ?: "null")
+            val interactsWithCaffeinePromise = MedicationInfoRetriever.interactsWithCaffeine(dpd_object.ndc_id ?: "null")
+
+            var interactsWithAlcoholResponse = false
+            var interactsWithCaffeineResponse = false
+
+            waitingForResponse = true
+
+            interactsWithAlcoholPromise.whenComplete { result: Promise.Result<Boolean, RuntimeException> ->
+                when (result) {
+                    is Promise.Result.Success -> {
+                        // Use result here
+                        interactsWithAlcoholResponse = result.value
+                    }
+                    is Promise.Result.Error -> Log.i("Error", result.error.message!!)
+                }
+                interactsWithCaffeinePromise.whenComplete { result: Promise.Result<Boolean, RuntimeException> ->
+                    when (result) {
+                        is Promise.Result.Success -> {
+                            // Use result here
+                            interactsWithCaffeineResponse = result.value
+                        }
+                        is Promise.Result.Error -> Log.i("Error", result.error.message!!)
+                    }
+
+                    when (true) {
+                        interactsWithAlcoholResponse && interactsWithCaffeineResponse -> {
+                            correctAnswerString = bothString
+                            incorrectAnswers.add(justAlcString)
+                            incorrectAnswers.add(justCafString)
+                            incorrectAnswers.add(neitherString)
+                        }
+                        interactsWithAlcoholResponse && !interactsWithCaffeineResponse -> {
+                            correctAnswerString = justAlcString
+                            incorrectAnswers.add(bothString)
+                            incorrectAnswers.add(justCafString)
+                            incorrectAnswers.add(neitherString)
+                        }
+                        !interactsWithAlcoholResponse && interactsWithCaffeineResponse -> {
+                            correctAnswerString = justCafString
+                            incorrectAnswers.add(bothString)
+                            incorrectAnswers.add(justAlcString)
+                            incorrectAnswers.add(neitherString)
+                        }
+                        !interactsWithAlcoholResponse && !interactsWithCaffeineResponse -> {
+                            correctAnswerString = neitherString
+                            incorrectAnswers.add(bothString)
+                            incorrectAnswers.add(justAlcString)
+                            incorrectAnswers.add(justCafString)
+                        }
+                    }
+
+                    question.question = questionString
+
+                    waitingForResponse = false
+                }
+            }
         }
         //Placeholder
         2-> {
@@ -143,6 +208,10 @@ fun generateQuestion(id: Int, medication: Medications):Questions {
             throw IOException("question failed to generate")
         }
 
+    }
+
+    while(waitingForResponse) {
+        Thread.sleep(50)
     }
 
     //if there are more than 3 incorrect answers, remove some

@@ -50,6 +50,7 @@ import com.pillpals.pillpals.helpers.DatabaseHelper.Companion.obliterateSchedule
 import com.pillpals.pillpals.ocrreader.OcrCaptureActivity
 import com.pillpals.pillpals.ui.AddDrugActivity
 import com.pillpals.pillpals.ui.medications.medication_info.MedicationInfoActivity
+import com.pillpals.pillpals.ui.quiz.generateQuestion
 import com.pillpals.pillpals.ui.search.SearchActivity
 import com.shopify.promises.Promise
 import com.shopify.promises.then
@@ -172,8 +173,6 @@ class DashboardFragment : Fragment() {
         val allMedications = readAllData(Medications::class.java) as RealmResults<out Medications>
         val allSchedules = readAllData(Schedules::class.java) as RealmResults<out Schedules>
 
-        Log.i("test", allSchedules.toString())
-
         if(allMedications.filter{ !it.deleted }.count() == 0) {
             noMedicationsSection.visibility = View.VISIBLE
         }
@@ -208,10 +207,7 @@ class DashboardFragment : Fragment() {
             }
         }
         timer.schedule(doAsynchronousTask, 0, 60000)
-
-        val id = Settings.Secure.getString(context!!.contentResolver, Settings.Secure.ANDROID_ID)
-
-        //FileWriter.readFileOnInternalStorage(context!!)
+        timer.schedule(doAsynchronousTask, 0, 60000)
 
         return view
     }
