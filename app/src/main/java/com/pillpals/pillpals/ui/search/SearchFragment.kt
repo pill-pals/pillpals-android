@@ -51,7 +51,7 @@ class SearchFragment : Fragment() {
     public var apiDown: Boolean = false
     public var drugCards: MutableList<DrugCard?> = mutableListOf()
     public var upcomingDrugCards: MutableList<DrugCard?> = mutableListOf()
-    lateinit var searchLoading: ImageView
+    lateinit var searchLoading: ProgressBar
     public lateinit var loadingAnimation: RotateAnimation
     public var lastQuery: String? = null
     public var searchingUpcomingDrugs = false
@@ -159,13 +159,13 @@ class SearchFragment : Fragment() {
 
                             override fun onResponse(call: Call, response: Response) {
                                 response.use {
-                                    if (!response.isSuccessful) throw IOException("Unexpected code $response")
+                                    if (response.isSuccessful) {
+                                        val jsonString = response.body!!.string()
+                                        val gson = Gson()
+                                        val autocomplete = gson.fromJson(jsonString, Autocomplete::class.java)
 
-                                    val jsonString = response.body!!.string()
-                                    val gson = Gson()
-                                    val autocomplete = gson.fromJson(jsonString, Autocomplete::class.java)
-
-                                    suggestions = autocomplete.suggestions
+                                        suggestions = autocomplete.suggestions
+                                    }
                                     lastQuery = query
                                     showResultsFlag = true
                                 }
@@ -504,6 +504,8 @@ class SearchFragment : Fragment() {
                                                                 val firstRoute = administrationRoutes.firstOrNull()
                                                                 if(firstRoute != null) {
                                                                     newCard.icon.setImageResource(administrationRouteToIcon(firstRoute.route_of_administration_name))
+                                                                    newCard.loadingIcon.visibility = View.GONE
+                                                                    newCard.icon.visibility = View.VISIBLE
 
                                                                     administrationRoutesList = administrationRoutes.fold(listOf<String>()) { acc, it ->
                                                                         acc.plus(it.route_of_administration_name)
@@ -563,10 +565,13 @@ class SearchFragment : Fragment() {
     private fun addDrugCard(name: String): DrugCard {
         var newCard = DrugCard(this.context!!)
 
+        newCard.loadingIcon.visibility = View.VISIBLE
+        newCard.icon.visibility = View.GONE
+
         newCard.nameText.text = name
         newCard.timeText.text = "..."
-        newCard.icon.setImageResource(R.drawable.loader)
-        newCard.icon.startAnimation(loadingAnimation)
+//        newCard.icon.setImageResource(R.drawable.loader)
+//        newCard.icon.startAnimation(loadingAnimation)
 
         newCard.button.layoutParams.width = ViewGroup.LayoutParams.WRAP_CONTENT
 
@@ -578,12 +583,12 @@ class SearchFragment : Fragment() {
 
     private fun showSearchLoading() {
         searchLoading.startAnimation(loadingAnimation)
-        searchLoading.setImageResource(R.drawable.loader)
+        //searchLoading.setImageResource(R.drawable.loader)
         searchLoading.visibility = View.VISIBLE
     }
 
     private fun hideSearchLoading() {
-        searchLoading.setImageDrawable(null)
+        //searchLoading.setImageDrawable(null)
         searchLoading.visibility = GONE
         searchLoading.startAnimation(loadingAnimation)
     }

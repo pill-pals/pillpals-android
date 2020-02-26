@@ -82,18 +82,30 @@
                 app:layout_constraintTop_toTopOf="parent">
             </LinearLayout>
 
-            <ImageView
+
+            <ProgressBar
                 android:id="@+id/searchLoading"
                 android:layout_width="40dp"
                 android:layout_height="40dp"
-                android:layout_marginStart="16dp"
                 android:layout_marginTop="8dp"
-                android:src="@drawable/loader"
                 android:animateLayoutChanges="true"
+
                 android:visibility="gone"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/searchResults"></ImageView>
+                app:layout_constraintTop_toBottomOf="@id/searchResults"
+                android:indeterminate="true" />
+<!--            <ImageView-->
+<!--                android:id="@+id/searchLoading"-->
+<!--                android:layout_width="40dp"-->
+<!--                android:layout_height="40dp"-->
+<!--                android:layout_marginTop="8dp"-->
+<!--                android:animateLayoutChanges="true"-->
+<!--                android:src="@drawable/loader"-->
+<!--                android:visibility="gone"-->
+<!--                app:layout_constraintEnd_toEndOf="parent"-->
+<!--                app:layout_constraintStart_toStartOf="parent"-->
+<!--                app:layout_constraintTop_toBottomOf="@id/searchResults"></ImageView>-->
         </androidx.constraintlayout.widget.ConstraintLayout>
 
     </com.pillpals.pillpals.ui.ColorFadeScrollView>

@@ -10,28 +10,28 @@
     <Button
         android:id="@+id/dialogScanBtn"
         android:text="Scan container label"
-        style="@style/Base.Widget.AppCompat.Button.Colored"
+        style="@style/TextAppearance.Button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
 
     <Button
         android:id="@+id/dialogSearchBtn"
         android:text="Search by name or DIN"
-        style="@style/Base.Widget.AppCompat.Button.Colored"
+        style="@style/TextAppearance.Button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
 
     <Button
         android:id="@+id/dialogManualBtn"
-        android:text="Add Manually"
-        style="@style/Base.Widget.AppCompat.Button.Colored"
+        android:text="Add manually"
+        style="@style/TextAppearance.Button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
 
     <Button
         android:id="@+id/dialogCancelAddBtn"
         android:text="Cancel"
-        style="@style/Base.Widget.AppCompat.Button.Colored"
+        style="@style/TextAppearance.Button"
         android:backgroundTint="@color/colorDarkGrey"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />

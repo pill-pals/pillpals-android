@@ -42,14 +42,14 @@
             android:id="@+id/dialogStartScanBtn"
             android:text="Start scan"
             android:layout_marginTop="16dp"
-            style="@style/Base.Widget.AppCompat.Button.Colored"
+            style="@style/TextAppearance.Button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
 
         <Button
             android:id="@+id/dialogCancelScanBtn"
             android:text="Cancel"
-            style="@style/Base.Widget.AppCompat.Button.Colored"
+            style="@style/TextAppearance.Button"
             android:backgroundTint="@color/colorDarkGrey"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />

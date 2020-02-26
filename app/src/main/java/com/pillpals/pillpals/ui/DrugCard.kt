@@ -3,10 +3,7 @@ package com.pillpals.pillpals.ui
 import android.content.Context
 import android.graphics.Color
 import android.util.AttributeSet
-import android.widget.ImageButton
-import android.widget.ImageView
-import android.widget.TextView
-import android.widget.LinearLayout
+import android.widget.*
 import com.google.android.material.button.MaterialButton
 import com.pillpals.pillpals.R
 import androidx.cardview.widget.CardView
@@ -27,6 +24,7 @@ class DrugCard : LinearLayout {
     public lateinit var icon: ImageView
     public lateinit var iconBackground: CardView
     public lateinit var overflowMenu: ImageButton
+    lateinit var loadingIcon: ProgressBar
     public var drugCode: Int = 0
     public var activeIngredients = listOf<String>()
     public var dosageString = ""
@@ -63,8 +61,10 @@ class DrugCard : LinearLayout {
         icon = findViewById(R.id.icon)
         iconBackground = findViewById(R.id.iconBackground)
         overflowMenu = findViewById(R.id.overflowMenu)
+        loadingIcon = findViewById(R.id.loadingIcon)
 
         //Initialize elements
+        loadingIcon.visibility = GONE
         button.visibility = GONE
         countdownLabel.visibility = GONE
         logtimeLabel.visibility = GONE

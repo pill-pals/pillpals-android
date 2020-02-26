@@ -11,6 +11,7 @@ import android.view.animation.LinearInterpolator
 import android.view.animation.RotateAnimation
 import android.widget.ImageView
 import android.widget.LinearLayout
+import android.widget.ProgressBar
 
 import com.pillpals.pillpals.R
 import io.realm.Realm
@@ -18,7 +19,7 @@ import io.realm.Realm
 class MedicationInfoTextFragment : Fragment() {
 
     public lateinit var layout: LinearLayout
-    lateinit var loading: ImageView
+    lateinit var loading: ProgressBar
     lateinit var loadingAnimation: RotateAnimation
 
     private lateinit var realm: Realm
@@ -50,12 +51,12 @@ class MedicationInfoTextFragment : Fragment() {
     fun setTabLoading(loadingBool: Boolean) {
         if(loadingBool) {
             loading.startAnimation(loadingAnimation)
-            loading.setImageResource(R.drawable.loader)
+            //loading.setImageResource(R.drawable.loader)
             loading.visibility = View.VISIBLE
         }
         else {
             loading.visibility = View.INVISIBLE
-            loading.setImageDrawable(null)
+            //loading.setImageDrawable(null)
             loading.startAnimation(loadingAnimation)
         }
     }
