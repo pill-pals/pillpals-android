@@ -89,7 +89,7 @@ class QuizActivity: AppCompatActivity() {
         }
 
         generateQuizButton.setOnClickListener{
-            QuizGenerator.generateQuiz()
+            QuizGenerator.safeGenerateQuiz(this)
             update()
         }
 

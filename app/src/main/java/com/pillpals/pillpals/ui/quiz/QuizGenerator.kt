@@ -1,5 +1,6 @@
 package com.pillpals.pillpals.ui.quiz
 
+import android.content.Context
 import com.pillpals.pillpals.ui.statistics.DataLogs
 import com.pillpals.pillpals.ui.statistics.MissingLogs
 import com.pillpals.pillpals.ui.statistics.TimeCount
@@ -7,6 +8,7 @@ import io.realm.Realm
 import java.util.*
 import kotlin.math.abs
 import android.util.Log
+import android.widget.Toast
 import com.pillpals.pillpals.data.model.*
 import com.pillpals.pillpals.helpers.DateHelper
 import com.pillpals.pillpals.helpers.QuizHelper
@@ -50,6 +52,15 @@ class QuizGenerator() {
             }else{
                 Log.i("quiz", "Quiz generation not attempted")
                 return 3
+            }
+        }
+
+        fun safeGenerateQuiz(context: Context) {
+            try {
+                generateQuiz()
+            }
+            catch(e: IOException){
+                Toast.makeText(context,"Quiz generation failed, try again later.", Toast.LENGTH_SHORT).show()
             }
         }
 
