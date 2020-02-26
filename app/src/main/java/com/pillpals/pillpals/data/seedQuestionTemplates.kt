@@ -6,15 +6,15 @@ import io.realm.RealmList
 import java.util.*
 
 fun seedQuestionTemplates(realm: Realm) {
-        var qT = QuestionTemplates()
+    var qT = QuestionTemplates()
 
-        for (i in 1..5) {
-            qT.id = i
-            realm.insertOrUpdate(qT)
-        }
-        for (i in 101..106){
-            qT.id = i
-            qT.canUseOnNonLinkedMedications = true
-            realm.insertOrUpdate(qT)
-        }
+    for (i in 1..5) {
+        qT.id = i
+        realm.insertOrUpdate(qT)
     }
+    for (i in 101..106){
+        qT.id = i
+        qT.canUseOnNonLinkedMedications = true
+        realm.insertOrUpdate(qT)
+    }
+}

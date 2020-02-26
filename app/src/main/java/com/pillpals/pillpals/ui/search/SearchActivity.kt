@@ -309,7 +309,6 @@ class SearchActivity : AppCompatActivity() {
                 url = "https://health-products.canada.ca/api/drug/drugproduct/?brandname=${re.replace(suggestion, "")}"
             }
 
-
             val request = Request.Builder().url(url).build()
 
             client.newCall(request).enqueue(object : Callback {
@@ -348,7 +347,7 @@ class SearchActivity : AppCompatActivity() {
                             return
                         }
 
-                        drugProducts.forEachIndexed {namedIndex, drugProduct ->
+                        drugProducts.take(100).forEachIndexed {namedIndex, drugProduct ->
                             // gather info and set to card
                             val newCard = DrugCard(outerContext)
                             newCard.nameText.text = drugProduct.brand_name
@@ -359,11 +358,6 @@ class SearchActivity : AppCompatActivity() {
                             newCard.button.margin(right = 0F)
 
                             newCard.drugCode = drugProduct.drug_code
-
-                            while(searchingUpcomingDrugs) {
-                                Thread.sleep(50)
-                            }
-                            upcomingDrugCards.add(newCard)
 
                             val url = "https://health-products.canada.ca/api/drug/activeingredient/?id=${drugProduct.drug_code}"
 
@@ -400,9 +394,11 @@ class SearchActivity : AppCompatActivity() {
                                             else acc.plus(it.strength_unit)
                                         }
 
-                                        newCard.dosageString = "${dosageValues.joinToString("/")} ${dosageUnits.joinToString("/")}"
+                                        val dosageString = "${dosageValues.joinToString("/")} ${dosageUnits.joinToString("/")}"
 
-                                        newCard.lateText.text = newCard.dosageString
+                                        newCard.dosageString = dosageString
+
+                                        newCard.lateText.text = dosageString
 
                                         newCard.lateText.visibility = View.VISIBLE
 
@@ -411,7 +407,7 @@ class SearchActivity : AppCompatActivity() {
                                         }
                                         upcomingDrugCards.add(newCard)
 
-                                        if(multipleDrugsExistsWithName(drugProduct.brand_name, newCard.dosageString)) {
+                                        if(multipleDrugsExistsWithName(drugProduct.brand_name, dosageString)) {
                                             drugCards[index] = null
                                             refreshCardsFlag = true
                                             return
@@ -448,13 +444,15 @@ class SearchActivity : AppCompatActivity() {
                                                         val fdaResults = fdaResponse.results
 
                                                         val fdaResultWithDosage = fdaResults?.filter {
-                                                            if(it.active_ingredients == null) return@filter false
-                                                            val totalVal = it.active_ingredients.fold(0f) {acc, it ->
-                                                                acc + it.strength.replace("( .*)".toRegex(), "").toFloat()
+                                                            if(it.active_ingredients == null) false
+                                                            else {
+                                                                val totalVal = it.active_ingredients.fold(0f) {acc, it ->
+                                                                    acc + it.strength.replace("( .*)".toRegex(), "").toFloat()
+                                                                }
+                                                                it.active_ingredients.any {
+                                                                    it.strength.contains("${dosageValues.first()} ${dosageUnits.firstOrNull()?.toLowerCase()}")
+                                                                } || (dosageValues.firstOrNull() != null && dosageValues.firstOrNull()!!.isNotEmpty() && dosageValues.firstOrNull()?.toFloat() == totalVal)
                                                             }
-                                                            it.active_ingredients.any {
-                                                                it.strength.contains("${dosageValues.first()} ${dosageUnits.firstOrNull()?.toLowerCase()}")
-                                                            } || dosageValues.firstOrNull()?.toFloat() == totalVal
                                                         }?.firstOrNull()
 
                                                         val firstFdaResult = fdaResults?.firstOrNull()
@@ -506,6 +504,8 @@ class SearchActivity : AppCompatActivity() {
                                                                 val firstRoute = administrationRoutes.firstOrNull()
                                                                 if(firstRoute != null) {
                                                                     newCard.icon.setImageResource(administrationRouteToIcon(firstRoute.route_of_administration_name))
+                                                                    newCard.loadingIcon.visibility = View.GONE
+                                                                    newCard.icon.visibility = View.VISIBLE
 
                                                                     administrationRoutesList = administrationRoutes.fold(listOf<String>()) { acc, it ->
                                                                         acc.plus(it.route_of_administration_name)
@@ -525,7 +525,6 @@ class SearchActivity : AppCompatActivity() {
                                                                     else {
                                                                         infoIntent.putExtra("link-medication", false)
                                                                     }
-
 
                                                                     infoIntent.putExtra("drug-code", newCard.drugCode)
                                                                     infoIntent.putExtra("icon-color", colorString)
@@ -571,10 +570,13 @@ class SearchActivity : AppCompatActivity() {
     private fun addDrugCard(name: String): DrugCard {
         var newCard = DrugCard(this)
 
+        newCard.loadingIcon.visibility = View.VISIBLE
+        newCard.icon.visibility = View.GONE
+
         newCard.nameText.text = name
         newCard.timeText.text = "..."
-        newCard.icon.setImageResource(R.drawable.loader)
-        newCard.icon.startAnimation(loadingAnimation)
+//        newCard.icon.setImageResource(R.drawable.loader)
+//        newCard.icon.startAnimation(loadingAnimation)
 
         newCard.button.layoutParams.width = ViewGroup.LayoutParams.WRAP_CONTENT
 
