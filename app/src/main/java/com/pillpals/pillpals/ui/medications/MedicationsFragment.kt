@@ -82,7 +82,7 @@ class MedicationsFragment : Fragment() {
         drugButton.setOnClickListener {
             val addPrompt = LayoutInflater.from(this.context).inflate(R.layout.add_medication_prompt, null)
 
-            val title = SpannableString("Add medication")
+            val title = SpannableString("Add Medication")
             title.setSpan(
                 ForegroundColorSpan(this!!.resources.getColor(R.color.colorLightGrey)),
                 0,
@@ -99,7 +99,7 @@ class MedicationsFragment : Fragment() {
                 alertDialog.dismiss()
                 val scanPrompt = LayoutInflater.from(this.context).inflate(R.layout.scan_prompt, null)
 
-                val scanTitle = SpannableString("Scan medication")
+                val scanTitle = SpannableString("Scan Medication")
                 scanTitle.setSpan(
                     ForegroundColorSpan(this!!.resources.getColor(R.color.colorLightGrey)),
                     0,

@@ -57,7 +57,7 @@ class SearchActivity : AppCompatActivity() {
     public var apiDown: Boolean = false
     public var drugCards: MutableList<DrugCard?> = mutableListOf()
     public var upcomingDrugCards: MutableList<DrugCard?> = mutableListOf()
-    lateinit var searchLoading: ImageView
+    lateinit var searchLoading: ProgressBar
     public lateinit var loadingAnimation: RotateAnimation
     public var lastQuery: String? = null
     public var searchingUpcomingDrugs = false
@@ -167,13 +167,13 @@ class SearchActivity : AppCompatActivity() {
 
                             override fun onResponse(call: Call, response: Response) {
                                 response.use {
-                                    if (!response.isSuccessful) throw IOException("Unexpected code $response")
+                                    if (response.isSuccessful) {
+                                        val jsonString = response.body!!.string()
+                                        val gson = Gson()
+                                        val autocomplete = gson.fromJson(jsonString, Autocomplete::class.java)
 
-                                    val jsonString = response.body!!.string()
-                                    val gson = Gson()
-                                    val autocomplete = gson.fromJson(jsonString, Autocomplete::class.java)
-
-                                    suggestions = autocomplete.suggestions
+                                        suggestions = autocomplete.suggestions
+                                    }
                                     lastQuery = query
                                     showResultsFlag = true
                                 }
@@ -586,12 +586,12 @@ class SearchActivity : AppCompatActivity() {
 
     private fun showSearchLoading() {
         searchLoading.startAnimation(loadingAnimation)
-        searchLoading.setImageResource(R.drawable.loader)
+        //searchLoading.setImageResource(R.drawable.loader)
         searchLoading.visibility = View.VISIBLE
     }
 
     private fun hideSearchLoading() {
-        searchLoading.setImageDrawable(null)
+        //searchLoading.setImageDrawable(null)
         searchLoading.visibility = GONE
         searchLoading.startAnimation(loadingAnimation)
     }

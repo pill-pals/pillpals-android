@@ -327,7 +327,7 @@ class MedicationInfoRetriever {
                             if(termObjects == null || termObjects.isEmpty()) return resolve(res)
 
                             val totalCount = termObjects.fold(0) {acc, it -> acc + it.count}.toFloat()
-                            Log.i("here", "test")
+
                             res = termObjects.fold(listOf<SideEffectResult>()) {acc, it -> acc.plus(SideEffectResult(it.term, it.count, it.count.toFloat() / totalCount))}
 
                             resolve(res)

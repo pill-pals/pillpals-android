@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
+import android.widget.Toast
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
@@ -28,8 +29,12 @@ import io.realm.RealmResults
 
 class MainActivity : AppCompatActivity() {
 
+    private lateinit var quizNoMedsToast: Toast
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        quizNoMedsToast = Toast.makeText(this, "You must have at least one medication for the Quiz feature", Toast.LENGTH_SHORT)
 
         Realm.init(this)
 
@@ -65,8 +70,14 @@ class MainActivity : AppCompatActivity() {
         }
 
         R.id.action_stars -> {
-            val addIntent = Intent(this, QuizActivity::class.java)
-            startActivity(addIntent)
+            val allMedications = DatabaseHelper.readAllData(Medications::class.java) as RealmResults<out Medications>
+            if(allMedications.count() == 0) {
+                quizNoMedsToast.show()
+            }
+            else {
+                val addIntent = Intent(this, QuizActivity::class.java)
+                startActivity(addIntent)
+            }
             true
         }
 

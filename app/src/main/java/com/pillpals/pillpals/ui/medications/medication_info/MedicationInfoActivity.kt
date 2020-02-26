@@ -14,10 +14,7 @@ import android.text.style.ForegroundColorSpan
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import android.widget.Button
-import android.widget.LinearLayout
 import android.widget.LinearLayout.LayoutParams
-import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentStatePagerAdapter
@@ -32,7 +29,7 @@ import android.view.View
 import android.view.animation.Animation
 import android.view.animation.LinearInterpolator
 import android.view.animation.RotateAnimation
-import android.widget.ImageView
+import android.widget.*
 import androidx.cardview.widget.CardView
 import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
@@ -58,7 +55,7 @@ class MedicationInfoActivity : AppCompatActivity() {
     public lateinit var nameText: TextView
     public lateinit var dosageText: TextView
     public lateinit var alreadyAdded: TextView
-    lateinit var updatingLoadingIcon: ImageView
+    lateinit var updatingLoadingIcon: ProgressBar
     lateinit var updatingText: TextView
     lateinit var loadingAnimation: RotateAnimation
     lateinit var informationIcon: ImageView
@@ -348,7 +345,7 @@ class MedicationInfoActivity : AppCompatActivity() {
     }
 
     private fun bulletedList(list: List<String>): String {
-        return " • " + list.joinToString("\n• ")
+        return "• " + list.joinToString("\n• ")
     }
 
     //Assumes that the headers and bodyText lists are ordered and have indices that correspond with each other 1:1
@@ -396,7 +393,7 @@ class MedicationInfoActivity : AppCompatActivity() {
         // Fill info from  DB to start
         // fillStoredData()
 
-        updatingLoadingIcon.setImageResource(R.drawable.loader)
+        //updatingLoadingIcon.setImageResource(R.drawable.loader)
         updatingLoadingIcon.startAnimation(loadingAnimation)
 
         updatingLoadingIcon.visibility = View.VISIBLE
