@@ -164,19 +164,17 @@ class QuizQuestionActivity : AppCompatActivity() {
     }
 
     private fun handleButtonOnClick(question: Questions, answer: Int, index: Int) {
-        var debounceTimer = Timer()
-        debounceTimer.schedule(timerTask {
-            buttonOnClickEnabled = true
-        },fadeinTime+fadeoutTime*2+correctAnswerShowDelay)
-
         if (buttonOnClickEnabled) {
+            var debounceTimer = Timer()
+            debounceTimer.schedule(timerTask {
+                buttonOnClickEnabled = true
+            },fadeinTime+fadeoutTime*2+correctAnswerShowDelay+200)
+            buttonOnClickEnabled = false
+
             answerQuestion(question,answer)
             animateViewOut(question,index)
             flashColor(question, answer)
         }
-
-        buttonOnClickEnabled = false
-
     }
 
     private fun flashColor(question: Questions, answer: Int) {
