@@ -207,9 +207,7 @@ class DashboardFragment : Fragment() {
             }
         }
         timer.schedule(doAsynchronousTask, 0, 60000)
-
-        Log.i("del", allMedications.last()!!.dpd_object!!.first()!!.toString())
-
+        
         return view
     }
 
