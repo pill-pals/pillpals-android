@@ -60,6 +60,11 @@
             </intent>
         </Preference>
 
+        <Preference
+            android:key="privacy_policy"
+            android:title="Privacy Policy">
+        </Preference>
+
     </PreferenceCategory>
 
 </androidx.preference.PreferenceScreen>
