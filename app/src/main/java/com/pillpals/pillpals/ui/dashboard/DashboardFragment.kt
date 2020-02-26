@@ -208,6 +208,8 @@ class DashboardFragment : Fragment() {
         }
         timer.schedule(doAsynchronousTask, 0, 60000)
 
+        Log.i("del", allMedications.last()!!.dpd_object!!.first()!!.toString())
+
         return view
     }
 
@@ -391,6 +393,9 @@ class DashboardFragment : Fragment() {
                     intent.putStringArrayListExtra("active-ingredients",  ArrayList(dpdObject.activeIngredients))
                     intent.putExtra("dosage-string", dpdObject.dosageString)
                     intent.putExtra("name-text", dpdObject.name)
+                    intent.putExtra("ndc-code", dpdObject.ndc_id)
+                    intent.putExtra("rxcui", dpdObject.rxcui)
+                    intent.putExtra("spl-set-id", dpdObject.spl_set_id)
                     startActivityForResult(intent, 2)
                 }
                 R.id.linkMedication -> {
@@ -461,6 +466,9 @@ class DashboardFragment : Fragment() {
                     intent.putStringArrayListExtra("active-ingredients",  ArrayList(dpdObject.activeIngredients))
                     intent.putExtra("dosage-string", dpdObject.dosageString)
                     intent.putExtra("name-text", dpdObject.name)
+                    intent.putExtra("ndc-code", dpdObject.ndc_id)
+                    intent.putExtra("rxcui", dpdObject.rxcui)
+                    intent.putExtra("spl-set-id", dpdObject.spl_set_id)
                     startActivityForResult(intent, 2)
                 }
                 R.id.linkMedication -> {
@@ -537,6 +545,9 @@ class DashboardFragment : Fragment() {
                     intent.putStringArrayListExtra("active-ingredients",  ArrayList(dpdObject.activeIngredients))
                     intent.putExtra("dosage-string", dpdObject.dosageString)
                     intent.putExtra("name-text", dpdObject.name)
+                    intent.putExtra("ndc-code", dpdObject.ndc_id)
+                    intent.putExtra("rxcui", dpdObject.rxcui)
+                    intent.putExtra("spl-set-id", dpdObject.spl_set_id)
                     startActivityForResult(intent, 2)
                 }
                 R.id.linkMedication -> {
@@ -635,6 +646,9 @@ class DashboardFragment : Fragment() {
             intent.putStringArrayListExtra("active-ingredients",  ArrayList(dpdObject.activeIngredients))
             intent.putExtra("dosage-string", dpdObject.dosageString)
             intent.putExtra("name-text", dpdObject.name)
+            intent.putExtra("ndc-code", dpdObject.ndc_id)
+            intent.putExtra("rxcui", dpdObject.rxcui)
+            intent.putExtra("spl-set-id", dpdObject.spl_set_id)
             startActivityForResult(intent, 2)
         }
 
