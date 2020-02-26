@@ -418,7 +418,20 @@ class SearchFragment : Fragment() {
                                         newCard.timeText.text = ingredientNameList.joinToString()
 
                                         // Get other ID's from FDA
-                                        val url = "https://api.fda.gov/drug/ndc.json?limit=100&search=brand_name:${drugProduct.brand_name.replace("( .*)".toRegex(), "")}"
+                                        val url = "https://api.fda.gov/drug/ndc.json?limit=100&search=brand_name:${drugProduct.brand_name
+                                            .replace("(ACT(-| ))".toRegex(), "")
+                                            .replace("(TEVA(-| ))".toRegex(), "")
+                                            .replace("(TARO(-| ))".toRegex(), "")
+                                            .replace("(DOM(-| ))".toRegex(), "")
+                                            .replace("(PHL(-| ))".toRegex(), "")
+                                            .replace("(PMS(-| ))".toRegex(), "")
+                                            .replace("(RIVA(-| ))".toRegex(), "")
+                                            .replace("(RATIO(-| ))".toRegex(), "")
+                                            .replace("(NU(-| ))".toRegex(), "")
+                                            .replace("(APO(-| ))".toRegex(), "")
+                                            .replace("(MYLAN(-| ))".toRegex(), "")
+                                            .replace("(ZYM(-| ))".toRegex(), "")
+                                            .replace("( .*)".toRegex(), "")}"
 
                                         val request = Request.Builder().url(url).build()
 
@@ -434,39 +447,39 @@ class SearchFragment : Fragment() {
 
                                             override fun onResponse(call: Call, response: Response) {
                                                 response.use {
-                                                    if (!response.isSuccessful) throw IOException("Unexpected code $response")
+                                                    if (response.isSuccessful) {
+                                                        val jsonString = response.body!!.string()
+                                                        val gson = Gson()
+                                                        val fdaResponse = gson.fromJson(jsonString, OpenFDANameResponse::class.java)
 
-                                                    val jsonString = response.body!!.string()
-                                                    val gson = Gson()
-                                                    val fdaResponse = gson.fromJson(jsonString, OpenFDANameResponse::class.java)
+                                                        if(fdaResponse.error == null) {
+                                                            val fdaResults = fdaResponse.results
 
-                                                    if(fdaResponse.error == null) {
-                                                        val fdaResults = fdaResponse.results
-
-                                                        val fdaResultWithDosage = fdaResults?.filter {
-                                                            if(it.active_ingredients == null) false
-                                                            else {
-                                                                val totalVal = it.active_ingredients.fold(0f) {acc, it ->
-                                                                    acc + it.strength.replace("( .*)".toRegex(), "").toFloat()
+                                                            val fdaResultWithDosage = fdaResults?.filter {
+                                                                if(it.active_ingredients == null) false
+                                                                else {
+                                                                    val totalVal = it.active_ingredients.fold(0f) {acc, it ->
+                                                                        acc + it.strength.replace("( .*)".toRegex(), "").toFloat()
+                                                                    }
+                                                                    it.active_ingredients.any {
+                                                                        it.strength.contains("${dosageValues.first()} ${dosageUnits.firstOrNull()?.toLowerCase()}")
+                                                                    } || (dosageValues.firstOrNull() != null && dosageValues.firstOrNull()!!.isNotEmpty() && dosageValues.firstOrNull()?.toFloat() == totalVal)
                                                                 }
-                                                                it.active_ingredients.any {
-                                                                    it.strength.contains("${dosageValues.first()} ${dosageUnits.firstOrNull()?.toLowerCase()}")
-                                                                } || (dosageValues.firstOrNull() != null && dosageValues.firstOrNull()!!.isNotEmpty() && dosageValues.firstOrNull()?.toFloat() == totalVal)
+                                                            }?.firstOrNull()
+
+                                                            val firstFdaResult = fdaResults?.firstOrNull()
+
+                                                            // SET FDA IDS
+                                                            if(fdaResultWithDosage != null) {
+                                                                newCard.ndcCode = fdaResultWithDosage.product_ndc
+                                                                newCard.rxcui = fdaResultWithDosage.openfda.rxcui?.firstOrNull()
+                                                                newCard.splSetId = fdaResultWithDosage.openfda.spl_set_id?.firstOrNull()
                                                             }
-                                                        }?.firstOrNull()
-
-                                                        val firstFdaResult = fdaResults?.firstOrNull()
-
-                                                        // SET FDA IDS
-                                                        if(fdaResultWithDosage != null) {
-                                                            newCard.ndcCode = fdaResultWithDosage.product_ndc
-                                                            newCard.rxcui = fdaResultWithDosage.openfda.rxcui?.firstOrNull()
-                                                            newCard.splSetId = fdaResultWithDosage.openfda.spl_set_id?.firstOrNull()
-                                                        }
-                                                        else if(firstFdaResult != null) {
-                                                            newCard.ndcCode = firstFdaResult.product_ndc
-                                                            newCard.rxcui = firstFdaResult.openfda.rxcui?.firstOrNull()
-                                                            newCard.splSetId = firstFdaResult.openfda.spl_set_id?.firstOrNull()
+                                                            else if(firstFdaResult != null) {
+                                                                newCard.ndcCode = firstFdaResult.product_ndc
+                                                                newCard.rxcui = firstFdaResult.openfda.rxcui?.firstOrNull()
+                                                                newCard.splSetId = firstFdaResult.openfda.spl_set_id?.firstOrNull()
+                                                            }
                                                         }
                                                     }
 
