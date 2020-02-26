@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/colorLightGrey"
+    android:background="@drawable/alarm_gradient"
     tools:context=".ui.AlarmActivity">
 
     <!-- The primary full-screen view. This can be replaced with whatever view
@@ -13,31 +13,35 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/alarmLayout"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:layout_marginHorizontal="16dp">
 
         <TextView
             android:id="@+id/alarmMessage"
             android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_marginTop="32dp"
-            android:gravity="center"
+            android:layout_height="64dp"
+            android:layout_marginTop="24dp"
+            android:autoSizeMaxTextSize="40sp"
+            android:autoSizeMinTextSize="20sp"
+            android:autoSizeStepGranularity="2sp"
+            android:autoSizeTextType="uniform"
+            android:gravity="center_horizontal"
             android:keepScreenOn="true"
-            android:text="It's time to take your medication!"
-            android:textColor="@color/colorDarkGrey"
-            android:textSize="40sp"
+            android:text="Medication Name"
+            android:textColor="@color/colorWhite"
             android:textStyle="bold"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toBottomOf="@+id/alarmIconBackground" />
 
         <androidx.cardview.widget.CardView
             android:id="@+id/alarmIconBackground"
             android:layout_width="160dp"
             android:layout_height="160dp"
-            android:layout_marginTop="80dp"
+            android:layout_marginTop="56dp"
             app:cardBackgroundColor="@android:color/holo_blue_bright"
             app:cardCornerRadius="16dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/alarmMessage">
+            app:layout_constraintTop_toBottomOf="@+id/alarmTime">
 
             <ImageView
                 android:id="@+id/alarmIcon"
@@ -54,23 +58,45 @@
             android:id="@+id/alarmTime"
             android:layout_width="wrap_content"
             android:layout_height="0dp"
-            android:layout_marginTop="32dp"
+            android:layout_marginTop="64dp"
+            android:fontFamily="monospace"
             android:text="12:00 PM"
-            android:textColor="@color/colorDarkGrey"
-            android:textSize="40sp"
+            android:textColor="@color/colorWhite"
+            android:textSize="60dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/alarmIconBackground" />
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/alarmDosage"
+            android:layout_width="match_parent"
+            android:layout_height="24dp"
+            android:layout_marginHorizontal="32dp"
+            android:autoSizeMaxTextSize="20sp"
+            android:autoSizeMinTextSize="10sp"
+            android:autoSizeStepGranularity="2sp"
+            android:autoSizeTextType="uniform"
+            android:gravity="center_horizontal"
+            android:textColor="@color/colorWhite"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/alarmMessage" />
 
         <TextView
             android:id="@+id/alarmNote"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:layout_height="80dp"
+            android:layout_marginHorizontal="32dp"
             android:layout_marginTop="16dp"
-            android:textSize="20sp"
+            android:autoSizeMaxTextSize="20sp"
+            android:autoSizeMinTextSize="10sp"
+            android:autoSizeStepGranularity="2sp"
+            android:autoSizeTextType="uniform"
+            android:gravity="center_horizontal"
+            android:textColor="@color/colorWhite"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/alarmTime" />
+            app:layout_constraintTop_toBottomOf="@+id/alarmDosage" />
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/alarmControls"
@@ -81,11 +107,16 @@
             <Button
                 android:id="@+id/alarmLogButton"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="4dp"
-                android:layout_marginEnd="4dp"
+                android:layout_height="60dp"
+                android:layout_marginHorizontal="0dp"
+                android:layout_marginBottom="16dp"
+                android:backgroundTint="#1F7926"
+                android:fontFamily="sans-serif-light"
+                android:insetTop="0dp"
+                android:insetBottom="0dp"
                 android:text="LOG"
                 android:textSize="32sp"
+                app:cornerRadius="30dp"
                 app:layout_constraintBottom_toTopOf="@+id/alarmBottomButtons"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent" />
@@ -94,7 +125,8 @@
                 android:id="@+id/alarmBottomButtons"
                 style="?metaButtonBarStyle"
                 android:layout_width="0dp"
-                android:layout_height="48dp"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
                 android:orientation="horizontal"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -105,17 +137,21 @@
                     android:id="@+id/alarmSnoozeButton"
                     style="@style/Widget.MaterialComponents.Button.TextButton"
                     android:layout_width="0dp"
-                    android:layout_height="wrap_content"
+                    android:layout_height="40dp"
                     android:layout_weight="1"
                     android:backgroundTint="@color/colorPrimary"
-                    android:insetLeft="4dp"
+                    android:fontFamily="sans-serif-light"
+                    android:insetLeft="0dp"
+                    android:insetTop="0dp"
+                    android:insetBottom="0dp"
                     android:text="Snooze"
                     android:textColor="@color/colorGrey"
-                    android:textSize="20sp" />
+                    android:textSize="20sp"
+                    app:cornerRadius="20dp" />
 
                 <View
                     android:id="@+id/alarmButtonSeparator"
-                    android:layout_width="4dp"
+                    android:layout_width="8dp"
                     android:layout_height="match_parent"
                     android:layout_weight="0" />
 
@@ -123,13 +159,17 @@
                     android:id="@+id/alarmOpenAppButton"
                     style="@style/Widget.MaterialComponents.Button.TextButton"
                     android:layout_width="0dp"
-                    android:layout_height="wrap_content"
+                    android:layout_height="40dp"
                     android:layout_weight="1"
                     android:backgroundTint="@color/colorPrimary"
-                    android:insetRight="4dp"
+                    android:fontFamily="sans-serif-light"
+                    android:insetTop="0dp"
+                    android:insetRight="0dp"
+                    android:insetBottom="0dp"
                     android:text="Open PillPals"
                     android:textColor="@color/colorGrey"
-                    android:textSize="20sp" />
+                    android:textSize="20sp"
+                    app:cornerRadius="20dp" />
 
             </LinearLayout>
         </androidx.constraintlayout.widget.ConstraintLayout>

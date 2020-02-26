@@ -234,7 +234,7 @@ class MedicationsFragment : Fragment() {
         newCard.iconBackground.setCardBackgroundColor(Color.parseColor(getColorStringByID(medication.color_id)))
         newCard.icon.setImageDrawable(getCorrectIconDrawable(this.context!!, medication))
 
-        newCard.setOnClickListener {
+        newCard.icon.setOnClickListener {
             val dpdObject = medication.dpd_object?.firstOrNull() ?: return@setOnClickListener
 
             val intent = Intent(context, MedicationInfoActivity::class.java)

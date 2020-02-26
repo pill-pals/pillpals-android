@@ -34,6 +34,7 @@ class AlarmActivity : AppCompatActivity() {
     public lateinit var iconCard: CardView
     public lateinit var icon: ImageView
     public lateinit var alarmTime: TextView
+    public lateinit var alarmDosage: TextView
     public lateinit var alarmNote: TextView
     public lateinit var logButton: Button
     public lateinit var snoozeButton: Button
@@ -41,6 +42,9 @@ class AlarmActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(applicationContext)
+        val privateMode = sharedPreferences.getBoolean("private_notifications", false)
 
         var schedule = DatabaseHelper.getScheduleByUid(
             intent.getStringExtra("schedule-uid")
@@ -68,13 +72,15 @@ class AlarmActivity : AppCompatActivity() {
 
             setupViewVars()
 
-            val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(applicationContext)
-            message.text = sharedPreferences.getString("fullscreen_notification_message", "It's time to take your medication!")
+            message.text = if (privateMode) "" else medication.name
 
-            alarmTime.text = DateHelper.dateToString(schedule.occurrence!!)
+            alarmTime.text = DateHelper.dateToString(schedule.occurrence!!).replace("a.m.","AM").replace("p.m.","PM")
+            alarmDosage.text = if (privateMode) "" else medication.dosage
 
-            if (medication.notes.isNotEmpty()) {
+            if (medication.notes.isNotEmpty() && !privateMode) {
                 alarmNote.text = medication.notes
+            } else if (privateMode) {
+                alarmNote.text = sharedPreferences.getString("private_notification_message","You have a notification")
             }
 
             iconCard.setCardBackgroundColor(Color.parseColor(getColorStringByID(medication.color_id)))
@@ -92,6 +98,12 @@ class AlarmActivity : AppCompatActivity() {
                 alarmSnoozeFunc(schedule)
                 alarmOpenFunc()
             }
+
+            if (privateMode) {
+                iconCard.visibility = View.GONE
+                icon.visibility = View.GONE
+                openButton.text = "Open App"
+            }
         }
     }
 
@@ -104,6 +116,8 @@ class AlarmActivity : AppCompatActivity() {
         logButton = findViewById(R.id.alarmLogButton)
         snoozeButton = findViewById(R.id.alarmSnoozeButton)
         openButton = findViewById(R.id.alarmOpenAppButton)
+        alarmDosage = findViewById(R.id.alarmDosage)
+
     }
 
     private fun alarmLogFunc(schedule: Schedules) {
