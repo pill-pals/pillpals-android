@@ -17,5 +17,6 @@ public class BootupReceiver: BroadcastReceiver() {
         DashboardFragment().setUpSchedules(schedules, false)
         NotificationUtils.createNotificationChannels(context)
         NotificationUtils.updateAlarms(context)
+        NotificationUtils.createQuizNotifications(context)
     }
 }

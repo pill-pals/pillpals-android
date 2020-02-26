@@ -123,14 +123,18 @@ class NotificationUtils {
         }
 
         fun createQuizNotifications(context: Context){
-            val mIntent = Intent(context, QuizReceiver::class.java)
-            val mPendingIntent = PendingIntent.getBroadcast(context, 0, mIntent, 0)
-            val mAlarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-            mAlarmManager.setRepeating(
-                AlarmManager.RTC_WAKEUP, System.currentTimeMillis(),
-                1000*60*60, mPendingIntent
-            )
-            Log.i("quiz", "Quiz Receiver Initiated")
+            if(PendingIntent.getBroadcast(context, 0, Intent(context, QuizReceiver::class.java), PendingIntent.FLAG_NO_CREATE) == null) {
+                val mIntent = Intent(context, QuizReceiver::class.java)
+                val mPendingIntent = PendingIntent.getBroadcast(context, 0, mIntent, 0)
+                val mAlarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+                mAlarmManager.setRepeating(
+                    AlarmManager.RTC_WAKEUP, System.currentTimeMillis(),
+                    1000 * 60 * 60 * 24, mPendingIntent
+                )
+                Log.i("quiz", "Quiz Receiver Initiated")
+            }else{
+                Log.i("quiz", "Quiz Receiver Already Active")
+            }
         }
     }
 }

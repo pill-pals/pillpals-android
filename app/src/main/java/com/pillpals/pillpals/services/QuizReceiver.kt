@@ -24,7 +24,7 @@ class QuizReceiver: BroadcastReceiver() {
         }
         val quizStatus = QuizGenerator.tryGenerateQuiz()
 
-        if(!sharedPreferences.getBoolean("notifications", false)) {
+        if(!sharedPreferences.getBoolean("notifications_quiz", false)) {
             val mainIntent = Intent(context, MainActivity::class.java)
             val pendingIntent = PendingIntent.getActivity(context, 0, mainIntent, PendingIntent.FLAG_UPDATE_CURRENT)
 
