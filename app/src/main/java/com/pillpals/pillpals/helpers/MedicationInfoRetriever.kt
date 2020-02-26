@@ -654,7 +654,7 @@ class MedicationInfoRetriever {
 
                             colorProperty ?: return resolve(ColorResult(false, null))
 
-                            resolve(ColorResult(false, colorProperty.propValue))
+                            resolve(ColorResult(true, colorProperty.propValue))
 
 //                            val colorHex = colorProperty.propValue.replace("(;.*)".toRegex(), "")
 //
@@ -751,7 +751,7 @@ class MedicationInfoRetriever {
 
                             shapeProperty ?: return resolve(ShapeResult(false, null))
 
-                            resolve(ShapeResult(false, shapeProperty.propValue))
+                            resolve(ShapeResult(true, shapeProperty.propValue))
                         }
                     }
                 })

@@ -19,7 +19,7 @@
             android:id="@+id/textView7"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Information about medications is found through a variety of online resources.\nThese resources may not be inaccurate.\nThis collected information is in no way a replacement for the information your pharmacist could tell you.\nThe online sources used by PillPals include:"
+            android:text="Information about medications is found through a variety of online resources.\nThese resources may be inaccurate.\nThis collected information is in no way a replacement for the information your pharmacist could tell you.\nThe online sources used by PillPals include:"
             android:textColor="@color/colorWhite" />
 
         <LinearLayout
