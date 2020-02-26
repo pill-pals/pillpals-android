@@ -27,6 +27,11 @@ import com.pillpals.pillpals.ui.AlarmActivity
 
 public class AlarmReceiver: BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
+        if (intent.getBooleanExtra("stop-noise", false)) { //Need to be able to do this on :remote from elsewhere
+            PillPalsApplication.alarmNoiseHelper.stopNoise()
+            return
+        }
+
         val notificationManager = NotificationManagerCompat.from(context)
 
         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
@@ -39,10 +44,7 @@ public class AlarmReceiver: BroadcastReceiver() {
             return //Don't generate a notification for a schedule that's already been logged
         }
 
-        if (intent.getBooleanExtra("stop-noise", false)) { //Need to be able to do this on :remote from elsewhere
-            PillPalsApplication.alarmNoiseHelper.stopNoise()
-            return
-        } else if (intent.getBooleanExtra("cancel", false)) {
+        if (intent.getBooleanExtra("cancel", false)) {
             notificationManager.cancel(schedule.uid!!.hashCode())
         } else {
             val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
