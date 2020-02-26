@@ -232,7 +232,7 @@ class AddDrugActivity : AppCompatActivity() {
 
             linkMedicationButton.setOnClickListener {
                 val linkIntent = Intent(this, SearchActivity::class.java)
-
+                linkIntent.putExtra("is-for-linking", true)
                 startActivityForResult(linkIntent, 4)
             }
 

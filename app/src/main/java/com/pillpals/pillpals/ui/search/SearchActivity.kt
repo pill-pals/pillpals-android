@@ -518,7 +518,7 @@ class SearchActivity : AppCompatActivity() {
                                                                 newCard.button.setOnClickListener {
                                                                     val infoIntent = Intent(outerContext, MedicationInfoActivity::class.java)
 
-                                                                    if(intent.hasExtra("medication-uid")) {
+                                                                    if(intent.hasExtra("medication-uid") || intent.hasExtra("is-for-linking")) {
                                                                         // For linking DPDObject
                                                                         infoIntent.putExtra("link-medication", true)
                                                                     }
