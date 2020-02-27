@@ -8,11 +8,11 @@ import java.util.*
 fun seedQuestionTemplates(realm: Realm) {
     var qT = QuestionTemplates()
 
-    for (i in 1..10) {
+    for (i in 1..7) {
         qT.id = i
         realm.insertOrUpdate(qT)
     }
-    for (i in 101..106){
+    for (i in 101..104){
         qT.id = i
         qT.canUseOnNonLinkedMedications = true
         realm.insertOrUpdate(qT)
