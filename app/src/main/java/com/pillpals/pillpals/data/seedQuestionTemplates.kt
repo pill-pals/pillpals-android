@@ -8,7 +8,7 @@ import java.util.*
 fun seedQuestionTemplates(realm: Realm) {
     var qT = QuestionTemplates()
 
-    for (i in 1..5) {
+    for (i in 1..10) {
         qT.id = i
         realm.insertOrUpdate(qT)
     }

@@ -124,7 +124,7 @@ fun generateQuestion(id: Int, medication: Medications):Questions {
                             }
                         }
                     }
-                    is Promise.Result.Error -> currentResult="Fail"
+                    is Promise.Result.Error -> throwFromResponse=true
                 }
 
                 correctAnswerString = currentResult
