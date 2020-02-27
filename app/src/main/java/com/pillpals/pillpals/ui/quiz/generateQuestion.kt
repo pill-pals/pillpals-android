@@ -124,7 +124,7 @@ fun generateQuestion(id: Int, medication: Medications):Questions {
                             }
                         }
                     }
-                    is Promise.Result.Error -> Log.i("Error", result.error.message!!)
+                    is Promise.Result.Error -> currentResult="Fail"
                 }
 
                 correctAnswerString = currentResult
@@ -165,7 +165,7 @@ fun generateQuestion(id: Int, medication: Medications):Questions {
                             resultList.add(it.replace("( .*)".toRegex(), ""))
                         }
                     }
-                    is Promise.Result.Error -> Log.i("Error", result.error.message!!)
+                    is Promise.Result.Error -> throwFromResponse=true
                 }
 
                 correctAnswerString = resultList.random()
