@@ -4,10 +4,7 @@ import android.util.Log
 import com.pillpals.pillpals.data.model.Medications
 import com.pillpals.pillpals.data.model.MoodLogs
 import com.pillpals.pillpals.data.model.Questions
-import com.pillpals.pillpals.helpers.DatabaseHelper
-import com.pillpals.pillpals.helpers.DateHelper
-import com.pillpals.pillpals.helpers.MedicationInfoRetriever
-import com.pillpals.pillpals.helpers.StatsHelper
+import com.pillpals.pillpals.helpers.*
 import com.shopify.promises.Promise
 import io.realm.Realm
 import io.realm.RealmList
@@ -25,6 +22,7 @@ fun generateQuestion(id: Int, medication: Medications):Questions {
     var incorrectAnswers = mutableListOf<String>()
 
     var waitingForResponse = false
+    var throwFromResponse = false
 
     when (id) {
         //----  Questions with a medication that requires a linked database drug  ----//
@@ -115,11 +113,65 @@ fun generateQuestion(id: Int, medication: Medications):Questions {
         }
         //Placeholder
         4-> {
-            correctAnswerString = "Correct"
-            incorrectAnswers.add("Incorrect 1")
-            incorrectAnswers.add("Incorrect 2")
-            incorrectAnswers.add("Incorrect 3")
-            question.question = "This question is asking about " + medication.name + " using template 4"
+            val dpd_object = medication.dpd_object?.firstOrNull()
+
+            dpd_object ?: return question
+
+            val listOfColours = listOf(
+                "Red",
+                "Green",
+                "Blue",
+                "White",
+                "Orange",
+                "Black",
+                "Purple",
+                "Yellow",
+                "Pink",
+                "Brown",
+                "Teal",
+                "Magenta"
+            )
+
+            val questionString = "Which color are your ${medication.name} pills?"
+
+            val colorPromise = MedicationInfoRetriever.color(dpd_object.ndc_id ?: "null")
+
+            var colorResponse: ColorResult? = null
+
+            waitingForResponse = true
+
+            colorPromise.whenComplete { result: Promise.Result<ColorResult, RuntimeException> ->
+                when (result) {
+                    is Promise.Result.Success -> {
+                        // Use result here
+                        colorResponse = result.value
+                    }
+                    is Promise.Result.Error -> throwFromResponse = true
+                }
+
+                if(colorResponse == null) {
+                    throwFromResponse = true
+                }
+                else {
+                    var colorList = colorResponse!!.colorName?.split(",")
+
+                    colorList = colorList?.fold(listOf<String>()) {acc, it ->
+                        acc.plus(it.replace("(\\(.*)".toRegex(), "").toLowerCase().capitalize())
+                    }
+
+                    if(colorList == null) {
+                        throwFromResponse = true
+                    }
+                    else {
+                        correctAnswerString = colorList.random()
+                        incorrectAnswers = listOfColours.filter { it != correctAnswerString }.shuffled().take(3) as MutableList<String>
+
+                        question.question = questionString
+
+                        waitingForResponse = false
+                    }
+                }
+            }
         }
         //Placeholder
         5-> {
@@ -211,6 +263,7 @@ fun generateQuestion(id: Int, medication: Medications):Questions {
     }
 
     while(waitingForResponse) {
+        if(throwFromResponse) throw IOException("Question $id failed to generate.")
         Thread.sleep(50)
     }
     
