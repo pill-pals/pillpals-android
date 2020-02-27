@@ -408,7 +408,7 @@ class SearchActivity : AppCompatActivity() {
                                         upcomingDrugCards.add(newCard)
 
                                         if(multipleDrugsExistsWithName(drugProduct.brand_name, dosageString)) {
-                                            drugCards[index] = null
+                                            if(index < drugCards.count()) drugCards[index] = null
                                             refreshCardsFlag = true
                                             return
                                         }

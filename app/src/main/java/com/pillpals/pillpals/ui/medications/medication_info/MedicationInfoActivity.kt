@@ -264,7 +264,9 @@ class MedicationInfoActivity : AppCompatActivity() {
             tabZeroValues = tabZeroValues.plus(shapeResponse!!.shapeName!!)
         }
 
-        if(packageSizesResponse != null && packageSizesResponse!!.isNotEmpty()) {
+        if(packageSizesResponse != null
+            && packageSizesResponse!!.isNotEmpty()
+            && packageSizesResponse!!.first().replace("(\\s)".toRegex(), "").count() > 0 ) {
             tabZeroTitles = tabZeroTitles.plus("Package Sizes")
             tabZeroValues = tabZeroValues.plus(bulletedList(packageSizesResponse!!))
         }
