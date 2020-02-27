@@ -18,6 +18,8 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
+import android.view.animation.Animation
+import android.view.animation.AnimationUtils
 import android.view.animation.DecelerateInterpolator
 import android.widget.*
 import androidx.appcompat.app.AlertDialog
@@ -91,6 +93,10 @@ class QuizQuestionActivity : AppCompatActivity() {
     private val fadeinTime = 350.toLong()
     private val flashTime = 850.toLong()
 
+    private val voteMultiplier = 1
+    private val txtNoNumber = mutableListOf<Int>()
+    private var animIndex = 0
+
     var buttonOnClickEnabled = true
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -125,6 +131,11 @@ class QuizQuestionActivity : AppCompatActivity() {
         answer3constraint = findViewById(R.id.answer3constraint)
         answer4constraint = findViewById(R.id.answer4constraint)
         scrollView = findViewById(R.id.scrollView)
+        txtNoNumber.add(R.id.txtNoNumber1)
+        txtNoNumber.add(R.id.txtNoNumber2)
+        txtNoNumber.add(R.id.txtNoNumber3)
+        txtNoNumber.add(R.id.txtNoNumber4)
+        txtNoNumber.add(R.id.txtNoNumber5)
 
         setPageContentsForQuestion(QuizHelper.getQuestionsAnswered(quiz))
     }
@@ -180,10 +191,29 @@ class QuizQuestionActivity : AppCompatActivity() {
             },fadeinTime+fadeoutTime*2+correctAnswerShowDelay+200)
             buttonOnClickEnabled = false
 
-            answerQuestion(question,answer)
-            animateViewOut(question,index)
+            answerQuestion(question, answer)
+            animateViewOut(question, index)
             flashColor(question, answer)
+            plusOneAnimation(question, answer)
         }
+    }
+
+    fun plusOneAnimation(question: Questions, answer: Int) {
+        if(question.correctAnswer != answer) return
+        var tv: TextView
+        val fadeInAnimation: Animation
+
+        if (animIndex >= txtNoNumber.count()) {
+            animIndex = 0
+        }
+        tv = findViewById(txtNoNumber[animIndex])
+        tv.setVisibility(View.VISIBLE)
+        tv.text = "+ 1"
+//        txtNoNumber.setTextColor(getResources().getColor(R.color.text_color_add));
+        fadeInAnimation = AnimationUtils.loadAnimation(this, R.anim.float_up)
+        fadeInAnimation.setAnimationListener(FloatUpAnimationListener(tv))
+        tv.startAnimation(fadeInAnimation)
+        animIndex++
     }
 
     private fun flashColor(question: Questions, answer: Int) {

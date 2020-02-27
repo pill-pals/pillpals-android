@@ -277,13 +277,6 @@ class MedicationInfoActivity : AppCompatActivity() {
         }
 
         // Tab 1 - Side Effects
-        if(sideEffectsResponse != null && sideEffectsResponse!!.isNotEmpty()) {
-            tabOneTitles = tabOneTitles.plus("Side Effects")
-            tabOneValues = tabOneValues.plus(bulletedList(sideEffectsResponse!!.fold(listOf()) {acc, it ->
-                acc.plus("${it.sideEffect} (${it.percent * 100f}%)")
-            }))
-        }
-
         if(interactionsResponse != null && interactionsResponse!!.isNotEmpty() && rxcui != null) {
             val filteredName = nameString.replace("(ACT(-| ))".toRegex(), "")
                 .replace("(TEVA(-| ))".toRegex(), "")
@@ -318,6 +311,13 @@ class MedicationInfoActivity : AppCompatActivity() {
         if(interactsWithCaffeineResponse == true) {
             tabOneTitles = tabOneTitles.plus("Interacts with caffeine")
             tabOneValues = tabOneValues.plus("This drug may have some degree of an interaction with caffeine")
+        }
+
+        if(sideEffectsResponse != null && sideEffectsResponse!!.isNotEmpty()) {
+            tabOneTitles = tabOneTitles.plus("Side Effects")
+            tabOneValues = tabOneValues.plus(bulletedList(sideEffectsResponse!!.fold(listOf()) {acc, it ->
+                acc.plus("${it.sideEffect} (${it.percent * 100f}%)")
+            }))
         }
 
         // Tab 2 - Warnings/Tips
