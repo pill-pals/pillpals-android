@@ -1,5 +1,6 @@
 package com.pillpals.pillpals.ui
 
+import android.Manifest
 import android.app.Activity
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -17,6 +18,7 @@ import android.widget.ImageView
 import android.widget.Toast
 import io.realm.Realm
 import androidx.cardview.widget.CardView
+import androidx.core.app.ActivityCompat
 import com.google.android.flexbox.FlexboxLayout
 import com.pillpals.pillpals.data.model.Photos
 import io.realm.RealmObject
@@ -122,7 +124,14 @@ class EditMedicationIcon : AppCompatActivity() {
                 //val addIntent = Intent(this, DrugGallery::class.java)
                 //startActivityForResult(addIntent, 1)
 
-                dispatchTakePictureIntent()
+                val rc = ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
+                if (rc == PackageManager.PERMISSION_GRANTED) {
+                    dispatchTakePictureIntent()
+                } else {
+                    ActivityCompat.requestPermissions(this,
+                        arrayOf(Manifest.permission.CAMERA), 200)
+                }
+                //dispatchTakePictureIntent()
 
             }else{
                 Toast.makeText(applicationContext, "Your device does not have a camera", Toast.LENGTH_SHORT).show()
