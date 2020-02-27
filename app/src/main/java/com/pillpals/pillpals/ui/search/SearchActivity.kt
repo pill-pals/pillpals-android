@@ -431,7 +431,7 @@ class SearchActivity : AppCompatActivity() {
                                             .replace("(APO(-| ))".toRegex(), "")
                                             .replace("(MYLAN(-| ))".toRegex(), "")
                                             .replace("(ZYM(-| ))".toRegex(), "")
-                                            .replace("( .*)".toRegex(), "")}"
+                                            .replace("((-| ).*)".toRegex(), "")}"
 
                                         val request = Request.Builder().url(url).build()
 
@@ -455,7 +455,7 @@ class SearchActivity : AppCompatActivity() {
                                                         if(fdaResponse.error == null) {
                                                             val fdaResults = fdaResponse.results
 
-                                                            val fdaResultWithDosage = fdaResults?.filter {
+                                                            val fdaResultsWithDosage = fdaResults?.filter {
                                                                 if(it.active_ingredients == null) false
                                                                 else {
                                                                     val totalVal = it.active_ingredients.fold(0f) {acc, it ->
@@ -465,15 +465,29 @@ class SearchActivity : AppCompatActivity() {
                                                                         it.strength.contains("${dosageValues.first()} ${dosageUnits.firstOrNull()?.toLowerCase()}")
                                                                     } || (dosageValues.firstOrNull() != null && dosageValues.firstOrNull()!!.isNotEmpty() && dosageValues.firstOrNull()?.toFloat() == totalVal)
                                                                 }
-                                                            }?.firstOrNull()
+                                                            }
 
+                                                            val firstFDAResultWithDosageWithRxcui = fdaResultsWithDosage?.filter { it.openfda?.rxcui != null }?.firstOrNull()
+                                                            val firstFDAResultWithDosage = fdaResultsWithDosage?.firstOrNull()
+
+                                                            val firstFdaResultWithRxcui = fdaResults?.filter { it.openfda?.rxcui != null }?.firstOrNull()
                                                             val firstFdaResult = fdaResults?.firstOrNull()
 
                                                             // SET FDA IDS
-                                                            if(fdaResultWithDosage != null) {
-                                                                newCard.ndcCode = fdaResultWithDosage.product_ndc
-                                                                newCard.rxcui = fdaResultWithDosage.openfda.rxcui?.firstOrNull()
-                                                                newCard.splSetId = fdaResultWithDosage.openfda.spl_set_id?.firstOrNull()
+                                                            if(firstFDAResultWithDosageWithRxcui != null) {
+                                                                newCard.ndcCode = firstFDAResultWithDosageWithRxcui.product_ndc
+                                                                newCard.rxcui = firstFDAResultWithDosageWithRxcui.openfda.rxcui?.firstOrNull()
+                                                                newCard.splSetId = firstFDAResultWithDosageWithRxcui.openfda.spl_set_id?.firstOrNull()
+                                                            }
+                                                            else if(firstFdaResultWithRxcui != null) {
+                                                                newCard.ndcCode = firstFdaResultWithRxcui.product_ndc
+                                                                newCard.rxcui = firstFdaResultWithRxcui.openfda.rxcui?.firstOrNull()
+                                                                newCard.splSetId = firstFdaResultWithRxcui.openfda.spl_set_id?.firstOrNull()
+                                                            }
+                                                            else if(firstFDAResultWithDosage != null) {
+                                                                newCard.ndcCode = firstFDAResultWithDosage.product_ndc
+                                                                newCard.rxcui = firstFDAResultWithDosage.openfda.rxcui?.firstOrNull()
+                                                                newCard.splSetId = firstFDAResultWithDosage.openfda.spl_set_id?.firstOrNull()
                                                             }
                                                             else if(firstFdaResult != null) {
                                                                 newCard.ndcCode = firstFdaResult.product_ndc

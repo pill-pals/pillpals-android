@@ -208,6 +208,16 @@ class DashboardFragment : Fragment() {
         }
         timer.schedule(doAsynchronousTask, 0, 60000)
 
+        MedicationInfoRetriever.interactions(listOf("198211", "349253")).whenComplete { result: Promise.Result<List<InteractionResult>, RuntimeException> ->
+            when (result) {
+                is Promise.Result.Success -> {
+                    // Use result here
+                    Log.i("Success", result.value.toString())
+                }
+                is Promise.Result.Error -> Log.i("Error", result.error.message!!)
+            }
+        }
+
         return view
     }
 
@@ -869,7 +879,20 @@ class DashboardFragment : Fragment() {
                                     dosageString = "${dosageValues.joinToString("/")} ${dosageUnits.joinToString("/")}"
 
                                     // Get other ID's from FDA
-                                    val url = "https://api.fda.gov/drug/ndc.json?limit=100&search=brand_name:${drugProduct.brand_name.replace("( .*)".toRegex(), "")}"
+                                    val url = "https://api.fda.gov/drug/ndc.json?limit=100&search=brand_name:${drugProduct.brand_name
+                                        .replace("(ACT(-| ))".toRegex(), "")
+                                        .replace("(TEVA(-| ))".toRegex(), "")
+                                        .replace("(TARO(-| ))".toRegex(), "")
+                                        .replace("(DOM(-| ))".toRegex(), "")
+                                        .replace("(PHL(-| ))".toRegex(), "")
+                                        .replace("(PMS(-| ))".toRegex(), "")
+                                        .replace("(RIVA(-| ))".toRegex(), "")
+                                        .replace("(RATIO(-| ))".toRegex(), "")
+                                        .replace("(NU(-| ))".toRegex(), "")
+                                        .replace("(APO(-| ))".toRegex(), "")
+                                        .replace("(MYLAN(-| ))".toRegex(), "")
+                                        .replace("(ZYM(-| ))".toRegex(), "")
+                                        .replace("((-| ).*)".toRegex(), "")}"
 
                                     val request = Request.Builder().url(url).build()
 
@@ -889,24 +912,39 @@ class DashboardFragment : Fragment() {
                                                     if(fdaResponse.error == null) {
                                                         val fdaResults = fdaResponse.results
 
-                                                        val fdaResultWithDosage = fdaResults?.filter {
-                                                            if(it.active_ingredients == null) return@filter false
-                                                            val totalVal = it.active_ingredients.fold(0f) {acc, it ->
-                                                                acc + it.strength.replace("( .*)".toRegex(), "").toFloat()
+                                                        val fdaResultsWithDosage = fdaResults?.filter {
+                                                            if(it.active_ingredients == null) false
+                                                            else {
+                                                                val totalVal = it.active_ingredients.fold(0f) {acc, it ->
+                                                                    acc + it.strength.replace("( .*)".toRegex(), "").toFloat()
+                                                                }
+                                                                it.active_ingredients.any {
+                                                                    it.strength.contains("${dosageValues.first()} ${dosageUnits.firstOrNull()?.toLowerCase()}")
+                                                                } || (dosageValues.firstOrNull() != null && dosageValues.firstOrNull()!!.isNotEmpty() && dosageValues.firstOrNull()?.toFloat() == totalVal)
                                                             }
-                                                            it.active_ingredients.any {
-                                                                it.strength.contains("${dosageValues.first()} ${dosageUnits.firstOrNull()?.toLowerCase()}")
-                                                            } || dosageValues.firstOrNull()?.toFloat() == totalVal
-                                                        }?.firstOrNull()
+                                                        }
 
+                                                        val firstFDAResultWithDosageWithRxcui = fdaResultsWithDosage?.filter { it.openfda?.rxcui != null }?.firstOrNull()
+                                                        val firstFDAResultWithDosage = fdaResultsWithDosage?.firstOrNull()
+
+                                                        val firstFdaResultWithRxcui = fdaResults?.filter { it.openfda?.rxcui != null }?.firstOrNull()
                                                         val firstFdaResult = fdaResults?.firstOrNull()
 
                                                         // SET FDA IDS
-
-                                                        if(fdaResultWithDosage != null) {
-                                                            ndcCode = fdaResultWithDosage.product_ndc
-                                                            rxcui = fdaResultWithDosage.openfda.rxcui?.firstOrNull()
-                                                            splSetId = fdaResultWithDosage.openfda.spl_set_id?.firstOrNull()
+                                                        if(firstFDAResultWithDosageWithRxcui != null) {
+                                                            ndcCode = firstFDAResultWithDosageWithRxcui.product_ndc
+                                                            rxcui = firstFDAResultWithDosageWithRxcui.openfda.rxcui?.firstOrNull()
+                                                            splSetId = firstFDAResultWithDosageWithRxcui.openfda.spl_set_id?.firstOrNull()
+                                                        }
+                                                        else if(firstFdaResultWithRxcui != null) {
+                                                            ndcCode = firstFdaResultWithRxcui.product_ndc
+                                                            rxcui = firstFdaResultWithRxcui.openfda.rxcui?.firstOrNull()
+                                                            splSetId = firstFdaResultWithRxcui.openfda.spl_set_id?.firstOrNull()
+                                                        }
+                                                        else if(firstFDAResultWithDosage != null) {
+                                                            ndcCode = firstFDAResultWithDosage.product_ndc
+                                                            rxcui = firstFDAResultWithDosage.openfda.rxcui?.firstOrNull()
+                                                            splSetId = firstFDAResultWithDosage.openfda.spl_set_id?.firstOrNull()
                                                         }
                                                         else if(firstFdaResult != null) {
                                                             ndcCode = firstFdaResult.product_ndc

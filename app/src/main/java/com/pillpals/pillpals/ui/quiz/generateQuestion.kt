@@ -244,7 +244,8 @@ fun generateQuestion(id: Int, medication: Medications):Questions {
                 "Liquid",
                 "Powder",
                 "Aerosol",
-                "Syrup"
+                "Syrup",
+                "Oval"
             )
 
             val questionString = "Which form does your ${medication.name} take?"
