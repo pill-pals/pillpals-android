@@ -502,7 +502,7 @@ fun generateQuestion(id: Int, medication: Medications?):Questions {
                     "Always take that dose early or late",
                     "Just skip that dose",
                     "Take more medication at a different time to balance it",
-                    "Stop taking the medication at all",
+                    "Stop taking the medication at all"
                 )
             }
             204 -> {
