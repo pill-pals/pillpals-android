@@ -432,8 +432,10 @@ fun generateQuestion(id: Int, medication: Medications?):Questions {
         }
     } else {
         when (id) {
-            //----  Questions with a no medication  ----//
+            //----  General knowledge questions with no medication  ----//
+            // What to do if drug is recalled
             201 -> {
+                //https://www.webmd.com/a-to-z-guides/what-is-a-drug-recall
                 question.question = "Which of these should you do if a drug you're taking is recalled?"
                 correctAnswerString = "Talk to your pharmacist/doctor"
                 incorrectAnswers = mutableListOf(
@@ -442,7 +444,10 @@ fun generateQuestion(id: Int, medication: Medications?):Questions {
                     "Resell the remaining medication"
                 )
             }
+            // Causes of drug recall
             202 -> {
+                //https://www.webmd.com/a-to-z-guides/what-is-a-drug-recall
+                //https://www.ncbi.nlm.nih.gov/pubmed/26843501
                 question.question = "Which of these is a possible reason for a drug to be recalled?"
                 correctAnswerString = ALL_OF_THE_ABOVE
                 incorrectAnswers = mutableListOf(
@@ -509,6 +514,17 @@ fun generateQuestion(id: Int, medication: Medications?):Questions {
                 correctAnswerString = mapGradeToRange(grade)
                 grades.remove(grade)
                 incorrectAnswers = grades.map{ mapGradeToRange(it) } as MutableList<String>
+            }
+            // Consistently unable to take a dose
+            206 -> {
+                question.question = "What should you do if you're usually unable to take your prescription at a certain time?"
+                correctAnswerString = "Talk to your pharmacist/doctor about adjusting the schedule"
+                incorrectAnswers = mutableListOf(
+                    "Always take that dose early or late",
+                    "Just skip that dose",
+                    "Take more medication at a different time to balance it",
+                    "Stop taking the medication at all"
+                )
             }
         }
     }
