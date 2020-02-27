@@ -15,6 +15,8 @@ import kotlin.math.roundToInt
 
 
 fun generateQuestion(id: Int, medication: Medications?):Questions {
+    val ALL_OF_THE_ABOVE = "All of the above"
+
     val realm = Realm.getDefaultInstance()
     var question = Questions()
     var correctAnswerString = ""
@@ -471,21 +473,37 @@ fun generateQuestion(id: Int, medication: Medications?):Questions {
         when (id) {
             //----  Questions with a no medication  ----//
             201 -> {
-                question.question = "Question with no medication using id $id."
-                correctAnswerString = "Correct"
-                incorrectAnswers = mutableListOf("Wrong 1","Wrong 2","Wrong 3")
+                question.question = "Which of these should you do if a drug you're taking is recalled?"
+                correctAnswerString = "Talk to your pharmacist/doctor"
+                incorrectAnswers = mutableListOf(
+                    "Flush the remaining medication down the toilet",
+                    "Continue taking the remaining medication",
+                    "Resell the remaining medication"
+                )
             }
             //Placeholder
             202 -> {
-                question.question = "Question with no medication using id $id."
-                correctAnswerString = "Correct"
-                incorrectAnswers = mutableListOf("Wrong 1","Wrong 2","Wrong 3")
+                question.question = "Which of these is a possible reason for a drug to be recalled?"
+                correctAnswerString = ALL_OF_THE_ABOVE
+                incorrectAnswers = mutableListOf(
+                    "Mislabelling",
+                    "Packaging error",
+                    "Contamination",
+                    "Incorrect potency",
+                    "Defective product",
+                    "Unanticipated health risk"
+                )
             }
             //Placeholder
             203 -> {
-                question.question = "Question with no medication using id $id."
-                correctAnswerString = "Correct"
-                incorrectAnswers = mutableListOf("Wrong 1","Wrong 2","Wrong 3")
+                question.question = "What should you do if you're usually unable to take your prescription at a certain time?"
+                correctAnswerString = "Talk to your pharmacist/doctor about adjusting the schedule"
+                incorrectAnswers = mutableListOf(
+                    "Always take that dose early or late",
+                    "Just skip that dose",
+                    "Take more medication at a different time to balance it",
+                    "Stop taking the medication at all"
+                )
             }
             204 -> {
                 question.question = "Question with no medication using id $id."
@@ -520,8 +538,14 @@ fun generateQuestion(id: Int, medication: Medications?):Questions {
     incorrectAnswers = incorrectAnswers.take(3) as MutableList<String>
 
     //randomize Answers
-    incorrectAnswers.add(correctAnswerString)
-    incorrectAnswers.shuffle()
+    if (correctAnswerString == ALL_OF_THE_ABOVE) {
+        incorrectAnswers.shuffle()
+        incorrectAnswers.add(correctAnswerString)
+    } else {
+        incorrectAnswers.add(correctAnswerString)
+        incorrectAnswers.shuffle()
+    }
+
     for (i in 0..3) {
         question.answers.add(incorrectAnswers[i])
         if (correctAnswerString == incorrectAnswers[i]) {
