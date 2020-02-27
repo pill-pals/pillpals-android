@@ -305,18 +305,94 @@ fun generateQuestion(id: Int, medication: Medications):Questions {
             question.question = "This question is asking about " + medication.name + " using template 5"
         }
         7-> {
-            correctAnswerString = "Correct"
-            incorrectAnswers.add("Incorrect 1")
-            incorrectAnswers.add("Incorrect 2")
-            incorrectAnswers.add("Incorrect 3")
-            question.question = "This question is asking about " + medication.name + " using template 5"
+            val dpd_object = medication.dpd_object?.firstOrNull()
+
+            dpd_object ?: return question
+            val qString = "What is the schedule classification of ${medication.name}?"
+
+            val allIncorrect: List<String> = listOf("Prescription", "OTC", "Homeopathic", "Narcotic (CDSA I)",
+                "Schedule G (CDSA IV)", "Ethical", "Targeted (CDSA IV)", "Schedule D", "Narcotic", "Schedule G (CDSA III)",
+                "Schedule C", "Narcotic (CDSA II)", "Unclassified")
+
+            val schedulePromise = MedicationInfoRetriever.drugSchedules(dpd_object.dpd_id)
+            var resultList = mutableListOf<String>()
+            waitingForResponse = true
+
+            schedulePromise.whenComplete { result: Promise.Result<List<String>, RuntimeException> ->
+                when (result) {
+                    is Promise.Result.Success -> {
+                        // Use result here
+                        result.value.forEach{
+                            if(it == ""){
+                                resultList.add("Unclassified")
+                            }else {
+                                resultList.add(it)
+                            }
+                        }
+                    }
+                    is Promise.Result.Error -> throwFromResponse=true
+                }
+
+                correctAnswerString = resultList.random()
+
+                while(incorrectAnswers.count()<3){
+                    val currentIncorrect = allIncorrect.random()
+                    if(!resultList.contains(currentIncorrect) && !incorrectAnswers.contains(currentIncorrect)){
+
+                        incorrectAnswers.add(currentIncorrect)
+                    }
+                }
+
+                question.question = qString
+
+                waitingForResponse = false
+            }
         }
         8-> {
-            correctAnswerString = "Correct"
-            incorrectAnswers.add("Incorrect 1")
-            incorrectAnswers.add("Incorrect 2")
-            incorrectAnswers.add("Incorrect 3")
-            question.question = "This question is asking about " + medication.name + " using template 5"
+            val dpd_object = medication.dpd_object?.firstOrNull()
+
+            dpd_object ?: return question
+            val qString = "Which of the following is an active ingredient of ${medication.name}?"
+
+            val allIncorrect: List<String> = listOf("Phenolate Sodium", "Menthol", "Isopropyl Alcohol",
+                "Magnesium (Magnesium Oxide)", "Salicylic Acid", "Nicotinamide", "Ginger", "Folic Acid",
+                "Iron (Ferrous Fumerate)", "Tin (Stannous Chloride)", "Lithium Carbonate", "Vitamin D (Cod Liver Oil)",
+                "Sodium Chloride", "Calcium (Calcium Citrate)", "Acetaminophen", "Ibuprofen", "Amylase", "Acetic Acid",
+                "Zinc Oxide", "Titanium Dioxide", "Caffeine", "Dextrose", "Codeine Phosphate", "Sodium Bicarbonate",
+                "Guaifenesin", "Citric Acid", "Gelatin", "Oxytocin", "Iodine", "Vitamin A", "Vitamin E", "Vitamin B2",
+                "Ascorbic Acid", "Ramipril", "Paracetamol", "Insulin", "Codeine", "Protease", "Lipase", "Water",
+                "Talc", "Ammonia", "Mineral Oil", "Camphor", "Glycerine", "Estrogen", "Progesterone", "Citalopram",
+                "Fluvoxamine", "Paroxetine", "Sertraline", "Mixed Salts Amphetamine", "Sodium", "Leucine", "Morphine Sulfate")
+
+            val ingredientPromise = MedicationInfoRetriever.activeIngredients(dpd_object.dpd_id)
+            var resultList = mutableListOf<String>()
+            waitingForResponse = true
+
+            ingredientPromise.whenComplete { result: Promise.Result<List<String>, RuntimeException> ->
+                when (result) {
+                    is Promise.Result.Success -> {
+                        // Use result here
+                        result.value.forEach{fullString ->
+                            resultList.add(fullString.split(" ").joinToString(" ") { it.toLowerCase().capitalize() })
+                        }
+                    }
+                    is Promise.Result.Error -> throwFromResponse=true
+                }
+
+                correctAnswerString = resultList.random()
+
+                while(incorrectAnswers.count()<3){
+                    val currentIncorrect = allIncorrect.random()
+                    if(!resultList.contains(currentIncorrect) && !incorrectAnswers.contains(currentIncorrect)){
+
+                        incorrectAnswers.add(currentIncorrect)
+                    }
+                }
+
+                question.question = qString
+
+                waitingForResponse = false
+            }
         }
         9-> {
             correctAnswerString = "Correct"
