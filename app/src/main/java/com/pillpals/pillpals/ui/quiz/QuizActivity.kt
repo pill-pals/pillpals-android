@@ -425,7 +425,7 @@ class QuizActivity: AppCompatActivity() {
             override fun run() {
                 QuizGenerator.debounceSafeGenerate = true
                 try {
-                    QuizGenerator.generateQuiz()
+                    QuizGenerator.asyncGenerateQuiz()
                     QuizGenerator.debounceSafeGenerate = false
                     update()
                 }
