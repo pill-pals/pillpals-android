@@ -301,7 +301,7 @@ fun generateQuestion(id: Int, medication: Medications?):Questions {
                 val dpd_object = medication.dpd_object?.firstOrNull()
 
                 dpd_object ?: return question
-                val qString = "What is the schedule classification of ${medication.name}?"
+                val qString = "What is the Controlled Drug and Substances Act schedule classification of ${medication.name}?"
 
                 val allIncorrect: List<String> = listOf("Prescription", "Over The Counter (OTC)", "Homeopathic", "Narcotic (CDSA I)",
                     "Schedule G (CDSA IV)", "Ethical", "Targeted (CDSA IV)", "Schedule D", "Narcotic", "Schedule G (CDSA III)",
