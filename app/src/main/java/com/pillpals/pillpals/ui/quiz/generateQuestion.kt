@@ -204,7 +204,7 @@ fun generateQuestion(id: Int, medication: Medications):Questions {
                 "Magenta"
             )
 
-            val questionString = "Which color are your ${medication.name} pills?"
+            val questionString = "Which color are your ${medication.name} medications?"
 
             val colorPromise = MedicationInfoRetriever.color(dpd_object.ndc_id ?: "null")
 
@@ -247,11 +247,55 @@ fun generateQuestion(id: Int, medication: Medications):Questions {
         }
         //Placeholder
         5-> {
-            correctAnswerString = "Correct"
-            incorrectAnswers.add("Incorrect 1")
-            incorrectAnswers.add("Incorrect 2")
-            incorrectAnswers.add("Incorrect 3")
-            question.question = "This question is asking about " + medication.name + " using template 5"
+            val dpd_object = medication.dpd_object?.firstOrNull()
+
+            dpd_object ?: return question
+
+            val listOfShapes = listOf(
+                "Capsule",
+                "Tablet",
+                "Liquid",
+                "Powder",
+                "Aerosol",
+                "Syrup"
+            )
+
+            val questionString = "Which form does your ${medication.name} take?"
+
+            val shapePromise = MedicationInfoRetriever.shape(dpd_object.ndc_id ?: "null")
+
+            var shapeResponse: ShapeResult? = null
+
+            waitingForResponse = true
+
+            shapePromise.whenComplete { result: Promise.Result<ShapeResult, RuntimeException> ->
+                when (result) {
+                    is Promise.Result.Success -> {
+                        // Use result here
+                        shapeResponse = result.value
+                    }
+                    is Promise.Result.Error -> throwFromResponse = true
+                }
+
+                if(shapeResponse == null) {
+                    throwFromResponse = true
+                }
+                else {
+                    var shape = shapeResponse!!.shapeName
+
+                    if(shape == null) {
+                        throwFromResponse = true
+                    }
+                    else {
+                        correctAnswerString = shape.toLowerCase().capitalize()
+                        incorrectAnswers = listOfShapes.filter { it != correctAnswerString }.shuffled().take(3) as MutableList<String>
+
+                        question.question = questionString
+
+                        waitingForResponse = false
+                    }
+                }
+            }
         }
         6-> {
             correctAnswerString = "Correct"
