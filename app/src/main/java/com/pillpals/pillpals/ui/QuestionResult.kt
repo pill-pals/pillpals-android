@@ -9,6 +9,7 @@ import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.LinearLayout
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
 import com.pillpals.pillpals.R
@@ -29,7 +30,7 @@ class QuestionResult : LinearLayout {
     public lateinit var questionText: TextView
     public lateinit var userAnswer: TextView
     public lateinit var correctAnswer: TextView
-    public lateinit var userAnswerStack: LinearLayout
+    public lateinit var userAnswerLayout: ConstraintLayout
     public lateinit var icon: ImageView
 
     companion object {
@@ -68,7 +69,7 @@ class QuestionResult : LinearLayout {
         questionText = findViewById(R.id.questionText)
         userAnswer = findViewById(R.id.userAnswer)
         correctAnswer = findViewById(R.id.correctAnswer)
-        userAnswerStack = findViewById(R.id.userAnswerStack)
+        userAnswerLayout = findViewById(R.id.userAnswerLayout)
         icon = findViewById(R.id.icon)
 
         questionTitle.text = "Question " + (questionIndex + 1).toString()
@@ -78,7 +79,7 @@ class QuestionResult : LinearLayout {
 
         if (question.userAnswer == question.correctAnswer) {
             icon.imageTintList = ColorStateList.valueOf(ResourcesCompat.getColor(getResources(), R.color.colorGreen, null))
-            userAnswerStack.visibility = View.GONE
+            userAnswerLayout.visibility = View.GONE
         } else {
             icon.imageTintList = ColorStateList.valueOf(ResourcesCompat.getColor(getResources(), R.color.colorRed, null))
             icon.setImageDrawable(

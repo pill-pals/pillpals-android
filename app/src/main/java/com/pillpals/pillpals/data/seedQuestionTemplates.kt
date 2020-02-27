@@ -17,7 +17,7 @@ fun seedQuestionTemplates(realm: Realm) {
         qT.canUseOnNonLinkedMedications = true
         realm.insertOrUpdate(qT)
     }
-    for (i in 201..206){
+    for (i in 201..204){
         qT.id = i
         qT.notRelatedToMedication = true
         realm.insertOrUpdate(qT)

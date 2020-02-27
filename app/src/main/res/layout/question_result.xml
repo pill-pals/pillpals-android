@@ -60,56 +60,59 @@
                 android:text="Question text question text question text question text question text question text?"
                 android:textColor="@color/colorBlack" />
 
-            <LinearLayout
-                android:id="@+id/userAnswerStack"
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/userAnswerLayout"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_marginBottom="4dp"
-                android:layout_weight="1"
-                android:orientation="horizontal">
+                android:layout_height="wrap_content">
 
                 <TextView
                     android:id="@+id/textView10"
                     android:layout_width="70dp"
                     android:layout_height="wrap_content"
-                    android:text="You said: " />
+                    android:layout_marginTop="2dp"
+                    android:text="You said: "
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
 
                 <TextView
                     android:id="@+id/userAnswer"
 
-                    android:layout_width="wrap_content"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginLeft="4dp"
                     android:text="Question 1"
                     android:textColor="@color/colorBlack"
-                    android:textSize="18sp" />
+                    android:textSize="18sp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@+id/textView10"
+                    app:layout_constraintTop_toTopOf="parent" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
 
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/correctAnswerStack"
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/correctAnswerLayout"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:orientation="horizontal">
+                android:layout_height="wrap_content">
 
                 <TextView
                     android:id="@+id/textView11"
                     android:layout_width="70dp"
                     android:layout_height="wrap_content"
-                    android:text="Answer:" />
+                    android:layout_marginTop="2dp"
+                    android:text="Answer:"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
 
                 <TextView
                     android:id="@+id/correctAnswer"
 
-                    android:layout_width="wrap_content"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginLeft="4dp"
                     android:text="Question 1"
                     android:textColor="@color/colorBlack"
-                    android:textSize="18sp" />
-
-            </LinearLayout>
+                    android:textSize="18sp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@+id/textView11"
+                    app:layout_constraintTop_toTopOf="parent" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
 
         </LinearLayout>
 
