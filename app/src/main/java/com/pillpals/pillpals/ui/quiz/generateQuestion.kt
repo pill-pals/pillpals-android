@@ -541,20 +541,13 @@ fun generateQuestion(id: Int, medication: Medications?):Questions {
             }
             // Adherence grades
             205 -> {
-                val grades = mutableListOf("A+","A","B+","B","C","D","F")
+                var grades = mutableListOf("A+","A","B+","B","C","D","F")
                 val grade = grades.random()
                 question.question = "According to how PillPals grades adherence, getting the grade $grade means you took your medication within:"
-                correctAnswerString = when (grade) {
-                    "A+" -> "10 minutes"
-                    "A" -> "20 minutes"
-                    "B+" -> "1 hour"
-                    "B" -> "2 hours"
-                    "C" -> "5 hours"
-                    "D" -> "10 hours"
-                    else -> "Over 10 hours or missed dose"
-                }
+
+                correctAnswerString = mapGradeToRange(grade)
                 grades.remove(grade)
-                incorrectAnswers = grades
+                incorrectAnswers = grades.map{ mapGradeToRange(it) } as MutableList<String>
             }
         }
     }

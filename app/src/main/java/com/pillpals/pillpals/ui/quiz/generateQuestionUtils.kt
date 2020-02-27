@@ -16,3 +16,15 @@ fun mapMoodToString(i: Int):String {
         else -> "Missing Mood Data"
     }
 }
+
+fun mapGradeToRange(grade: String):String {
+    return when (grade) {
+        "A+" -> "10 minutes"
+        "A" -> "20 minutes"
+        "B+" -> "1 hour"
+        "B" -> "2 hours"
+        "C" -> "5 hours"
+        "D" -> "10 hours"
+        else -> "Over 10 hours or missed dose"
+    }
+}
