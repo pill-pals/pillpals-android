@@ -118,25 +118,18 @@ fun generateQuestion(id: Int, medication: Medications):Questions {
                     is Promise.Result.Success -> {
                         // Use result here
                         result.value.forEach{
-                            if(it.percent>=currentPercent){
+                            if(it.percent >= currentPercent){
                                 currentPercent=it.percent
                                 currentResult=it.sideEffect.toLowerCase().capitalize()
                             }
                         }
                     }
-                    is Promise.Result.Error -> throwFromResponse=true
+                    is Promise.Result.Error -> throwFromResponse = true
                 }
 
                 correctAnswerString = currentResult
 
-                while(incorrectAnswers.count()<3){
-                    val currentIncorrect = allIncorrect.random()
-                    if(!currentIncorrect.contains(currentResult, true)
-                        && !currentResult.contains(currentIncorrect, true) && !incorrectAnswers.contains(currentIncorrect)){
-
-                        incorrectAnswers.add(currentIncorrect)
-                    }
-                }
+                incorrectAnswers = allIncorrect.filter { it.toLowerCase() != currentResult.toLowerCase() }.shuffled().take(3) as MutableList<String>
 
                 question.question = qString
 
@@ -165,18 +158,12 @@ fun generateQuestion(id: Int, medication: Medications):Questions {
                             resultList.add(it.replace("( .*)".toRegex(), ""))
                         }
                     }
-                    is Promise.Result.Error -> throwFromResponse=true
+                    is Promise.Result.Error -> throwFromResponse = true
                 }
 
                 correctAnswerString = resultList.random()
 
-                while(incorrectAnswers.count()<3){
-                    val currentIncorrect = allIncorrect.random()
-                    if(!resultList.contains(currentIncorrect) && !incorrectAnswers.contains(currentIncorrect)){
-
-                        incorrectAnswers.add(currentIncorrect)
-                    }
-                }
+                incorrectAnswers = allIncorrect.filter { !resultList.contains(it) }.shuffled().take(3) as MutableList<String>
 
                 question.question = qString
 
@@ -236,7 +223,7 @@ fun generateQuestion(id: Int, medication: Medications):Questions {
                     }
                     else {
                         correctAnswerString = colorList.random()
-                        incorrectAnswers = listOfColours.filter { it != correctAnswerString }.shuffled().take(3) as MutableList<String>
+                        incorrectAnswers = listOfColours.filter { !colorList.contains(it) }.shuffled().take(3) as MutableList<String>
 
                         question.question = questionString
 
@@ -310,7 +297,7 @@ fun generateQuestion(id: Int, medication: Medications):Questions {
             dpd_object ?: return question
             val qString = "What is the schedule classification of ${medication.name}?"
 
-            val allIncorrect: List<String> = listOf("Prescription", "OTC", "Homeopathic", "Narcotic (CDSA I)",
+            val allIncorrect: List<String> = listOf("Prescription", "Over The Counter (OTC)", "Homeopathic", "Narcotic (CDSA I)",
                 "Schedule G (CDSA IV)", "Ethical", "Targeted (CDSA IV)", "Schedule D", "Narcotic", "Schedule G (CDSA III)",
                 "Schedule C", "Narcotic (CDSA II)", "Unclassified")
 
@@ -330,18 +317,12 @@ fun generateQuestion(id: Int, medication: Medications):Questions {
                             }
                         }
                     }
-                    is Promise.Result.Error -> throwFromResponse=true
+                    is Promise.Result.Error -> throwFromResponse = true
                 }
 
                 correctAnswerString = resultList.random()
 
-                while(incorrectAnswers.count()<3){
-                    val currentIncorrect = allIncorrect.random()
-                    if(!resultList.contains(currentIncorrect) && !incorrectAnswers.contains(currentIncorrect)){
-
-                        incorrectAnswers.add(currentIncorrect)
-                    }
-                }
+                incorrectAnswers = allIncorrect.filter { !resultList.contains(it) }.shuffled().take(3) as MutableList<String>
 
                 question.question = qString
 
@@ -376,18 +357,12 @@ fun generateQuestion(id: Int, medication: Medications):Questions {
                             resultList.add(fullString.split(" ").joinToString(" ") { it.toLowerCase().capitalize() })
                         }
                     }
-                    is Promise.Result.Error -> throwFromResponse=true
+                    is Promise.Result.Error -> throwFromResponse = true
                 }
 
                 correctAnswerString = resultList.random()
 
-                while(incorrectAnswers.count()<3){
-                    val currentIncorrect = allIncorrect.random()
-                    if(!resultList.contains(currentIncorrect) && !incorrectAnswers.contains(currentIncorrect)){
-
-                        incorrectAnswers.add(currentIncorrect)
-                    }
-                }
+                incorrectAnswers = allIncorrect.filter { !resultList.contains(it) }.shuffled().take(3) as MutableList<String>
 
                 question.question = qString
 
@@ -493,7 +468,10 @@ fun generateQuestion(id: Int, medication: Medications):Questions {
         if(throwFromResponse) throw IOException("Question $id failed to generate.")
         Thread.sleep(50)
     }
-    
+    if(throwFromResponse) throw IOException("Question $id failed to generate.")
+
+    if(incorrectAnswers.count() < 3) throw IOException("Question $id failed to generate.")
+
     //if there are more than 3 incorrect answers, remove some
     incorrectAnswers.shuffle()
     incorrectAnswers = incorrectAnswers.take(3) as MutableList<String>

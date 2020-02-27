@@ -293,8 +293,6 @@ class MedicationInfoRetriever {
 
                 val url = "https://api.fda.gov/drug/event.json?search=patient.drug.openfda.product_ndc:\"${ndcId}\"&count=patient.reaction.reactionmeddrapt.exact"
 
-                Log.i("here", url)
-
                 val request = Request.Builder().url(url).build()
 
                 onCancel {
