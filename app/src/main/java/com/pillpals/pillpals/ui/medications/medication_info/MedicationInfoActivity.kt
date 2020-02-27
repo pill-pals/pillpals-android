@@ -260,7 +260,7 @@ class MedicationInfoActivity : AppCompatActivity() {
         }
 
         if(shapeResponse?.shapeName != null) {
-            tabZeroTitles = tabZeroTitles.plus("Color")
+            tabZeroTitles = tabZeroTitles.plus("Shape")
             tabZeroValues = tabZeroValues.plus(shapeResponse!!.shapeName!!)
         }
 
@@ -284,6 +284,32 @@ class MedicationInfoActivity : AppCompatActivity() {
             }))
         }
 
+        if(interactionsResponse != null && interactionsResponse!!.isNotEmpty() && rxcui != null) {
+            val filteredName = nameString.replace("(ACT(-| ))".toRegex(), "")
+                .replace("(TEVA(-| ))".toRegex(), "")
+                .replace("(TARO(-| ))".toRegex(), "")
+                .replace("(DOM(-| ))".toRegex(), "")
+                .replace("(PHL(-| ))".toRegex(), "")
+                .replace("(PMS(-| ))".toRegex(), "")
+                .replace("(RIVA(-| ))".toRegex(), "")
+                .replace("(RATIO(-| ))".toRegex(), "")
+                .replace("(NU(-| ))".toRegex(), "")
+                .replace("(APO(-| ))".toRegex(), "")
+                .replace("(MYLAN(-| ))".toRegex(), "")
+                .replace("(ZYM(-| ))".toRegex(), "")
+                .replace("((-| ).*)".toRegex(), "")
+            if(interactionsResponse!!.filter { it.interaction.contains(filteredName, true) }.count() > 0) {
+                tabOneTitles = tabOneTitles.plus("Interactions with your linked drugs")
+                tabOneValues = tabOneValues.plus(bulletedList(
+                    interactionsResponse!!.filter {
+                        it.interaction.contains(filteredName, true)
+                    }.fold(listOf()) {acc, it ->
+                        acc.plus(it.interaction)
+                    })
+                )
+            }
+        }
+
         if(interactsWithAlcoholResponse == true) {
             tabOneTitles = tabOneTitles.plus("Interacts with alcohol")
             tabOneValues = tabOneValues.plus("This drug may have some degree of an interaction with alcohol")
@@ -292,19 +318,6 @@ class MedicationInfoActivity : AppCompatActivity() {
         if(interactsWithCaffeineResponse == true) {
             tabOneTitles = tabOneTitles.plus("Interacts with caffeine")
             tabOneValues = tabOneValues.plus("This drug may have some degree of an interaction with caffeine")
-        }
-
-        if(interactionsResponse != null && interactionsResponse!!.isNotEmpty() && rxcui != null) {
-            if(interactionsResponse!!.filter { it.rxcuis.contains(rxcui!!) }.count() > 0) {
-                tabOneTitles = tabOneTitles.plus("Interactions with your linked drugs")
-                tabOneValues = tabOneValues.plus(bulletedList(
-                    interactionsResponse!!.filter {
-                        it.rxcuis.contains(rxcui!!)
-                    }.fold(listOf()) {acc, it ->
-                        acc.plus(it.interaction)
-                    })
-                )
-            }
         }
 
         // Tab 2 - Warnings/Tips

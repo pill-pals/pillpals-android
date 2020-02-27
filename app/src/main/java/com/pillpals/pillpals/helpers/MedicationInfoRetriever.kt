@@ -225,6 +225,8 @@ class MedicationInfoRetriever {
 
                 val url = "https://rxnav.nlm.nih.gov/REST/interaction/list.json?rxcuis=${rxcuis.joinToString("+")}"
 
+                Log.i("test", url)
+
                 val request = Request.Builder().url(url).build()
 
                 onCancel {
