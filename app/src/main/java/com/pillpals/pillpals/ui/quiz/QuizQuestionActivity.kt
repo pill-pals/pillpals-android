@@ -131,14 +131,23 @@ class QuizQuestionActivity : AppCompatActivity() {
 
     private fun setPageContentsForQuestion(index: Int){
         val question = quiz!!.questions[index]!!
-        iconBackground.setCardBackgroundColor(Color.parseColor(getColorStringByID(question.medication!!.color_id)))
-        icon.setImageDrawable(
-            DatabaseHelper.getCorrectIconDrawable(
-                this,
-                question.medication!!
+        if (question.medication == null) {
+            iconBackground.setCardBackgroundColor(ContextCompat.getColor(this, R.color.colorPrimary))
+            icon.setImageDrawable(ContextCompat.getDrawable(this, this.getResources()
+                .getIdentifier("drawable/ic_pill_v5", null, this.packageName)))
+            icon.imageTintList = ColorStateList.valueOf(ResourcesCompat.getColor(getResources(), R.color.colorWhite, null))
+            drugName.text = "Knowledge Question"
+        } else {
+            iconBackground.setCardBackgroundColor(Color.parseColor(getColorStringByID(question.medication!!.color_id)))
+            icon.setImageDrawable(
+                DatabaseHelper.getCorrectIconDrawable(
+                    this,
+                    question.medication!!
+                )
             )
-        )
-        drugName.text = question.medication!!.name
+            icon.imageTintList = ColorStateList.valueOf(ResourcesCompat.getColor(getResources(), R.color.colorBlack, null))
+            drugName.text = question.medication!!.name
+        }
         questionTitle.text = "Question " + (index + 1).toString()
         questionText.text = question.question
 

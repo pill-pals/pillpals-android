@@ -9,5 +9,6 @@ import io.realm.annotations.PrimaryKey
 open class QuestionTemplates(
     @PrimaryKey var id: Int = 0,
     var canUseOnNonLinkedMedications: Boolean = false,
+    var notRelatedToMedication: Boolean = false,
     var questions: RealmList<Questions> = RealmList()
     ) : RealmObject(){}

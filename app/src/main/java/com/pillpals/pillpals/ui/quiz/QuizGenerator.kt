@@ -60,48 +60,53 @@ class QuizGenerator() {
             }
         }
 
-        fun generateQuiz() {
+        fun asyncGenerateQuiz() {
             val handler = Handler(Looper.getMainLooper())
             val runnable = object: Runnable {
                 override fun run() {
-                    realm.executeTransaction {
-                        var quiz = it.createObject(Quizzes::class.java, UUID.randomUUID().toString())
-                        quiz.date = Date()
-                        quiz.name = generateQuizName()
+                    generateQuiz()
+                }
+            }
+            handler.post(runnable)
+        }
 
-                        var attemptedTemplates = mutableListOf<QuestionTemplates>()
-                        var selectedTemplates = mutableListOf<QuestionTemplates>()
-                        var generatedQuestions = mutableListOf<Questions>()
+        fun generateQuiz() {
+            realm.executeTransaction {
+                var quiz = it.createObject(Quizzes::class.java, UUID.randomUUID().toString())
+                quiz.date = Date()
+                quiz.name = generateQuizName()
 
-                        var counter = 0
-                        while (counter <= 9) {
-                            var template = getRandomTemplate(attemptedTemplates)
-                            var question: Questions? = try {generateQuestion(template.id, getRandomMedication(template))} catch(e: IOException) {null}
-                            attemptedTemplates.add(template)
+                var attemptedTemplates = mutableListOf<QuestionTemplates>()
+                var selectedTemplates = mutableListOf<QuestionTemplates>()
+                var generatedQuestions = mutableListOf<Questions>()
 
-                            if (question != null) {
-                                counter++
-                                selectedTemplates.add(template)
-                                generatedQuestions.add(question)
-                            }
-                        }
+                var counter = 0
+                while (counter <= 9) {
+                    var template = getRandomTemplate(attemptedTemplates)
+                    var question: Questions? = try {generateQuestion(template.id, getRandomMedication(template))} catch(e: IOException) {null}
+                    Log.d("question",template.id.toString() + " - " + question.toString())
+                    attemptedTemplates.add(template)
 
-                        //create objects in realm for linking
-                        for (i in 0..9) {
-                            var question = it.createObject(Questions::class.java, UUID.randomUUID().toString())
-                            question.question = generatedQuestions[i].question
-                            question.answers = generatedQuestions[i].answers
-                            question.correctAnswer = generatedQuestions[i].correctAnswer
-                            question.medication = generatedQuestions[i].medication
-
-                            selectedTemplates[i].questions.add(question)
-                            quiz.questions.add(question)
-                        }
+                    if (question != null) {
+                        counter++
+                        selectedTemplates.add(template)
+                        generatedQuestions.add(question)
                     }
+                }
+
+                //create objects in realm for linking
+                for (i in 0..9) {
+                    var question = it.createObject(Questions::class.java, UUID.randomUUID().toString())
+                    question.question = generatedQuestions[i].question
+                    question.answers = generatedQuestions[i].answers
+                    question.correctAnswer = generatedQuestions[i].correctAnswer
+                    question.medication = generatedQuestions[i].medication
+
+                    selectedTemplates[i].questions.add(question)
+                    quiz.questions.add(question)
                 }
             }
 
-            handler.post(runnable)
         }
 
         private fun generateQuizName():String {
@@ -121,7 +126,8 @@ class QuizGenerator() {
             return unattemptedTemplates.random()
         }
 
-        private fun getRandomMedication(template: QuestionTemplates):Medications {
+        private fun getRandomMedication(template: QuestionTemplates):Medications? {
+            if (template.notRelatedToMedication) return null
             var query = realm.where(Medications::class.java).and().equalTo("deleted",false)
 
             if(!template.canUseOnNonLinkedMedications) {
