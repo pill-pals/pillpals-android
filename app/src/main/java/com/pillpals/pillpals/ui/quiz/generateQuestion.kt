@@ -253,6 +253,41 @@ fun generateQuestion(id: Int, medication: Medications):Questions {
             incorrectAnswers.add("Incorrect 3")
             question.question = "This question is asking about " + medication.name + " using template 5"
         }
+        6-> {
+            correctAnswerString = "Correct"
+            incorrectAnswers.add("Incorrect 1")
+            incorrectAnswers.add("Incorrect 2")
+            incorrectAnswers.add("Incorrect 3")
+            question.question = "This question is asking about " + medication.name + " using template 5"
+        }
+        7-> {
+            correctAnswerString = "Correct"
+            incorrectAnswers.add("Incorrect 1")
+            incorrectAnswers.add("Incorrect 2")
+            incorrectAnswers.add("Incorrect 3")
+            question.question = "This question is asking about " + medication.name + " using template 5"
+        }
+        8-> {
+            correctAnswerString = "Correct"
+            incorrectAnswers.add("Incorrect 1")
+            incorrectAnswers.add("Incorrect 2")
+            incorrectAnswers.add("Incorrect 3")
+            question.question = "This question is asking about " + medication.name + " using template 5"
+        }
+        9-> {
+            correctAnswerString = "Correct"
+            incorrectAnswers.add("Incorrect 1")
+            incorrectAnswers.add("Incorrect 2")
+            incorrectAnswers.add("Incorrect 3")
+            question.question = "This question is asking about " + medication.name + " using template 5"
+        }
+        10-> {
+            correctAnswerString = "Correct"
+            incorrectAnswers.add("Incorrect 1")
+            incorrectAnswers.add("Incorrect 2")
+            incorrectAnswers.add("Incorrect 3")
+            question.question = "This question is asking about " + medication.name + " using template 5"
+        }
 
 
         //----  Questions that can be used on any medication  ----//
