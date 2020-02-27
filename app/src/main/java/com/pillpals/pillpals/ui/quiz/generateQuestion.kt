@@ -4,10 +4,7 @@ import android.util.Log
 import com.pillpals.pillpals.data.model.Medications
 import com.pillpals.pillpals.data.model.MoodLogs
 import com.pillpals.pillpals.data.model.Questions
-import com.pillpals.pillpals.helpers.DatabaseHelper
-import com.pillpals.pillpals.helpers.DateHelper
-import com.pillpals.pillpals.helpers.MedicationInfoRetriever
-import com.pillpals.pillpals.helpers.StatsHelper
+import com.pillpals.pillpals.helpers.*
 import com.shopify.promises.Promise
 import io.realm.Realm
 import io.realm.RealmList
@@ -99,19 +96,91 @@ fun generateQuestion(id: Int, medication: Medications):Questions {
         }
         //Placeholder
         2-> {
-            correctAnswerString = "Correct"
-            incorrectAnswers.add("Incorrect 1")
-            incorrectAnswers.add("Incorrect 2")
-            incorrectAnswers.add("Incorrect 3")
-            question.question = "This question is asking about " + medication.name + " using template 2"
+            val dpd_object = medication.dpd_object?.firstOrNull()
+
+            dpd_object ?: return question
+            val qString = "What is the most common side effect of ${medication.name}?"
+
+            val allIncorrect: List<String> = listOf("Death", "Suicidal thoughts", "Anxiety", "Nausea", "Vomiting", "Dizziness",
+                "Drowsiness", "Headache", "Insomnia", "Chest pain", "Asthma", "Loss of appetite", "Tremors", "Dry mouth", "Fever",
+                "Muscle pain", "Hair loss", "Soreness", "Swelling", "Dry skin")
+
+            val sideEffectsPromise = MedicationInfoRetriever.sideEffects(dpd_object.ndc_id ?: "null")
+
+            var currentPercent = 0f
+            var currentResult = ""
+
+            waitingForResponse = true
+
+            sideEffectsPromise.whenComplete { result: Promise.Result<List<SideEffectResult>, RuntimeException> ->
+                when (result) {
+                    is Promise.Result.Success -> {
+                        // Use result here
+                        result.value.forEach{
+                            if(it.percent>=currentPercent){
+                                currentPercent=it.percent
+                                currentResult=it.sideEffect.toLowerCase().capitalize()
+                            }
+                        }
+                    }
+                    is Promise.Result.Error -> Log.i("Error", result.error.message!!)
+                }
+
+                correctAnswerString = currentResult
+
+                while(incorrectAnswers.count()<3){
+                    val currentIncorrect = allIncorrect.random()
+                    if(!currentIncorrect.contains(currentResult, true)
+                        && !currentResult.contains(currentIncorrect, true) && !incorrectAnswers.contains(currentIncorrect)){
+
+                        incorrectAnswers.add(currentIncorrect)
+                    }
+                }
+
+                question.question = qString
+
+                waitingForResponse = false
+            }
         }
         //Placeholder
         3-> {
-            correctAnswerString = "Correct"
-            incorrectAnswers.add("Incorrect 1")
-            incorrectAnswers.add("Incorrect 2")
-            incorrectAnswers.add("Incorrect 3")
-            question.question = "This question is asking about " + medication.name + " using template 3"
+            val dpd_object = medication.dpd_object?.firstOrNull()
+
+            dpd_object ?: return question
+            val qString = "Which of the following is an intake method of ${medication.name}?"
+
+            val allIncorrect: List<String> = listOf("Oral", "Topical", "Intravenous", "Ophthalmic", "Intramuscular", "Dental",
+                "Inhalation", "Rectal", "Dialysis", "Disinfectant")
+
+            val intakePromise = MedicationInfoRetriever.intakeRoutes(dpd_object.dpd_id)
+            var resultList = mutableListOf<String>()
+            waitingForResponse = true
+
+            intakePromise.whenComplete { result: Promise.Result<List<String>, RuntimeException> ->
+                when (result) {
+                    is Promise.Result.Success -> {
+                        // Use result here
+                        result.value.forEach{
+                            resultList.add(it.replace("( .*)".toRegex(), ""))
+                        }
+                    }
+                    is Promise.Result.Error -> Log.i("Error", result.error.message!!)
+                }
+
+                correctAnswerString = resultList.random()
+
+                while(incorrectAnswers.count()<3){
+                    val currentIncorrect = allIncorrect.random()
+                    if(!resultList.contains(currentIncorrect) && !incorrectAnswers.contains(currentIncorrect)){
+
+                        incorrectAnswers.add(currentIncorrect)
+                    }
+                }
+
+                question.question = qString
+
+                waitingForResponse = false
+            }
         }
         //Placeholder
         4-> {
