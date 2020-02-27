@@ -112,7 +112,7 @@ class QuizGenerator() {
         private fun generateQuizName():String {
             //TODO: come up with algorithm for quiz names
             var quizzes = realm.where(Quizzes::class.java).findAll()
-            return "Gen Quiz " + quizzes.size.toString()
+            return "Quiz " + quizzes.size.toString()
         }
 
         private fun getRandomTemplate(attemptedTemplates: MutableList<QuestionTemplates>):QuestionTemplates {
