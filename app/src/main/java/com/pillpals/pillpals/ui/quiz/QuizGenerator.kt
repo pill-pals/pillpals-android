@@ -51,8 +51,8 @@ class QuizGenerator() {
                 }
                 Log.i("quiz", "New quiz generated")
                 return 1
-            } else if(!newQuizExists && !quizzesInTimeFrame.isEmpty()){
-                Log.i("quiz", "Quiz in time frame")
+            } else if(newQuizExists){
+                Log.i("quiz", "Quiz Available")
                 return 2
             }else{
                 Log.i("quiz", "Quiz generation not attempted")

@@ -203,7 +203,7 @@ class QuizActivity: AppCompatActivity() {
         completedCollapseBtn.setOnClickListener {
             toggleCollapse(completedStack, completedCollapseBtn)
         }
-        if (prefs.getBoolean(getString(R.string.quiz_completed_stack_collapsed), true)) {
+        if (prefs.getBoolean(getString(R.string.quiz_completed_stack_collapsed), false)) {
             completedCollapseBtn.setImageResource(R.drawable.ic_circle_chevron_right_from_down)
         }
         completedStack.layoutTransition.enableTransitionType(LayoutTransition.CHANGING)
