@@ -560,8 +560,8 @@ class MedicationInfoActivity : AppCompatActivity() {
         }
     }
 
-    private fun allUsersMedications(): RealmResults<out Medications> {
-        return DatabaseHelper.readAllData(Medications::class.java) as RealmResults<out Medications>
+    private fun allUsersMedications(): List<Medications> {
+        return (DatabaseHelper.readAllData(Medications::class.java) as RealmResults<out Medications>).filter { !it.deleted }
     }
 
     private fun allUsersRxcuis(): List<String> {

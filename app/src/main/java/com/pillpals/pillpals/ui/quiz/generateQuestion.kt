@@ -107,7 +107,7 @@ fun generateQuestion(id: Int, medication: Medications?):Questions {
 
                 val allIncorrect: List<String> = listOf("Death", "Suicidal thoughts", "Anxiety", "Nausea", "Vomiting", "Dizziness",
                     "Drowsiness", "Headache", "Insomnia", "Chest pain", "Asthma", "Loss of appetite", "Tremors", "Dry mouth", "Fever",
-                    "Muscle pain", "Hair loss", "Soreness", "Swelling", "Dry skin")
+                    "Muscle pain", "Hair loss", "Soreness", "Swelling", "Dry skin", "Dyspnoea")
 
                 val sideEffectsPromise = MedicationInfoRetriever.sideEffects(dpd_object.ndc_id ?: "null")
 
@@ -289,13 +289,6 @@ fun generateQuestion(id: Int, medication: Medications?):Questions {
                 }
             }
             6-> {
-                correctAnswerString = "Correct"
-                incorrectAnswers.add("Incorrect 1")
-                incorrectAnswers.add("Incorrect 2")
-                incorrectAnswers.add("Incorrect 3")
-                question.question = "This question is asking about " + medication.name + " using template 5"
-            }
-            7-> {
                 val dpd_object = medication.dpd_object?.firstOrNull()
 
                 dpd_object ?: return question
@@ -333,7 +326,7 @@ fun generateQuestion(id: Int, medication: Medications?):Questions {
                     waitingForResponse = false
                 }
             }
-            8-> {
+            7-> {
                 val dpd_object = medication.dpd_object?.firstOrNull()
 
                 dpd_object ?: return question
@@ -372,20 +365,6 @@ fun generateQuestion(id: Int, medication: Medications?):Questions {
 
                     waitingForResponse = false
                 }
-            }
-            9-> {
-                correctAnswerString = "Correct"
-                incorrectAnswers.add("Incorrect 1")
-                incorrectAnswers.add("Incorrect 2")
-                incorrectAnswers.add("Incorrect 3")
-                question.question = "This question is asking about " + medication.name + " using template 5"
-            }
-            10-> {
-                correctAnswerString = "Correct"
-                incorrectAnswers.add("Incorrect 1")
-                incorrectAnswers.add("Incorrect 2")
-                incorrectAnswers.add("Incorrect 3")
-                question.question = "This question is asking about " + medication.name + " using template 5"
             }
 
 
@@ -448,24 +427,6 @@ fun generateQuestion(id: Int, medication: Medications?):Questions {
 
                 question.question = "The recent (last 7 days) feelings I had logged about ${medication.name} is:"
             }
-            //Placeholder
-            105-> {
-                correctAnswerString = "Correct"
-                incorrectAnswers.add("Incorrect 1")
-                incorrectAnswers.add("Incorrect 2")
-                incorrectAnswers.add("Incorrect 3")
-                question.question = "This question is asking about " + medication.name + " using template 105"
-            }
-            //Placeholder
-            106-> {
-                correctAnswerString = "Correct"
-                incorrectAnswers.add("Incorrect 1")
-                incorrectAnswers.add("Incorrect 2")
-                incorrectAnswers.add("Incorrect 3")
-                question.question = "This question is asking about " + medication.name + " using template 105"
-                throw IOException("question failed to generate")
-            }
-
         }
     } else {
         when (id) {
