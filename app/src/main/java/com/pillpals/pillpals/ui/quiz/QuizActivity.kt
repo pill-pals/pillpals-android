@@ -34,14 +34,20 @@ import io.realm.RealmObject.deleteFromRealm
 import androidx.core.app.ComponentActivity.ExtraData
 import androidx.core.content.ContextCompat.getSystemService
 import android.icu.lang.UCharacter.GraphemeClusterBreak.T
+import android.os.Handler
+import android.os.HandlerThread
+import android.os.Looper
 import android.util.Log
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.Toast
 import com.pillpals.pillpals.helpers.DatabaseHelper.Companion.getColorStringByID
 import com.pillpals.pillpals.helpers.DatabaseHelper.Companion.getCorrectIconDrawable
+import com.pillpals.pillpals.helpers.backgroundThreadToast
 import com.pillpals.pillpals.ui.DrugCard
 import com.pillpals.pillpals.ui.search.SearchActivity
 import com.pillpals.pillpals.ui.statistics.MedicationScoresActivity
+import java.io.IOException
 
 
 class QuizActivity: AppCompatActivity() {
@@ -89,8 +95,8 @@ class QuizActivity: AppCompatActivity() {
         }
 
         generateQuizButton.setOnClickListener{
-            QuizGenerator.safeGenerateQuiz(this)
-            update()
+            safeGenerateQuiz(this)
+            //update()
         }
 
         //clearTestData()
@@ -243,23 +249,30 @@ class QuizActivity: AppCompatActivity() {
     }
 
     fun update() {
-        pausedStack.layoutTransition.disableTransitionType(LayoutTransition.DISAPPEARING)
-        completedStack.layoutTransition.disableTransitionType(LayoutTransition.DISAPPEARING)
-        pausedStack.layoutTransition.disableTransitionType(LayoutTransition.APPEARING)
-        completedStack.layoutTransition.disableTransitionType(LayoutTransition.APPEARING)
-        pausedStack.layoutTransition.disableTransitionType(LayoutTransition.CHANGING)
-        completedStack.layoutTransition.disableTransitionType(LayoutTransition.CHANGING)
-        newStack.removeViews(1, newStack.childCount - 1)
-        pausedStack.removeViews(1, pausedStack.childCount - 1)
-        completedStack.removeViews(1, completedStack.childCount - 1)
+        val handler = Handler(Looper.getMainLooper())
+        val runnable = object: Runnable {
+            override fun run() {
+                pausedStack.layoutTransition.disableTransitionType(LayoutTransition.DISAPPEARING)
+                completedStack.layoutTransition.disableTransitionType(LayoutTransition.DISAPPEARING)
+                pausedStack.layoutTransition.disableTransitionType(LayoutTransition.APPEARING)
+                completedStack.layoutTransition.disableTransitionType(LayoutTransition.APPEARING)
+                pausedStack.layoutTransition.disableTransitionType(LayoutTransition.CHANGING)
+                completedStack.layoutTransition.disableTransitionType(LayoutTransition.CHANGING)
+                newStack.removeViews(1, newStack.childCount - 1)
+                pausedStack.removeViews(1, pausedStack.childCount - 1)
+                completedStack.removeViews(1, completedStack.childCount - 1)
 
-        checkLinkedDrugs()
+                checkLinkedDrugs()
 
-        setUpQuizCards((readAllData(Quizzes::class.java) as RealmResults<out Quizzes>).sort("date"))
+                setUpQuizCards((readAllData(Quizzes::class.java) as RealmResults<out Quizzes>).sort("date"))
 
-        setUpCollapsing()
+                setUpCollapsing()
 
-        hideEmptyStacks()
+                hideEmptyStacks()
+            }
+        }
+
+        handler.post(runnable)
     }
 
     private fun hideEmptyStacks() {
@@ -398,5 +411,30 @@ class QuizActivity: AppCompatActivity() {
         newCard.overflowMenu.visibility = View.GONE
 
         buttonLayout.addView(newCard)
+    }
+
+    fun safeGenerateQuiz(context: Context) {
+        Toast.makeText(context,"Loading quiz generator...", Toast.LENGTH_SHORT).show()
+        if(QuizGenerator.debounceSafeGenerate) return
+
+        val mHandlerThread = HandlerThread("QuizGeneratorThread")
+        mHandlerThread.start()
+
+        val handler = Handler(mHandlerThread.getLooper())
+        val runnable = object: Runnable {
+            override fun run() {
+                QuizGenerator.debounceSafeGenerate = true
+                try {
+                    QuizGenerator.generateQuiz()
+                    QuizGenerator.debounceSafeGenerate = false
+                    update()
+                }
+                catch(e: IOException){
+                    backgroundThreadToast(context,"Quiz generation failed, try again later.", Toast.LENGTH_SHORT)
+                }
+            }
+        }
+
+        handler.post(runnable)
     }
 }

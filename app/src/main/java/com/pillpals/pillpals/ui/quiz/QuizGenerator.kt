@@ -1,6 +1,9 @@
 package com.pillpals.pillpals.ui.quiz
 
 import android.content.Context
+import android.os.Handler
+import android.os.HandlerThread
+import android.os.Looper
 import com.pillpals.pillpals.ui.statistics.DataLogs
 import com.pillpals.pillpals.ui.statistics.MissingLogs
 import com.pillpals.pillpals.ui.statistics.TimeCount
@@ -12,6 +15,7 @@ import android.widget.Toast
 import com.pillpals.pillpals.data.model.*
 import com.pillpals.pillpals.helpers.DateHelper
 import com.pillpals.pillpals.helpers.QuizHelper
+import com.pillpals.pillpals.helpers.backgroundThreadToast
 import io.realm.Sort
 import io.realm.kotlin.createObject
 import java.io.IOException
@@ -19,6 +23,7 @@ import java.io.IOException
 class QuizGenerator() {
     companion object {
         val realm = Realm.getDefaultInstance()
+        var debounceSafeGenerate = false
 
         fun tryGenerateQuiz():Int {
             //Only generates a new quiz if no new quizzes exist and the last quiz was generated over 3 days ago
@@ -55,50 +60,48 @@ class QuizGenerator() {
             }
         }
 
-        fun safeGenerateQuiz(context: Context) {
-            try {
-                generateQuiz()
-            }
-            catch(e: IOException){
-                Toast.makeText(context,"Quiz generation failed, try again later.", Toast.LENGTH_SHORT).show()
-            }
-        }
-
         fun generateQuiz() {
-            realm.executeTransaction {
-                var quiz = it.createObject(Quizzes::class.java, UUID.randomUUID().toString())
-                quiz.date = Date()
-                quiz.name = generateQuizName()
+            val handler = Handler(Looper.getMainLooper())
+            val runnable = object: Runnable {
+                override fun run() {
+                    realm.executeTransaction {
+                        var quiz = it.createObject(Quizzes::class.java, UUID.randomUUID().toString())
+                        quiz.date = Date()
+                        quiz.name = generateQuizName()
 
-                var attemptedTemplates = mutableListOf<QuestionTemplates>()
-                var selectedTemplates = mutableListOf<QuestionTemplates>()
-                var generatedQuestions = mutableListOf<Questions>()
+                        var attemptedTemplates = mutableListOf<QuestionTemplates>()
+                        var selectedTemplates = mutableListOf<QuestionTemplates>()
+                        var generatedQuestions = mutableListOf<Questions>()
 
-                var counter = 0
-                while (counter <= 9) {
-                    var template = getRandomTemplate(attemptedTemplates)
-                    var question: Questions? = try {generateQuestion(template.id, getRandomMedication(template))} catch(e: IOException) {null}
-                    attemptedTemplates.add(template)
+                        var counter = 0
+                        while (counter <= 9) {
+                            var template = getRandomTemplate(attemptedTemplates)
+                            var question: Questions? = try {generateQuestion(template.id, getRandomMedication(template))} catch(e: IOException) {null}
+                            attemptedTemplates.add(template)
 
-                    if (question != null) {
-                        counter++
-                        selectedTemplates.add(template)
-                        generatedQuestions.add(question)
+                            if (question != null) {
+                                counter++
+                                selectedTemplates.add(template)
+                                generatedQuestions.add(question)
+                            }
+                        }
+
+                        //create objects in realm for linking
+                        for (i in 0..9) {
+                            var question = it.createObject(Questions::class.java, UUID.randomUUID().toString())
+                            question.question = generatedQuestions[i].question
+                            question.answers = generatedQuestions[i].answers
+                            question.correctAnswer = generatedQuestions[i].correctAnswer
+                            question.medication = generatedQuestions[i].medication
+
+                            selectedTemplates[i].questions.add(question)
+                            quiz.questions.add(question)
+                        }
                     }
                 }
-
-                //create objects in realm for linking
-                for (i in 0..9) {
-                    var question = it.createObject(Questions::class.java, UUID.randomUUID().toString())
-                    question.question = generatedQuestions[i].question
-                    question.answers = generatedQuestions[i].answers
-                    question.correctAnswer = generatedQuestions[i].correctAnswer
-                    question.medication = generatedQuestions[i].medication
-
-                    selectedTemplates[i].questions.add(question)
-                    quiz.questions.add(question)
-                }
             }
+
+            handler.post(runnable)
         }
 
         private fun generateQuizName():String {
