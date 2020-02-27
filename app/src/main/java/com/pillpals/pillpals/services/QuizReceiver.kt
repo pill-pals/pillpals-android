@@ -45,11 +45,11 @@ class QuizReceiver: BroadcastReceiver() {
                 val mBuilder =
                     NotificationCompat.Builder(context, context.getString(R.string.channel_id_soft))
                         .setSmallIcon(R.drawable.ic_pill_v5)
-                        .setContentTitle("New quiz available!")
+                        .setContentTitle("You have unfinished quizzes!")
                         .setPriority(priorityValue)
                         .setContentIntent(pendingIntent)
                         .setOngoing(true)
-                        .setTicker("A new quiz is available!")
+                        .setTicker("You have unfinished quizzes!")
                         .setVisibility(NotificationCompat.VISIBILITY_PRIVATE)
 
                 notificationManager.notify(generateNotificationID(), mBuilder.build())
