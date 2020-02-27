@@ -17,4 +17,4 @@ open class Questions(
     val template: RealmResults<QuestionTemplates>? = null,
     @LinkingObjects("questions")
     val quiz: RealmResults<Quizzes>? = null
-    ) : RealmObject(){}
+) : RealmObject(){}
