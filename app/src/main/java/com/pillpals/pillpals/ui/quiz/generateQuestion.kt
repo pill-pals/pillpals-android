@@ -301,7 +301,7 @@ fun generateQuestion(id: Int, medication: Medications?):Questions {
                 val dpd_object = medication.dpd_object?.firstOrNull()
 
                 dpd_object ?: return question
-                val qString = "What is the schedule classification of ${medication.name}?"
+                val qString = "What is the Controlled Drug and Substances Act schedule classification of ${medication.name}?"
 
                 val allIncorrect: List<String> = listOf("Prescription", "Over The Counter (OTC)", "Homeopathic", "Narcotic (CDSA I)",
                     "Schedule G (CDSA IV)", "Ethical", "Targeted (CDSA IV)", "Schedule D", "Narcotic", "Schedule G (CDSA III)",
@@ -481,7 +481,6 @@ fun generateQuestion(id: Int, medication: Medications?):Questions {
                     "Resell the remaining medication"
                 )
             }
-            //Placeholder
             202 -> {
                 question.question = "Which of these is a possible reason for a drug to be recalled?"
                 correctAnswerString = ALL_OF_THE_ABOVE
@@ -494,31 +493,61 @@ fun generateQuestion(id: Int, medication: Medications?):Questions {
                     "Unanticipated health risk"
                 )
             }
-            //Placeholder
+            // What is a drug according to Canada Drug and Food Act
             203 -> {
-                question.question = "What should you do if you're usually unable to take your prescription at a certain time?"
-                correctAnswerString = "Talk to your pharmacist/doctor about adjusting the schedule"
-                incorrectAnswers = mutableListOf(
-                    "Always take that dose early or late",
-                    "Just skip that dose",
-                    "Take more medication at a different time to balance it",
-                    "Stop taking the medication at all"
-                )
+                //https://datac.ca/understanding-drug-schedules/
+                question.question = "According to the National Food and Drugs Act, what is NOT considered a drug?"
+                val correctAnswerStrings = mutableListOf("vitamins", "nutritional supplements","illegal narcotics","energy drinks")
+                correctAnswerString = correctAnswerStrings.random()
+                incorrectAnswers = mutableListOf("biologically-derived products like vaccines","tissues and organs","disinfectants","prescription pharmaceuticals","non-prescription pharmaceuticals")
             }
+            // What is unique to Canadian Drug Schedules
             204 -> {
-                question.question = "Question with no medication using id $id."
-                correctAnswerString = "Correct"
-                incorrectAnswers = mutableListOf("Wrong 1","Wrong 2","Wrong 3")
+                //https://datac.ca/understanding-drug-schedules/
+                val scheduleType = listOf("Schedule I", "Schedule II", "Schedule III", "Unscheduled").random()
+                var uniqueToScheduleI = mutableListOf("Require a prescription for sale","Are the most strictly regulated drugs","Are subject to provincial professional requirements on control")
+                var uniqueToScheduleII = mutableListOf("Require only intervention from pharmacist at point of sale","Only sometimes require a professional referral","Do not require a prescription, but cannot be self-selected by patient")
+                var uniqueToScheduleIII = mutableListOf("Are available on the shelf from a pharmacist","Are primarily subject to local professional requirements on control")
+                var uniqueToUnscheduled = mutableListOf("Can be sold at any retail outlet","Do not require professional supervision")
+
+                question.question = "According to Canada's National Drug Schedules, what is unique about $scheduleType drugs?"
+
+                when (scheduleType) {
+                    "Schedule I" -> {
+                        correctAnswerString = uniqueToScheduleI.random()
+                        incorrectAnswers.addAll(uniqueToScheduleII)
+                        incorrectAnswers.addAll(uniqueToScheduleIII)
+                        incorrectAnswers.addAll(uniqueToUnscheduled)
+                    }
+                    "Schedule II" -> {
+                        correctAnswerString = uniqueToScheduleII.random()
+                        incorrectAnswers.addAll(uniqueToScheduleI)
+                        incorrectAnswers.addAll(uniqueToScheduleIII)
+                        incorrectAnswers.addAll(uniqueToUnscheduled)
+                    }
+                    "Schedule III" -> {
+                        correctAnswerString = uniqueToScheduleIII.random()
+                        incorrectAnswers.addAll(uniqueToScheduleI)
+                        incorrectAnswers.addAll(uniqueToScheduleII)
+                        incorrectAnswers.addAll(uniqueToUnscheduled)
+                    }
+                    else -> {
+                        correctAnswerString = uniqueToUnscheduled.random()
+                        incorrectAnswers.addAll(uniqueToScheduleI)
+                        incorrectAnswers.addAll(uniqueToScheduleII)
+                        incorrectAnswers.addAll(uniqueToScheduleIII)
+                    }
+                }
             }
+            // Adherence grades
             205 -> {
-                question.question = "Question with no medication using id $id."
-                correctAnswerString = "Correct"
-                incorrectAnswers = mutableListOf("Wrong 1","Wrong 2","Wrong 3")
-            }
-            206 -> {
-                question.question = "Question with no medication using id $id."
-                correctAnswerString = "Correct"
-                incorrectAnswers = mutableListOf("Wrong 1","Wrong 2","Wrong 3")
+                var grades = mutableListOf("A+","A","B+","B","C","D","F")
+                val grade = grades.random()
+                question.question = "According to how PillPals grades adherence, getting the grade $grade means you took your medication within:"
+
+                correctAnswerString = mapGradeToRange(grade)
+                grades.remove(grade)
+                incorrectAnswers = grades.map{ mapGradeToRange(it) } as MutableList<String>
             }
         }
     }
