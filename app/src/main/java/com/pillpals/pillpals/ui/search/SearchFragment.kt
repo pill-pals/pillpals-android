@@ -132,7 +132,7 @@ class SearchFragment : Fragment() {
                     }
                 }
 
-                handler.postDelayed(runnable!!, 200)
+                handler.postDelayed(runnable!!, 100)
 
                 return false
             }

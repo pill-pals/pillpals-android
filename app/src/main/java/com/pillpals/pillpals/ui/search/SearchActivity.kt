@@ -140,7 +140,7 @@ class SearchActivity : AppCompatActivity() {
                     }
                 }
 
-                handler.postDelayed(runnable!!, 200)
+                handler.postDelayed(runnable!!, 100)
 
                 return false
             }
