@@ -387,6 +387,9 @@ class DashboardFragment : Fragment() {
                     val intent = Intent(context, MedicationInfoActivity::class.java)
                     intent.putExtra("drug-code", dpdObject.dpd_id)
                     intent.putExtra("icon-color", getColorStringByID(medication.color_id))
+                    if(dpdObject.administrationRoutes.firstOrNull() != null) {
+                        intent.putExtra("icon-resource", administrationRouteToIconString(dpdObject.administrationRoutes.first()!!))
+                    }
                     intent.putStringArrayListExtra("administration-routes", ArrayList(dpdObject.administrationRoutes))
                     intent.putStringArrayListExtra("active-ingredients",  ArrayList(dpdObject.activeIngredients))
                     intent.putExtra("dosage-string", dpdObject.dosageString)
@@ -460,6 +463,9 @@ class DashboardFragment : Fragment() {
                     val intent = Intent(context, MedicationInfoActivity::class.java)
                     intent.putExtra("drug-code", dpdObject.dpd_id)
                     intent.putExtra("icon-color", getColorStringByID(medication.color_id))
+                    if(dpdObject.administrationRoutes.firstOrNull() != null) {
+                        intent.putExtra("icon-resource", administrationRouteToIconString(dpdObject.administrationRoutes.first()!!))
+                    }
                     intent.putStringArrayListExtra("administration-routes", ArrayList(dpdObject.administrationRoutes))
                     intent.putStringArrayListExtra("active-ingredients",  ArrayList(dpdObject.activeIngredients))
                     intent.putExtra("dosage-string", dpdObject.dosageString)
@@ -539,6 +545,9 @@ class DashboardFragment : Fragment() {
                     val intent = Intent(context, MedicationInfoActivity::class.java)
                     intent.putExtra("drug-code", dpdObject.dpd_id)
                     intent.putExtra("icon-color", getColorStringByID(medication.color_id))
+                    if(dpdObject.administrationRoutes.firstOrNull() != null) {
+                        intent.putExtra("icon-resource", administrationRouteToIconString(dpdObject.administrationRoutes.first()!!))
+                    }
                     intent.putStringArrayListExtra("administration-routes", ArrayList(dpdObject.administrationRoutes))
                     intent.putStringArrayListExtra("active-ingredients",  ArrayList(dpdObject.activeIngredients))
                     intent.putExtra("dosage-string", dpdObject.dosageString)
@@ -640,6 +649,9 @@ class DashboardFragment : Fragment() {
             val intent = Intent(context, MedicationInfoActivity::class.java)
             intent.putExtra("drug-code", dpdObject.dpd_id)
             intent.putExtra("icon-color", getColorStringByID(medication.color_id))
+            if(dpdObject.administrationRoutes.firstOrNull() != null) {
+                intent.putExtra("icon-resource", administrationRouteToIconString(dpdObject.administrationRoutes.first()!!))
+            }
             intent.putStringArrayListExtra("administration-routes", ArrayList(dpdObject.administrationRoutes))
             intent.putStringArrayListExtra("active-ingredients",  ArrayList(dpdObject.activeIngredients))
             intent.putExtra("dosage-string", dpdObject.dosageString)
