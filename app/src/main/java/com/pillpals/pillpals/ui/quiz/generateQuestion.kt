@@ -31,6 +31,7 @@ fun generateQuestion(id: Int, medication: Medications?):Questions {
 
         when (id) {
             //----  Questions with a medication that requires a linked database drug  ----//
+            // Alcohol / Caffeine
             1-> {
                 val dpd_object = medication.dpd_object?.firstOrNull()
 
@@ -100,7 +101,7 @@ fun generateQuestion(id: Int, medication: Medications?):Questions {
                     }
                 }
             }
-            //Placeholder
+            //Most common side effect
             2-> {
                 val dpd_object = medication.dpd_object?.firstOrNull()
 
@@ -141,7 +142,7 @@ fun generateQuestion(id: Int, medication: Medications?):Questions {
                     waitingForResponse = false
                 }
             }
-            //Placeholder
+            //Intake method
             3-> {
                 val dpd_object = medication.dpd_object?.firstOrNull()
 
@@ -175,7 +176,7 @@ fun generateQuestion(id: Int, medication: Medications?):Questions {
                     waitingForResponse = false
                 }
             }
-            //Placeholder
+            //Color
             4-> {
                 val dpd_object = medication.dpd_object?.firstOrNull()
 
@@ -237,7 +238,7 @@ fun generateQuestion(id: Int, medication: Medications?):Questions {
                     }
                 }
             }
-            //Placeholder
+            //Shape
             5-> {
                 val dpd_object = medication.dpd_object?.firstOrNull()
 
@@ -290,6 +291,7 @@ fun generateQuestion(id: Int, medication: Medications?):Questions {
                     }
                 }
             }
+            //Classification
             6-> {
                 val dpd_object = medication.dpd_object?.firstOrNull()
 
@@ -328,6 +330,7 @@ fun generateQuestion(id: Int, medication: Medications?):Questions {
                     waitingForResponse = false
                 }
             }
+            //Active ingredient
             7-> {
                 val dpd_object = medication.dpd_object?.firstOrNull()
 
@@ -463,18 +466,18 @@ fun generateQuestion(id: Int, medication: Medications?):Questions {
             203 -> {
                 //https://datac.ca/understanding-drug-schedules/
                 question.question = "According to the National Food and Drugs Act, what is NOT considered a drug?"
-                val correctAnswerStrings = mutableListOf("vitamins", "nutritional supplements","illegal narcotics","energy drinks")
+                val correctAnswerStrings = mutableListOf("Vitamins", "Nutritional supplements", "Illegal narcotics", "Energy drinks")
                 correctAnswerString = correctAnswerStrings.random()
-                incorrectAnswers = mutableListOf("biologically-derived products like vaccines","tissues and organs","disinfectants","prescription pharmaceuticals","non-prescription pharmaceuticals")
+                incorrectAnswers = mutableListOf("Biologically-derived products like vaccines", "Tissues and organs", "Disinfectants", "Prescription pharmaceuticals", "Non-prescription pharmaceuticals")
             }
             // What is unique to Canadian Drug Schedules
             204 -> {
                 //https://datac.ca/understanding-drug-schedules/
                 val scheduleType = listOf("Schedule I", "Schedule II", "Schedule III", "Unscheduled").random()
-                var uniqueToScheduleI = mutableListOf("Require a prescription for sale","Are the most strictly regulated drugs","Are subject to provincial professional requirements on control")
-                var uniqueToScheduleII = mutableListOf("Require only intervention from pharmacist at point of sale","Only sometimes require a professional referral","Do not require a prescription, but cannot be self-selected by patient")
-                var uniqueToScheduleIII = mutableListOf("Are available on the shelf from a pharmacist","Are primarily subject to local professional requirements on control")
-                var uniqueToUnscheduled = mutableListOf("Can be sold at any retail outlet","Do not require professional supervision")
+                var uniqueToScheduleI = mutableListOf("Require a prescription for sale", "Are the most strictly regulated drugs", "Are subject to provincial professional requirements on control")
+                var uniqueToScheduleII = mutableListOf("Require only intervention from pharmacist at point of sale", "Only sometimes require a professional referral", "Do not require a prescription, but cannot be self-selected by patient")
+                var uniqueToScheduleIII = mutableListOf("Are available on the shelf from a pharmacist", "Are primarily subject to local professional requirements on control")
+                var uniqueToUnscheduled = mutableListOf("Can be sold at any retail outlet", "Do not require professional supervision")
 
                 question.question = "According to Canada's National Drug Schedules, what is unique about $scheduleType drugs?"
 
