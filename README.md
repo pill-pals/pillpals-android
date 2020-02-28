@@ -26,10 +26,10 @@ Each layout, either for a fragment or for a layout intent, is placed under res/l
 
 # Screenshots
 
-<img alt="Screenshot src="/screenshots/dashboard_page.png" width="250px"></img>
-<img alt="Screenshot src="/screenshots/search_page.png" width="250px"></img>
-<img alt="Screenshot src="/screenshots/stats_page.png" width="250px"></img>
-<img alt="Screenshot src="/screenshots/medications_page.png" width="250px"></img>
-<img alt="Screenshot src="/screenshots/medication_info.png" width="250px"></img>
-<img alt="Screenshot src="/screenshots/medication_edit.png" width="250px"></img>
-<img alt="Screenshot src="/screenshots/quiz_question.png" width="250px"></img>
+<img alt="Screenshot" src="/screenshots/dashboard_page.png" width="250px"></img>
+<img alt="Screenshot" src="/screenshots/search_page.png" width="250px"></img>
+<img alt="Screenshot" src="/screenshots/stats_page.png" width="250px"></img>
+<img alt="Screenshot" src="/screenshots/medications_page.png" width="250px"></img>
+<img alt="Screenshot" src="/screenshots/medication_info.png" width="250px"></img>
+<img alt="Screenshot" src="/screenshots/medication_edit.png" width="250px"></img>
+<img alt="Screenshot" src="/screenshots/quiz_question.png" width="250px"></img>
