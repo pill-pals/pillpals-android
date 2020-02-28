@@ -136,6 +136,7 @@ class QuizQuestionActivity : AppCompatActivity() {
         txtNoNumber.add(R.id.txtNoNumber3)
         txtNoNumber.add(R.id.txtNoNumber4)
         txtNoNumber.add(R.id.txtNoNumber5)
+        iconBackground.cardElevation = 0f
 
         setPageContentsForQuestion(QuizHelper.getQuestionsAnswered(quiz))
     }
@@ -150,20 +151,15 @@ class QuizQuestionActivity : AppCompatActivity() {
             drugName.text = "Knowledge Question"
         } else {
             iconBackground.setCardBackgroundColor(Color.parseColor(getColorStringByID(question.medication!!.color_id)))
-            icon.setImageDrawable(
-                DatabaseHelper.getCorrectIconDrawable(
-                    this,
-                    question.medication!!
-                )
-            )
-            icon.imageTintList = ColorStateList.valueOf(ResourcesCompat.getColor(getResources(), R.color.colorBlack, null))
+
+            icon.setImageDrawable(DatabaseHelper.getCorrectIconDrawable(this, question.medication!!))
+            icon.imageTintList = null
             drugName.text = question.medication!!.name
         }
         questionTitle.text = "Question " + (index + 1).toString()
         questionText.text = question.question
 
         setUpButtons(question, index)
-
     }
 
     private fun answerQuestion(question: Questions, answer: Int) {
