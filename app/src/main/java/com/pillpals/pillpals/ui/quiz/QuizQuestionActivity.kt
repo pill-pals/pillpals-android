@@ -14,6 +14,7 @@ import android.os.Bundle
 import android.text.SpannableString
 import android.text.Spanned
 import android.text.style.ForegroundColorSpan
+import android.util.DisplayMetrics
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.MenuItem
@@ -33,6 +34,8 @@ import androidx.cardview.widget.CardView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
+import androidx.core.view.marginLeft
+import androidx.core.view.marginTop
 import com.pillpals.pillpals.R
 import com.pillpals.pillpals.data.model.Medications
 import com.pillpals.pillpals.helpers.DatabaseHelper.Companion.getMedicationByUid
@@ -56,7 +59,10 @@ import com.pillpals.pillpals.helpers.DatabaseHelper.Companion.getRandomUniqueCol
 import com.pillpals.pillpals.helpers.DatabaseHelper.Companion.getScheduleByUid
 import com.pillpals.pillpals.helpers.QuizHelper
 import com.pillpals.pillpals.helpers.calculateScheduleRecords
+import com.pillpals.pillpals.ui.MainActivity
 import io.realm.RealmObject.deleteFromRealm
+import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.android.synthetic.main.activity_quiz_question.*
 import kotlinx.android.synthetic.main.delete_prompt.view.*
 import kotlinx.android.synthetic.main.gallery_icon_card.view.*
 import kotlinx.coroutines.GlobalScope
@@ -88,6 +94,7 @@ class QuizQuestionActivity : AppCompatActivity() {
     lateinit var answer3constraint: ConstraintLayout
     lateinit var answer4constraint: ConstraintLayout
     lateinit var scrollView: ScrollView
+    lateinit var container: RelativeLayout
     private val fadeoutTime = 350.toLong()
     private val correctAnswerShowDelay = 500.toLong()
     private val fadeinTime = 350.toLong()
@@ -114,6 +121,7 @@ class QuizQuestionActivity : AppCompatActivity() {
         supportActionBar!!.setTitle(quiz.name)
 
         icon = findViewById(R.id.icon)
+        container = findViewById(R.id.container)
         iconBackground = findViewById(R.id.iconBackground)
         drugName = findViewById(R.id.drugName)
         questionTitle = findViewById(R.id.questionTitle)
@@ -179,7 +187,7 @@ class QuizQuestionActivity : AppCompatActivity() {
         }
     }
 
-    private fun handleButtonOnClick(question: Questions, answer: Int, index: Int) {
+    private fun handleButtonOnClick(question: Questions, answer: Int, index: Int, coordinates: Coordinates) {
         if (buttonOnClickEnabled) {
             var debounceTimer = Timer()
             debounceTimer.schedule(timerTask {
@@ -190,11 +198,11 @@ class QuizQuestionActivity : AppCompatActivity() {
             answerQuestion(question, answer)
             animateViewOut(question, index)
             flashColor(question, answer)
-            plusOneAnimation(question, answer)
+            plusOneAnimation(question, answer, coordinates)
         }
     }
 
-    fun plusOneAnimation(question: Questions, answer: Int) {
+    fun plusOneAnimation(question: Questions, answer: Int, coordinates: Coordinates) {
         if(question.correctAnswer != answer) return
         var tv: TextView
         val fadeInAnimation: Animation
@@ -202,10 +210,15 @@ class QuizQuestionActivity : AppCompatActivity() {
         if (animIndex >= txtNoNumber.count()) {
             animIndex = 0
         }
+
+        val params = RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT)
+        params.leftMargin = coordinates.x - 20
+        params.topMargin = coordinates.y
         tv = findViewById(txtNoNumber[animIndex])
-        tv.setVisibility(View.VISIBLE)
+        tv.layoutParams = params
+        tv.visibility = View.VISIBLE
         tv.text = "+ 1"
-//        txtNoNumber.setTextColor(getResources().getColor(R.color.text_color_add));
+
         fadeInAnimation = AnimationUtils.loadAnimation(this, R.anim.float_up)
         fadeInAnimation.setAnimationListener(FloatUpAnimationListener(tv))
         tv.startAnimation(fadeInAnimation)
@@ -379,14 +392,40 @@ class QuizQuestionActivity : AppCompatActivity() {
     }
 
     private fun setUpButtons(question: Questions, index: Int) {
+        val topOffset = 300
+
         answer1.text = question.answers[0]
-        answer1btn.setOnClickListener{handleButtonOnClick(question,0,index)}
+        answer1btn.setOnTouchListener { v, event ->
+            val screenPosition = IntArray(2)
+            v.getLocationOnScreen(screenPosition)
+            val coords = Coordinates(event.x.toInt() + v.x.toInt(), event.y.toInt() + screenPosition[1] - topOffset)
+            handleButtonOnClick(question,0, index, coords)
+            true
+        }
         answer2.text = question.answers[1]
-        answer2btn.setOnClickListener{handleButtonOnClick(question,1,index)}
+        answer2btn.setOnTouchListener { v, event ->
+            val screenPosition = IntArray(2)
+            v.getLocationOnScreen(screenPosition)
+            val coords = Coordinates(event.x.toInt() + v.x.toInt(), event.y.toInt() + screenPosition[1] - topOffset)
+            handleButtonOnClick(question,1, index, coords)
+            true
+        }
         answer3.text = question.answers[2]
-        answer3btn.setOnClickListener{handleButtonOnClick(question,2,index)}
+        answer3btn.setOnTouchListener { v, event ->
+            val screenPosition = IntArray(2)
+            v.getLocationOnScreen(screenPosition)
+            val coords = Coordinates(event.x.toInt() + v.x.toInt(), event.y.toInt() + screenPosition[1] - topOffset)
+            handleButtonOnClick(question,2, index, coords)
+            true
+        }
         answer4.text = question.answers[3]
-        answer4btn.setOnClickListener{handleButtonOnClick(question,3,index)}
+        answer4btn.setOnTouchListener { v, event ->
+            val screenPosition = IntArray(2)
+            v.getLocationOnScreen(screenPosition)
+            val coords = Coordinates(event.x.toInt() + v.x.toInt(), event.y.toInt() + screenPosition[1] - topOffset)
+            handleButtonOnClick(question,3, index, coords)
+            true
+        }
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -399,3 +438,5 @@ class QuizQuestionActivity : AppCompatActivity() {
         return super.onOptionsItemSelected(item)
     }
 }
+
+data class Coordinates(val x: Int, val y: Int)
