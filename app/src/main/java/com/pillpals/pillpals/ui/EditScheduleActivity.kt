@@ -206,6 +206,12 @@ class EditScheduleActivity : AppCompatActivity() {
                 val schedules: MutableList<Schedules> = ArrayList()
                 Realm.getDefaultInstance().executeTransaction { realm ->
                     if (weekdayButton.isChecked) {
+                        calList.forEach {
+                            if(it.time.before(Date())){
+                                it.add(Calendar.DATE, 1)
+                            }
+                        }
+
                         if (dailyButton.isChecked || (sundayButton.isChecked && mondayButton.isChecked && tuesdayButton.isChecked && wednesdayButton.isChecked && thursdayButton.isChecked && fridayButton.isChecked && saturdayButton.isChecked)) {
                             calList.forEach {
                                 val schedule = realm.createObject(
