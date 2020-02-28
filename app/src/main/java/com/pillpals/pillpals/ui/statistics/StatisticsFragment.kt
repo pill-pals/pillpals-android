@@ -108,7 +108,7 @@ class StatisticsFragment : Fragment() {
         setupFilter(viewModeFilter)
 
         val allMedications = DatabaseHelper.readAllData(Medications::class.java) as RealmResults<out Medications>
-        medications = allMedications.filter{!it.deleted}
+        medications = allMedications.filter{ !it.deleted }
 
         determineRepeatingColors()
         populateLegendStack()

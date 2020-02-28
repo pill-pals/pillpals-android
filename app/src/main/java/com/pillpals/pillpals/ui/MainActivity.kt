@@ -70,7 +70,7 @@ class MainActivity : AppCompatActivity() {
         }*/
 
         R.id.action_stars -> {
-            val allMedications = DatabaseHelper.readAllData(Medications::class.java) as RealmResults<out Medications>
+            val allMedications = (DatabaseHelper.readAllData(Medications::class.java) as RealmResults<out Medications>).filter { !it.deleted }
             if(allMedications.count() == 0) {
                 quizNoMedsToast.show()
             }
@@ -100,7 +100,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onPrepareOptionsMenu(menu: Menu?): Boolean {
         val starIcon: MenuItem = menu!!.findItem(R.id.action_stars)
-        val medList = readAllData(Medications::class.java) as RealmResults<out Medications>
+        val medList = (readAllData(Medications::class.java) as RealmResults<out Medications>).filter { !it.deleted }
         val quizList = readAllData(Quizzes::class.java) as RealmResults<out Quizzes>
 
         if(medList.all{it.dpd_object.isNullOrEmpty()} || quizList.any{ QuizHelper.getQuestionsAnswered(it) == 0 }){

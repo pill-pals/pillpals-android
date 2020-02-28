@@ -372,19 +372,21 @@ class QuizActivity: AppCompatActivity() {
         var isLinked = false
         buttonLayout.removeViews(1, buttonLayout.childCount - 1)
 
-        for(medication in readAllData(Medications::class.java) as RealmResults<out Medications>){
+        val allMedications = (readAllData(Medications::class.java) as RealmResults<out Medications>).filter { !it.deleted }
+
+        for(medication in allMedications){
             if(!medication.dpd_object.isNullOrEmpty()){
                 isLinked = true
             }
             addDrugCard(medication)
         }
 
-        if(!isLinked){
+        if (!isLinked) {
             parentLayout.visibility=View.GONE
             generateQuizButton.visibility=View.GONE
             medicationScoresButton.visibility=View.GONE
             buttonLayout.visibility=View.VISIBLE
-        }else{
+        } else {
             parentLayout.visibility=View.VISIBLE
             generateQuizButton.visibility=View.VISIBLE
             medicationScoresButton.visibility=View.VISIBLE
