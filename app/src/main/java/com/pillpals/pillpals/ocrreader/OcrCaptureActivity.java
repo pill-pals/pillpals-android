@@ -59,7 +59,17 @@ import com.google.android.gms.vision.text.TextRecognizer;
 
 import java.io.IOException;
 import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 import java.util.Locale;
+import java.util.regex.MatchResult;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import kotlin.sequences.Sequence;
+import kotlin.text.Regex;
 
 /**
  * Activity for the Ocr Detecting app.  This app detects text and displays the value with the
@@ -377,7 +387,23 @@ public final class OcrCaptureActivity extends AppCompatActivity {
 
                 //intent
                 Intent intent = new Intent(this, OcrCaptureActivity.class);
-                String din = padStr(text.getValue().replaceAll("\\D+",""), "0", 8);
+
+
+                Pattern pattern = Pattern.compile("\\d+");
+                List<String> list = new ArrayList<String>();
+                Matcher m = pattern.matcher(text.getValue());
+                while (m.find()) {
+                    list.add(m.group());
+                }
+
+                String longestString = list.get(0);
+                for (String element : list) {
+                    if (element.length() > longestString.length()) {
+                        longestString = element;
+                    }
+                }
+
+                String din = padStr(longestString.replaceAll("\\D+",""), "0", 8);
                 Log.i("din", din);
                 intent.putExtra("din", din);
                 setResult(Activity.RESULT_OK, intent);
