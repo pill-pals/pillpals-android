@@ -103,7 +103,7 @@ class QuizActivity: AppCompatActivity() {
 
         checkLinkedDrugs()
 
-        createTestData()
+        //createTestData()
 
         setUpQuizCards((readAllData(Quizzes::class.java) as RealmResults<out Quizzes>).sort("date"))
         
