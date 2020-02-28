@@ -110,7 +110,7 @@ class MedicationScoresActivity : AppCompatActivity() {
 
         val adherenceScoreValue = StatsHelper.calculateAdherenceScore(timeCounts)
         var adherenceScorePair = DataPair(this)
-        adherenceScorePair.key.text = "Overall Score"
+        adherenceScorePair.key.text = "Overall Adherence"
         adherenceScorePair.value.text = StatsHelper.getGradeStringFromTimeDifference(adherenceScoreValue)
         adherenceScorePair.drawableValue.visibility = View.GONE
 
@@ -128,7 +128,7 @@ class MedicationScoresActivity : AppCompatActivity() {
             avgMoodScorePair.drawableValue.setImageResource(DatabaseHelper.getDrawableMoodIconById(this,avgMood.roundToInt()))
         }
 
-        timeCounts = timeCounts.filter{it.time > DateHelper.addUnitToDate(DateHelper.today(),-7,Calendar.DATE) && it.time <= DateHelper.today()}
+        timeCounts = timeCounts.filter{it.time > DateHelper.addUnitToDate(DateHelper.today(),-7,Calendar.DATE)}
 
         val recentAdherenceScoreValue = StatsHelper.calculateAdherenceScore(timeCounts)
         var recentAdherenceScorePair = DataPair(this)
@@ -136,7 +136,7 @@ class MedicationScoresActivity : AppCompatActivity() {
         recentAdherenceScorePair.value.text = StatsHelper.getGradeStringFromTimeDifference(recentAdherenceScoreValue)
         recentAdherenceScorePair.drawableValue.visibility = View.GONE
 
-        relevantMoodLogs = relevantMoodLogs.filter{it.date!! > DateHelper.addUnitToDate(DateHelper.today(),-7,Calendar.DATE) && it.date!! <= DateHelper.today()}
+        relevantMoodLogs = relevantMoodLogs.filter{it.date!! > DateHelper.addUnitToDate(DateHelper.today(),-7,Calendar.DATE)}
 
         val recentAvgMood = StatsHelper.calculateMoodScore(relevantMoodLogs)
 
