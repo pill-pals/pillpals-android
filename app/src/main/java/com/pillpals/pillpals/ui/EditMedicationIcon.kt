@@ -260,6 +260,17 @@ class EditMedicationIcon : AppCompatActivity() {
         }
     }
 
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        if(requestCode == 200 && !grantResults.contains(PackageManager.PERMISSION_DENIED)){
+            dispatchTakePictureIntent()
+        }
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+    }
+
     private fun populateGallery(photos: RealmResults<out Photos>){
         for(photo in photos){
             val newBmp = Bitmap.createScaledBitmap(DatabaseHelper.convertByteArrayToBitmap(photo.icon), 64,64,false)
