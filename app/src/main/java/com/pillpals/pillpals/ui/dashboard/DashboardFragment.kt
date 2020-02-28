@@ -208,16 +208,6 @@ class DashboardFragment : Fragment() {
         }
         timer.schedule(doAsynchronousTask, 0, 60000)
 
-        MedicationInfoRetriever.interactions(listOf("198211", "349253")).whenComplete { result: Promise.Result<List<InteractionResult>, RuntimeException> ->
-            when (result) {
-                is Promise.Result.Success -> {
-                    // Use result here
-                    Log.i("Success", result.value.toString())
-                }
-                is Promise.Result.Error -> Log.i("Error", result.error.message!!)
-            }
-        }
-
         return view
     }
 
