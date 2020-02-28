@@ -1,27 +1,35 @@
 Pill Pals 💊 medication tracking and information app, built for for Android 🤖
 
 
-
 # Setup
-Built with Kotlin, using Material and MPAndroidChart
+Built with Kotlin, using Material, MPAndroidChart, and Google Vision
 
 https://material.io/develop/android/
+
 https://github.com/PhilJay/MPAndroidChart
+
+https://developers.google.com/vision
 
 # Structure
 
-Each navigation page is a Fragment, placed under pillbuddies/ui/\<fragment-name\>
+Each navigation page is a Fragment, placed under pillpals/ui/\<fragment-name\>
 
 These fragments leverage:
-* layout intents, placed under pillbuddies/ui, which inflate layouts in res/layout
-* service intents, placed under pillbuddies/services
-* helper classes, placed under pillbuddies/helpers
-* Realm data models, placed under pillbuddies/data/models
+* layout intents, placed under pillpals/ui, which inflate layouts in res/layout
+* service intents, placed under pillpals/services
+* helper classes, placed under pillpals/helpers
+* seeds and API data models, placed under pillpals/data
+* Realm data models, placed under pillpals/data/models
+* our OCR reader, placed under pillpals/ocrreader
 
 Each layout, either for a fragment or for a layout intent, is placed under res/layout
 
 # Screenshots
 
-<img alt="First Screenshot" src="https://drive.google.com/uc?export=download&id=1A9BcJOHIx1b5q9HgdVmKYAqxRWOOubAN" width="250px"></img>
-<img alt="Second Screenshot" src="https://drive.google.com/uc?export=download&id=1ZBsKhoxMNi-m1w-3Re9yV3dimducvFXv" width="250px"></img>
-<img alt="Third Screenshot" src="https://drive.google.com/uc?export=download&id=1UrpKN3n2ZmNNYWMF0tuvCPdJ1TKv62c5" width="250px"></img>
+<img alt="Screenshot src="/screenshots/dashboard_page.png" width="250px"></img>
+<img alt="Screenshot src="/screenshots/search_page.png" width="250px"></img>
+<img alt="Screenshot src="/screenshots/stats_page.png" width="250px"></img>
+<img alt="Screenshot src="/screenshots/medications_page.png" width="250px"></img>
+<img alt="Screenshot src="/screenshots/medication_info.png" width="250px"></img>
+<img alt="Screenshot src="/screenshots/medication_edit.png" width="250px"></img>
+<img alt="Screenshot src="/screenshots/quiz_question.png" width="250px"></img>
