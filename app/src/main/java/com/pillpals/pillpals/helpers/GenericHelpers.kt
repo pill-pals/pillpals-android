@@ -85,7 +85,7 @@ public fun drawableToBitmap(drawable: Drawable): Bitmap? {
     return bitmap
 }
 
-public fun drugLogFunction(schedule: Schedules, context: Context, time: Date = Date()) {
+public fun drugLogFunction(schedule: Schedules, context: Context, time: Date = Calendar.getInstance().time) {
     val realm = Realm.getDefaultInstance()
 
     val databaseSchedule =

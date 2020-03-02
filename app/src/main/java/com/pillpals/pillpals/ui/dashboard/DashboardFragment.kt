@@ -1160,7 +1160,7 @@ class DashboardFragment : Fragment() {
 
             for (i in moodLogs.indices) {
                 var cal = Calendar.getInstance()
-                cal.time = DateHelper.addUnitToDate(Date(),dates[i],DateHelper.getIndexByUnit(Calendar.DATE))
+                cal.time = DateHelper.addUnitToDate(Date(),dates[i],Calendar.DATE)
                 cal.set(Calendar.MILLISECOND, 0)
                 cal.set(Calendar.SECOND, 0)
                 cal.set(Calendar.MINUTE, 0)

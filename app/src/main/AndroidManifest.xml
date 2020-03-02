@@ -61,11 +61,15 @@
 
         <receiver
             android:name=".services.AlarmReceiver"
-            android:process=":remote" />
+            android:process=":remote"
+            android:enabled="true"
+            android:directBootAware="true"
+            />
         <receiver
             android:name=".services.BootupReceiver"
             android:enabled="true"
-            android:exported="true">
+            android:exported="true"
+            android:directBootAware="true">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
                 <action android:name="android.intent.action.QUICKBOOT_POWERON" />
