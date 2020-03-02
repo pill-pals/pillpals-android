@@ -33,3 +33,8 @@ Each layout, either for a fragment or for a layout intent, is placed under res/l
 <img alt="Screenshot" src="/screenshots/medication_info.png" width="250px"></img>
 <img alt="Screenshot" src="/screenshots/medication_edit.png" width="250px"></img>
 <img alt="Screenshot" src="/screenshots/quiz_question.png" width="250px"></img>
+
+# License
+
+No license is provided for use of this source
+
