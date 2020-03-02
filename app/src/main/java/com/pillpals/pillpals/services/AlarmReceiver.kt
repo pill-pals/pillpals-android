@@ -146,7 +146,7 @@ public class AlarmReceiver: BroadcastReceiver() {
                     notification.flags = notification.flags or Notification.FLAG_INSISTENT
                 }
 
-//                setupNextAlarm(context, schedule)
+                setupNextAlarm(context, schedule)
 
                 // notificationId is a unique int for each notification that you must define
                 notificationManager.notify(schedule.uid!!.hashCode(), mBuilder.build())

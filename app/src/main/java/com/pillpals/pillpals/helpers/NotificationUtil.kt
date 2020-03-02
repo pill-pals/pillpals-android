@@ -42,11 +42,11 @@ class NotificationUtils {
             val firstTime = c.timeInMillis
 
             val am = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-            val interval = DateHelper.getMillisecondsByUnit(
-                DateHelper.getUnitByIndex(schedule.repetitionUnit!!)
-            ) * schedule.repetitionCount!!
-            am.setRepeating(AlarmManager.RTC_WAKEUP, firstTime, interval, mAlarmSender)
-//            am.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, firstTime, mAlarmSender)
+//            val interval = DateHelper.getMillisecondsByUnit(
+//                DateHelper.getUnitByIndex(schedule.repetitionUnit!!)
+//            ) * schedule.repetitionCount!!
+//            am.setRepeating(AlarmManager.RTC_WAKEUP, firstTime, interval, mAlarmSender)
+            am.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, firstTime, mAlarmSender)
         }
 
         fun updateAlarms(context: Context) {
@@ -65,6 +65,7 @@ class NotificationUtils {
             intent.putExtra("schedule-uid", schedule.uid)
             intent.putExtra("schedule-occurrence", DateHelper.convertToLocalDateViaInstant(schedule.occurrence!!).toString())
             intent.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES)
+            intent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND)
 
             return PendingIntent.getBroadcast(
                 context,

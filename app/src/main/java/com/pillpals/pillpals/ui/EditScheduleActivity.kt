@@ -222,6 +222,8 @@ class EditScheduleActivity : AppCompatActivity() {
                                 schedule.startDate = it.time
                                 schedule.repetitionCount = 1
                                 schedule.repetitionUnit = 2
+//                                schedule.repetitionCount = 5 //For testing (5 minute interval)
+//                                schedule.repetitionUnit = 4
                                 schedules.add(schedule)
                             }
                         } else {
