@@ -95,7 +95,7 @@ class AlarmActivity : AppCompatActivity() {
             }
 
             openButton.setOnClickListener {
-                alarmSnoozeFunc(schedule)
+//                alarmSnoozeFunc(schedule)
                 alarmOpenFunc()
             }
 
@@ -139,6 +139,7 @@ class AlarmActivity : AppCompatActivity() {
     }
 
     private fun alarmOpenFunc() {
+        PillPalsApplication.alarmNoiseHelper.stopNoise()
         var newIntent = Intent(this, MainActivity::class.java)
         startActivity(newIntent)
     }

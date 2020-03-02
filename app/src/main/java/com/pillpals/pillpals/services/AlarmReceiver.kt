@@ -24,6 +24,7 @@ import com.pillpals.pillpals.PillPalsApplication
 import com.pillpals.pillpals.helpers.AlarmNoiseHelper
 import com.pillpals.pillpals.helpers.DatabaseHelper.Companion.getColorStringByID
 import com.pillpals.pillpals.helpers.DatabaseHelper.Companion.getCorrectIconDrawable
+import com.pillpals.pillpals.helpers.NotificationUtils
 import com.pillpals.pillpals.ui.AlarmActivity
 
 
@@ -58,8 +59,8 @@ public class AlarmReceiver: BroadcastReceiver() {
             }
             if(!sharedPreferences.getBoolean("notifications", false)) {
                 val medication = schedule.medication!!.first() as Medications
-                val occurrenceLocal = LocalDateTime.parse(intent.getStringExtra("schedule-occurrence"))
-                val occurrence = Date.from(occurrenceLocal.atZone(ZoneId.systemDefault()).toInstant())
+                val occurrenceAtZone = schedule.occurrence!!.toInstant().atZone(ZoneId.systemDefault())
+                val occurrence = Date.from(occurrenceAtZone.toInstant())
 
                 val title = getTitleString(medication, privateMode, occurrence, sharedPreferences)
 
@@ -145,12 +146,26 @@ public class AlarmReceiver: BroadcastReceiver() {
                     notification.flags = notification.flags or Notification.FLAG_INSISTENT
                 }
 
+                setupNextAlarm(context, schedule)
+
                 // notificationId is a unique int for each notification that you must define
                 notificationManager.notify(schedule.uid!!.hashCode(), mBuilder.build())
 
                 //setupAutoCancel(context, intent, schedule, 15, Calendar.MINUTE) //TODO: Refine this end time
             }
         }
+    }
+
+    private fun setupNextAlarm(context: Context, schedule: Schedules) {
+        val am = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        am.cancel(NotificationUtils.getPendingIntent(context, schedule))
+        val interval = DateHelper.getMillisecondsByUnit(
+            DateHelper.getUnitByIndex(schedule.repetitionUnit!!)
+        ) * schedule.repetitionCount!!
+        val c = Calendar.getInstance()
+        c.time = schedule.occurrence!!
+        val nextTime = c.timeInMillis + interval
+        am.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, nextTime, NotificationUtils.getPendingIntent(context, schedule))
     }
 
     private fun setupAutoCancel(context: Context, intent: Intent, schedule: Schedules, time: Int, unit: Int) {
