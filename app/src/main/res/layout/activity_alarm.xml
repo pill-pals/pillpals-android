@@ -36,7 +36,7 @@
             android:id="@+id/alarmIconBackground"
             android:layout_width="160dp"
             android:layout_height="160dp"
-            android:layout_marginTop="56dp"
+            android:layout_marginTop="64dp"
             app:cardBackgroundColor="@android:color/holo_blue_bright"
             app:cardCornerRadius="16dp"
             app:layout_constraintEnd_toEndOf="parent"
@@ -58,8 +58,9 @@
             android:id="@+id/alarmTime"
             android:layout_width="wrap_content"
             android:layout_height="0dp"
-            android:layout_marginTop="64dp"
-            android:fontFamily="monospace"
+            android:layout_marginTop="96dp"
+            android:fontFamily="sans-serif"
+            android:gravity="center_horizontal"
             android:text="12:00 PM"
             android:textColor="@color/colorWhite"
             android:textSize="60dp"
@@ -82,10 +83,10 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/alarmMessage" />
 
-        <TextView
+        <me.grantland.widget.AutofitTextView
             android:id="@+id/alarmNote"
             android:layout_width="match_parent"
-            android:layout_height="80dp"
+            android:layout_height="64dp"
             android:layout_marginHorizontal="32dp"
             android:layout_marginTop="16dp"
             android:autoSizeMaxTextSize="20sp"
@@ -111,7 +112,7 @@
                 android:layout_marginHorizontal="0dp"
                 android:layout_marginBottom="16dp"
                 android:backgroundTint="#1F7926"
-                android:fontFamily="sans-serif-light"
+                android:fontFamily="sans-serif"
                 android:insetTop="0dp"
                 android:insetBottom="0dp"
                 android:text="LOG"
@@ -134,19 +135,19 @@
                 tools:ignore="UselessParent">
 
                 <Button
-                    android:id="@+id/alarmSnoozeButton"
+                    android:id="@+id/alarmOpenAppButton"
                     style="@style/Widget.MaterialComponents.Button.TextButton"
                     android:layout_width="0dp"
                     android:layout_height="40dp"
                     android:layout_weight="1"
                     android:backgroundTint="@color/colorPrimary"
-                    android:fontFamily="sans-serif-light"
-                    android:insetLeft="0dp"
+                    android:fontFamily="sans-serif"
                     android:insetTop="0dp"
+                    android:insetRight="0dp"
                     android:insetBottom="0dp"
-                    android:text="Snooze"
+                    android:text="Dismiss"
                     android:textColor="@color/colorGrey"
-                    android:textSize="20sp"
+                    android:textSize="18sp"
                     app:cornerRadius="20dp" />
 
                 <View
@@ -156,19 +157,19 @@
                     android:layout_weight="0" />
 
                 <Button
-                    android:id="@+id/alarmOpenAppButton"
+                    android:id="@+id/alarmSnoozeButton"
                     style="@style/Widget.MaterialComponents.Button.TextButton"
                     android:layout_width="0dp"
                     android:layout_height="40dp"
                     android:layout_weight="1"
                     android:backgroundTint="@color/colorPrimary"
-                    android:fontFamily="sans-serif-light"
+                    android:fontFamily="sans-serif"
+                    android:insetLeft="0dp"
                     android:insetTop="0dp"
-                    android:insetRight="0dp"
                     android:insetBottom="0dp"
-                    android:text="Open PillPals"
+                    android:text="Snooze"
                     android:textColor="@color/colorGrey"
-                    android:textSize="20sp"
+                    android:textSize="18sp"
                     app:cornerRadius="20dp" />
 
             </LinearLayout>
