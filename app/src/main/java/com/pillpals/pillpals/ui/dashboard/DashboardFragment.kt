@@ -569,7 +569,8 @@ class DashboardFragment : Fragment() {
     }
     //endregion
 
-    fun setUpSchedules(schedules: RealmResults<out Schedules>, addCards: Boolean) {
+    fun setUpSchedules(schedules: RealmResults<out Schedules>, addCards: Boolean = true) {
+        var upcomingSchedules = listOf<UpcomingSchedule>()
         for (databaseSchedule in schedules) {
             if (databaseSchedule.deleted || databaseSchedule.medication!!.first()!!.deleted) {
                 continue
@@ -611,11 +612,21 @@ class DashboardFragment : Fragment() {
                             testSchedule.repetitionUnit,
                             testSchedule.logs
                         )
-                        addDrugCard(newSchedule, databaseSchedule.medication!!.first()!!)
+
+                        upcomingSchedules = upcomingSchedules.plus(UpcomingSchedule(newSchedule, databaseSchedule.medication!!.first()!!))
+                        //addDrugCard(newSchedule, databaseSchedule.medication!!.first()!!)
                     }
 
                     testSchedule.occurrence = DateHelper.addUnitToDate(testSchedule.occurrence!!, n, u)
                 }
+            }
+        }
+
+        upcomingSchedules = upcomingSchedules.sortedBy { it.schedule.occurrence }
+
+        if (addCards) {
+            for (upcomingSchedule in upcomingSchedules) {
+                addDrugCard(upcomingSchedule.schedule, upcomingSchedule.medication)
             }
         }
     }
@@ -1175,3 +1186,5 @@ class DashboardFragment : Fragment() {
     }
     //endregion
 }
+
+data class UpcomingSchedule(val schedule: Schedules, val medication: Medications)

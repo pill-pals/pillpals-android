@@ -11,10 +11,6 @@ import io.realm.RealmResults
 
 public class BootupReceiver: BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
-        val schedules = DatabaseHelper.readAllData(
-            Schedules::class.java
-        ) as RealmResults<out Schedules>
-        DashboardFragment().setUpSchedules(schedules, false)
         NotificationUtils.createNotificationChannels(context)
         NotificationUtils.updateAlarms(context)
         NotificationUtils.createQuizNotifications(context)
