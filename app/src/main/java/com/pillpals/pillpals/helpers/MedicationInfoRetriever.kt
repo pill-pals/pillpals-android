@@ -44,7 +44,7 @@ class MedicationInfoRetriever {
             return Promise {
                 val client = OkHttpClient
                     .Builder()
-                    .connectTimeout(20, TimeUnit.SECONDS)
+                    .connectTimeout(5, TimeUnit.SECONDS)
                     .readTimeout(20, TimeUnit.SECONDS)
                     .build()
 
@@ -109,7 +109,7 @@ class MedicationInfoRetriever {
             return Promise {
                 val client = OkHttpClient
                     .Builder()
-                    .connectTimeout(20, TimeUnit.SECONDS)
+                    .connectTimeout(5, TimeUnit.SECONDS)
                     .readTimeout(20, TimeUnit.SECONDS)
                     .build()
 
@@ -164,7 +164,7 @@ class MedicationInfoRetriever {
             return Promise {
                 val client = OkHttpClient
                     .Builder()
-                    .connectTimeout(20, TimeUnit.SECONDS)
+                    .connectTimeout(5, TimeUnit.SECONDS)
                     .readTimeout(20, TimeUnit.SECONDS)
                     .build()
 
