@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.text.SpannableString
 import android.text.Spanned
 import android.text.style.ForegroundColorSpan
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.*
@@ -206,24 +207,19 @@ class EditScheduleActivity : AppCompatActivity() {
                 val schedules: MutableList<Schedules> = ArrayList()
                 Realm.getDefaultInstance().executeTransaction { realm ->
                     if (weekdayButton.isChecked) {
-                        calList.forEach {
-                            if(it.time.before(Date())){
-                                it.add(Calendar.DATE, 1)
-                            }
-                        }
-
                         if (dailyButton.isChecked || (sundayButton.isChecked && mondayButton.isChecked && tuesdayButton.isChecked && wednesdayButton.isChecked && thursdayButton.isChecked && fridayButton.isChecked && saturdayButton.isChecked)) {
                             calList.forEach {
                                 val schedule = realm.createObject(
                                     Schedules::class.java,
                                     UUID.randomUUID().toString()
                                 )
+                                if(it.time.before(Date())){
+                                    it.add(Calendar.DATE, 1)
+                                }
                                 schedule.occurrence = it.time
                                 schedule.startDate = it.time
                                 schedule.repetitionCount = 1
                                 schedule.repetitionUnit = 2
-//                                schedule.repetitionCount = 5 //For testing (5 minute interval)
-//                                schedule.repetitionUnit = 4
                                 schedules.add(schedule)
                             }
                         } else {
@@ -234,6 +230,9 @@ class EditScheduleActivity : AppCompatActivity() {
                                         UUID.randomUUID().toString()
                                     )
                                     it.set(Calendar.DAY_OF_WEEK, 1)
+                                    if(it.time.before(Date())){
+                                        it.add(Calendar.DATE, 7)
+                                    }
                                     schedule.occurrence = it.time
                                     schedule.startDate = it.time
                                     schedule.repetitionCount = 1
@@ -246,6 +245,9 @@ class EditScheduleActivity : AppCompatActivity() {
                                         UUID.randomUUID().toString()
                                     )
                                     it.set(Calendar.DAY_OF_WEEK, 2)
+                                    if(it.time.before(Date())){
+                                        it.add(Calendar.DATE, 7)
+                                    }
                                     schedule.occurrence = it.time
                                     schedule.startDate = it.time
                                     schedule.repetitionCount = 1
@@ -258,6 +260,9 @@ class EditScheduleActivity : AppCompatActivity() {
                                         UUID.randomUUID().toString()
                                     )
                                     it.set(Calendar.DAY_OF_WEEK, 3)
+                                    if(it.time.before(Date())){
+                                        it.add(Calendar.DATE, 7)
+                                    }
                                     schedule.occurrence = it.time
                                     schedule.startDate = it.time
                                     schedule.repetitionCount = 1
@@ -270,6 +275,9 @@ class EditScheduleActivity : AppCompatActivity() {
                                         UUID.randomUUID().toString()
                                     )
                                     it.set(Calendar.DAY_OF_WEEK, 4)
+                                    if(it.time.before(Date())){
+                                        it.add(Calendar.DATE, 7)
+                                    }
                                     schedule.occurrence = it.time
                                     schedule.startDate = it.time
                                     schedule.repetitionCount = 1
@@ -282,6 +290,9 @@ class EditScheduleActivity : AppCompatActivity() {
                                         UUID.randomUUID().toString()
                                     )
                                     it.set(Calendar.DAY_OF_WEEK, 5)
+                                    if(it.time.before(Date())){
+                                        it.add(Calendar.DATE, 7)
+                                    }
                                     schedule.occurrence = it.time
                                     schedule.startDate = it.time
                                     schedule.repetitionCount = 1
@@ -294,6 +305,9 @@ class EditScheduleActivity : AppCompatActivity() {
                                         UUID.randomUUID().toString()
                                     )
                                     it.set(Calendar.DAY_OF_WEEK, 6)
+                                    if(it.time.before(Date())){
+                                        it.add(Calendar.DATE, 7)
+                                    }
                                     schedule.occurrence = it.time
                                     schedule.startDate = it.time
                                     schedule.repetitionCount = 1
@@ -306,6 +320,9 @@ class EditScheduleActivity : AppCompatActivity() {
                                         UUID.randomUUID().toString()
                                     )
                                     it.set(Calendar.DAY_OF_WEEK, 7)
+                                    if(it.time.before(Date())){
+                                        it.add(Calendar.DATE, 7)
+                                    }
                                     schedule.occurrence = it.time
                                     schedule.startDate = it.time
                                     schedule.repetitionCount = 1
