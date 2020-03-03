@@ -19,6 +19,7 @@ import com.pillpals.pillpals.helpers.backgroundThreadToast
 import io.realm.Sort
 import io.realm.kotlin.createObject
 import java.io.IOException
+import java.lang.RuntimeException
 
 class QuizGenerator() {
     companion object {
@@ -60,11 +61,16 @@ class QuizGenerator() {
             }
         }
 
-        fun asyncGenerateQuiz() {
+        fun asyncGenerateQuiz(context: Context) {
             val handler = Handler(Looper.getMainLooper())
             val runnable = object: Runnable {
                 override fun run() {
-                    generateQuiz()
+                    try {
+                        generateQuiz()
+                    } catch(e: Exception) {
+                        backgroundThreadToast(context,"Quiz generation failed, try again later.", Toast.LENGTH_SHORT)
+                    }
+
                 }
             }
             handler.post(runnable)
@@ -84,7 +90,7 @@ class QuizGenerator() {
                 while (counter <= 9) {
                     var template = getRandomTemplate(attemptedTemplates)
                     var question: Questions? = try {generateQuestion(template.id, getRandomMedication(template))} catch(e: IOException) {null}
-                    Log.d("question",template.id.toString() + " - " + question.toString())
+                    Log.d("question",template.id.toString() + " - " + question.toString() + " - " + counter.toString())
                     attemptedTemplates.add(template)
 
                     if (question != null) {

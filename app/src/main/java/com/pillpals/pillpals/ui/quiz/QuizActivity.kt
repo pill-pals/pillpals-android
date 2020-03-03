@@ -427,11 +427,11 @@ class QuizActivity: AppCompatActivity() {
             override fun run() {
                 QuizGenerator.debounceSafeGenerate = true
                 try {
-                    QuizGenerator.asyncGenerateQuiz()
+                    QuizGenerator.asyncGenerateQuiz(context)
                     QuizGenerator.debounceSafeGenerate = false
                     update()
                 }
-                catch(e: IOException){
+                catch(e: Exception){
                     backgroundThreadToast(context,"Quiz generation failed, try again later.", Toast.LENGTH_SHORT)
                 }
             }

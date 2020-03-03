@@ -45,7 +45,7 @@ class MedicationInfoRetriever {
                 val client = OkHttpClient
                     .Builder()
                     .connectTimeout(5, TimeUnit.SECONDS)
-                    .readTimeout(20, TimeUnit.SECONDS)
+                    .readTimeout(10, TimeUnit.SECONDS)
                     .build()
 
                 val url = "https://health-products.canada.ca/api/drug/activeingredient/?id=${dpdId}"
@@ -110,7 +110,7 @@ class MedicationInfoRetriever {
                 val client = OkHttpClient
                     .Builder()
                     .connectTimeout(5, TimeUnit.SECONDS)
-                    .readTimeout(20, TimeUnit.SECONDS)
+                    .readTimeout(10, TimeUnit.SECONDS)
                     .build()
 
                 val url = "https://health-products.canada.ca/api/drug/route/?id=${dpdId}"
@@ -165,7 +165,7 @@ class MedicationInfoRetriever {
                 val client = OkHttpClient
                     .Builder()
                     .connectTimeout(5, TimeUnit.SECONDS)
-                    .readTimeout(20, TimeUnit.SECONDS)
+                    .readTimeout(10, TimeUnit.SECONDS)
                     .build()
 
                 val url = "https://health-products.canada.ca/api/drug/schedule/?id=${dpdId}"
