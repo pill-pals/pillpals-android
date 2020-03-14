@@ -1,4 +1,6 @@
-const dataString = ``;
+const dataString = `
+
+`;
 const dataName = "output"
 
 const sh = require('run-sh');
@@ -17,7 +19,23 @@ const data = JSON.parse(dataString);
 const pin = [{pin: data.pin}];
 const logs = data.logs;
 const moodLogs = data.mood_logs;
-const schedules = data.schedules;
+const schedulesReducer = (accumulator, currentValue) => {
+	if(!currentValue.hasOwnProperty("deletedDate")) {
+		currentValue = {
+			deleted: currentValue.deleted,
+		    deletedDate: '',
+		    log_uids: currentValue.log_uids,
+		    medication_uid: currentValue.medication_uid,
+		    repetitionCount: currentValue.repetitionCount,
+		    repetitionUnit: currentValue.repetitionUnit,
+		    startDate: currentValue.startDate,
+		    uid: currentValue.uid
+		}
+	}
+	accumulator.push(currentValue);
+	return accumulator
+}
+const schedules = data.schedules.reduce(schedulesReducer, []);
 const medications = data.medications;
 const quizzes = data.quizzes;
 

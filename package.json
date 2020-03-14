@@ -1,0 +1,23 @@
+{
+  "name": "pillbuddies-android",
+  "version": "1.0.0",
+  "description": "Pill Pals 💊 medication tracking and information app, built for for Android 🤖",
+  "main": "data-reader.js",
+  "dependencies": {
+    "run-sh": "^1.0.2"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pill-pals/pillpals-android.git"
+  },
+  "author": "",
+  "license": "UNLICENSED",
+  "bugs": {
+    "url": "https://github.com/pill-pals/pillpals-android/issues"
+  },
+  "homepage": "https://github.com/pill-pals/pillpals-android#readme"
+}
