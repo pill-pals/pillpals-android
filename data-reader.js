@@ -40,20 +40,18 @@ const medications = data.medications;
 const quizzes = data.quizzes;
 
 const questionReducer = (accumulator, currentValue) => {
-	if(!currentValue.hasOwnProperty("medication_uid")) {
-		currentValue = {
-			correctAnswer: currentValue.correctAnswer,
-    		medication_uid: "",
-    		quiz_uid: currentValue.quiz_uid,
-    		template_id: currentValue.template_id,
-    		uid: currentValue.uid
-		}
+	currentValue = {
+		correctAnswer: currentValue.correctAnswer === undefined ? "" : currentValue.correctAnswer,
+		medication_uid: currentValue.medication_uid || "",
+		quiz_uid: currentValue.quiz_uid || "",
+		template_id: currentValue.template_id,
+		uid: currentValue.uid || "",
+		userAnswer: currentValue.userAnswer === undefined ? "" : currentValue.userAnswer
 	}
 	accumulator.push(currentValue);
 	return accumulator
 }
 const questions = data.questions.reduce(questionReducer, []);
-
 const visit_logs = data.visit_logs;
 
 const output = convertToCSV(pin) +
