@@ -54,6 +54,7 @@ class NotificationUtils {
                 Schedules::class.java
             ) as RealmResults<out Schedules>
             for (schedule in schedules) {
+                if(schedule.deleted || schedule.medication?.firstOrNull() == null || schedule.medication.first()!!.deleted) continue
                 val am = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
                 am.cancel(getPendingIntent(context, schedule))
                 if(!schedule.deleted) startAlarm(context, schedule)

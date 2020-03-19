@@ -1,14 +1,14 @@
 package com.pillpals.pillpals.ui
 
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
-import android.util.Log
+import android.os.StrictMode
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.Toast
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import androidx.appcompat.app.AppCompatActivity
-import androidx.fragment.app.Fragment
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupActionBarWithNavController
@@ -20,12 +20,18 @@ import com.pillpals.pillpals.data.model.Schedules
 import com.pillpals.pillpals.helpers.DatabaseHelper
 import com.pillpals.pillpals.helpers.NotificationUtils
 import com.pillpals.pillpals.helpers.QuizHelper
-import com.pillpals.pillpals.ui.dashboard.DashboardFragment
 import com.pillpals.pillpals.ui.quiz.QuizActivity
 import com.pillpals.pillpals.ui.quiz.QuizGenerator
 import io.realm.Realm
 import io.realm.RealmObject
 import io.realm.RealmResults
+import java.io.BufferedWriter
+import java.io.OutputStreamWriter
+import java.io.PrintWriter
+import java.net.HttpURLConnection
+import java.net.URL
+import javax.net.ssl.HttpsURLConnection
+
 
 class MainActivity : AppCompatActivity() {
 
@@ -33,6 +39,9 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        val policy = StrictMode.ThreadPolicy.Builder().permitAll().build()
+        StrictMode.setThreadPolicy(policy)
 
         quizNoMedsToast = Toast.makeText(this, "You must have at least one medication for the Quiz feature", Toast.LENGTH_SHORT)
 
@@ -84,6 +93,13 @@ class MainActivity : AppCompatActivity() {
         R.id.action_settings -> {
             val addIntent = Intent(this, SettingsActivity::class.java)
             startActivity(addIntent)
+            true
+        }
+
+        R.id.donation_button -> {
+            val uri = Uri.parse("https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=FSRJPGS2RUXDE")
+            val intent = Intent(Intent.ACTION_VIEW, uri)
+            startActivity(intent)
             true
         }
 
