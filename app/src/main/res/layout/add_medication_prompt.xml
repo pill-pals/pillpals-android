@@ -9,7 +9,7 @@
 
     <Button
         android:id="@+id/dialogScanBtn"
-        android:text="Scan container label"
+        android:text="Scan container label\n(Canada only)"
         style="@style/TextAppearance.Button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
