@@ -1,5 +1,6 @@
 Pill Pals 💊 medication tracking and information app, built for for Android 🤖
 
+[Download on Google Play](https://play.google.com/store/apps/details?id=com.pillpals.pillpals)
 
 # Setup
 Built with Kotlin, using Material, MPAndroidChart, and Google Vision
